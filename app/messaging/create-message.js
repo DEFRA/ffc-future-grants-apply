@@ -2,7 +2,7 @@ const createMessage = (body, type, options) => {
   return {
     body,
     type,
-    source: 'ffc-ahwr-farmer-apply',
+    source: 'ffc-future-grants-apply',
     ...options
   }
 }

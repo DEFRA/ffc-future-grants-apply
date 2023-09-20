@@ -1,8 +1,8 @@
 environment: development
-name: ffc-ahwr-farmer-apply
+name: ffc-future-grants-apply
 namespace: ffc-ahwr
 workstream: ffc-ahwr
-image: ffc-ahwr-farmer-apply
+image: ffc-future-grants-apply
 
 labels: {}
 
@@ -16,10 +16,10 @@ azureIdentity:
   resourceID:
 
 containerConfigMap:
-  name: ffc-ahwr-farmer-apply-config-map
+  name: ffc-future-grants-apply-config-map
 
 containerSecret:
-  name: ffc-ahwr-farmer-apply-container-secret
+  name: ffc-future-grants-apply-container-secret
   type: Opaque
 
 deployment:
@@ -50,7 +50,7 @@ container:
   notifyTemplateIdFarmerRegisterYourInterestAccessNotGranted:
   port: 3000
   redisHostname: redis-hostname.default
-  redisPartition: ffc-ahwr-farmer-apply
+  redisPartition: ffc-future-grants-apply
   redisPassword: redis
   redisPort: 6379
   serviceUri:
@@ -81,10 +81,10 @@ container:
   apimScope:
   dateOfTestingEnabled:
   tenMonthRuleEnabled:
- 
+
 ingress:
   class: nginx
-  endpoint: ffc-ahwr-farmer
+  endpoint: ffc-future-grants
   server: value.replaced.from.app.config
   path: /apply
   type: minion
