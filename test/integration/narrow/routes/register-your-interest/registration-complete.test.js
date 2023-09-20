@@ -3,7 +3,7 @@ const expectPhaseBanner = require('../../../../utils/phase-banner-expect')
 const { serviceName, urlPrefix } = require('../../../../../app/config')
 const mockConfig = require('../../../../../app/config')
 
-describe('Farmer apply "Registration complete" page', () => {
+describe('future grants apply "Registration complete" page', () => {
   beforeAll(async () => {
     jest.resetAllMocks()
   })

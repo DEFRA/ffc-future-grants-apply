@@ -2,7 +2,7 @@ const cheerio = require('cheerio')
 const expectPhaseBanner = require('../../../utils/phase-banner-expect')
 const { serviceName, urlPrefix } = require('../../../../app/config')
 
-describe('Farmer apply terms and condition page test', () => {
+describe('future grants apply terms and condition page test', () => {
   describe('GET - public beta 1 terms and conditions', () => {
     test.each([
       { queryParam: undefined, continueButtonExpectedLength: 0 },

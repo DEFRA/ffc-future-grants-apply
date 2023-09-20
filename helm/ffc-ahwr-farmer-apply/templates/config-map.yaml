@@ -1,5 +1,5 @@
-{{- include "ffc-helm-library.container-config-map" (list . "ffc-ahwr-farmer-apply.config-map") -}}
-{{- define "ffc-ahwr-farmer-apply.config-map" -}}
+{{- include "ffc-helm-library.container-config-map" (list . "ffc-future-grants-apply.config-map") -}}
+{{- define "ffc-future-grants-apply.config-map" -}}
 data:
   NODE_ENV: {{ quote .Values.environment }}
   PORT: {{ quote .Values.container.port }}
