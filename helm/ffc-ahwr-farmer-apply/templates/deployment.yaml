@@ -1,8 +1,8 @@
-{{- include "ffc-helm-library.deployment" (list . "ffc-ahwr-farmer-apply.deployment") -}}
-{{- define "ffc-ahwr-farmer-apply.deployment" -}}
+{{- include "ffc-helm-library.deployment" (list . "ffc-future-grants-apply.deployment") -}}
+{{- define "ffc-future-grants-apply.deployment" -}}
 spec:
   template:
     spec:
       containers:
-      - {{ include "ffc-helm-library.container" (list . "ffc-ahwr-farmer-apply.container") }}
+      - {{ include "ffc-helm-library.container" (list . "ffc-future-grants-apply.container") }}
 {{- end -}}

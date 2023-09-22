@@ -1,7 +1,7 @@
 const cheerio = require('cheerio')
 const expectPhaseBanner = require('../../../utils/phase-banner-expect')
 
-describe('Farmer apply home page test', () => {
+describe('future grants apply home page test', () => {
   test('GET / route returns 200 when not logged in', async () => {
     const options = {
       method: 'GET',

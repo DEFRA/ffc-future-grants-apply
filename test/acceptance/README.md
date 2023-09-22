@@ -2,7 +2,7 @@
 
 > Future Farming and Countryside Programme - AHWR Apply Acceptance Tests
 
-This folder contains the acceptance tests for the FFC AHWR apply service components.
+This folder contains the acceptance tests for the FFC apply service components.
 
 The framework is (Cucumber)[https://cucumber.io/] and (webdriver.io)[https://webdriver.io/] based, containerised, expandable and based on the actively maintained webdriver.io Cucumber boilerplate project.
 
@@ -15,21 +15,22 @@ The framework is (Cucumber)[https://cucumber.io/] and (webdriver.io)[https://web
 # Quick start
 
 Docker is used to create a container for each of selenium-hub, chrome-browser and webdriver-cuke.
-* Selenium Hub allows concurrent execution of test cases
-* Chrome Browser is the browser specified in the configuration file `wdio.bs.config.js` by default
-* Webdriver.io along with Cucumber is this framework that defines the tests.
+
+- Selenium Hub allows concurrent execution of test cases
+- Chrome Browser is the browser specified in the configuration file `wdio.bs.config.js` by default
+- Webdriver.io along with Cucumber is this framework that defines the tests.
 
 ## How to run the tests
 
 1. Set the root URL for the environment in the environment variable `TEST_ENVIRONMENT_ROOT_URL`
 
-2. If running against localhost, then no need to set `TEST_ENVIRONMENT_ROOT_URL` as it will default to `docker.host.internal:3000`.  Instead make sure the application container is running with `docker-compose up --build` in the root folder of this repository
+2. If running against localhost, then no need to set `TEST_ENVIRONMENT_ROOT_URL` as it will default to `docker.host.internal:3000`. Instead make sure the application container is running with `docker-compose up --build` in the root folder of this repository
 
 3. Set the Browserstack credentials in the environment variables `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY`
 
 4. Set the number of Browserstack parallel runs in the environment variable `BROWSERSTACK_PARALLEL_RUNS`
 
-5. From the directory containing the dockerfile run `docker-compose run --rm wdio-cucumber`. This will run an acceptance test against the FFC AHWR apply service. Alternatively, run `./scripts/acceptance` from the root folder of this repository.
+5. From the directory containing the dockerfile run `docker-compose run --rm wdio-cucumber`. This will run an acceptance test against the FFC apply service. Alternatively, run `./scripts/acceptance` from the root folder of this repository.
 
 6. The test reports will be output to `./html-reports`. Note that WSL users need to run `mkdir -m 777 html-reports`. Read more about report configuration in the [rpii/wdio-hmtl-reporter docs](https://github.com/rpii/wdio-html-reporter)
 
@@ -43,7 +44,8 @@ that means that you write down what's supposed to happen in a real language. All
 directory. They should demonstrate, how tests could look like. Just create a new file and write your first
 test.
 
-__myFirstTest.feature__
+**myFirstTest.feature**
+
 ```gherkin
 Feature:
     In order to keep my product stable
@@ -98,7 +100,7 @@ Scenario: ...
 # Adding new steps and snippets
 
 The predefined snippets allow you to do a lot of common things but you might need extra snippets which
-are better aligned with your aims. To do so you will find all step definitions in `./acceptance/steps`. 
+are better aligned with your aims. To do so you will find all step definitions in `./acceptance/steps`.
 
 You define your snippet using regular expressions. This is pretty powerful as it allows you to create complex
 sentences with multiple options. Everything that's within `"([^"]*)?"` gets captured and appended to the
