@@ -7,7 +7,7 @@ const mockConfig = require('../../../../../app/config')
 
 jest.mock('ffc-messaging')
 
-describe('Farmer apply "Enter your business email address" page', () => {
+describe('future grants apply "Enter your business email address" page', () => {
   describe('ROI enabled', () => {
     let checkWaitingList
     let sendEmail

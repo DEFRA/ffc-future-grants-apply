@@ -1,5 +1,5 @@
 {{- if .Values.aadPodIdentity }}
-{{- include "ffc-helm-library.azure-identity-binding" (list . "ffc-ahwr-farmer-apply.azure-identity-binding") -}}
+{{- include "ffc-helm-library.azure-identity-binding" (list . "ffc-future-grants-apply.azure-identity-binding") -}}
 {{- end }}
-{{- define "ffc-ahwr-farmer-apply.azure-identity-binding" -}}
+{{- define "ffc-future-grants-apply.azure-identity-binding" -}}
 {{- end -}}
