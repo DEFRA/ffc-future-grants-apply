@@ -6,7 +6,7 @@ const speciesTypes = require('../constants/species')
 const speciesContent = require('../constants/species-content')
 const urlPrefix = require('../config/index').urlPrefix
 
-const backLink = `${urlPrefix}/which-review`
+const backLink = `${urlPrefix}/form-download`
 
 const getRadioOptions = (species) => {
   return { isPageHeading: true, legendClasses: 'govuk-fieldset__legend--l', inline: true, hintText: speciesContent[species].hintText }

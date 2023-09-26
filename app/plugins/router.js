@@ -10,7 +10,7 @@ const routes = [].concat(
   require('../routes/index'),
   require('../routes/org-review'),
   require('../routes/privacy-policy'),
-  require('../routes/which-review'),
+  require('../routes/form-download'),
   require('../routes/species-eligibility'),
   require('../routes/not-eligible'),
   require('../routes/check-answers'),

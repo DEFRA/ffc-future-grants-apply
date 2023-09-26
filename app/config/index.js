@@ -43,7 +43,7 @@ const schema = Joi.object({
   port: Joi.number().default(3000),
   serviceUri: Joi.string().uri(),
   claimServiceUri: Joi.string().uri(),
-  serviceName: Joi.string().default('Annual health and welfare review of livestock'),
+  serviceName: Joi.string().default('Apply for a farming grant'),
   useRedis: Joi.boolean().default(false),
   urlPrefix: Joi.string().default(urlPrefix),
   ruralPaymentsAgency: {

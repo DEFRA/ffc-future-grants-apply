@@ -27,7 +27,7 @@ jest.mock('ffc-messaging')
 
 describe('Species review test', () => {
   const auth = { credentials: { reference: '1111', sbi: '111111111' }, strategy: 'cookie' }
-  const url = `${config.urlPrefix}/which-review`
+  const url = `${config.urlPrefix}/form-download`
 
   describe(`GET ${url} route`, () => {
     test('returns 200', async () => {
