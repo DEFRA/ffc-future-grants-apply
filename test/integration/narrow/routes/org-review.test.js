@@ -114,7 +114,7 @@ describe('Org review page test', () => {
       const res = await global.__SERVER__.inject(options)
 
       expect(res.statusCode).toBe(302)
-      expect(res.headers.location).toEqual('/apply/which-review')
+      expect(res.headers.location).toEqual('/apply/form-download')
     })
 
     test('returns 200 with update your details recognised when no is answered', async () => {

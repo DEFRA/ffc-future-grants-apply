@@ -13,7 +13,7 @@ describe('future grants apply home page test', () => {
     expect(res.statusCode).toBe(200)
     const $ = cheerio.load(res.payload)
     expect($('.govuk-heading-l').text()).toEqual(
-      'Apply for an annual health and welfare review of your livestock'
+      'Apply for a farming grant'
     )
     const button = $('.govuk-main-wrapper .govuk-button')
     expect(button.text()).toMatch('Start now')

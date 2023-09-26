@@ -14,10 +14,10 @@ const radioOptions = { isPageHeading: true, legendClasses: 'govuk-fieldset__lege
 module.exports = [
   {
     method: 'GET',
-    path: `${urlPrefix}/which-review`,
+    path: `${urlPrefix}/form-download`,
     options: {
       handler: async (request, h) => {
-        return h.view('which-review', {
+        return h.view('form-download', {
           ...speciesRadios(legendText, whichReview, session.getFarmerApplyData(request, whichReview), undefined, radioOptions),
           backLink
         })
@@ -26,14 +26,14 @@ module.exports = [
   },
   {
     method: 'POST',
-    path: `${urlPrefix}/which-review`,
+    path: `${urlPrefix}/form-download`,
     options: {
       validate: {
         payload: Joi.object({
           [whichReview]: Joi.string().valid('sheep', 'pigs', 'dairy', 'beef').required()
         }),
         failAction: (request, h, _err) => {
-          return h.view('which-review', {
+          return h.view('form-download', {
             ...speciesRadios(legendText, whichReview, session.getFarmerApplyData(request, whichReview), errorText, radioOptions),
             backLink
           }).code(400).takeover()
