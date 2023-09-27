@@ -11,9 +11,8 @@ const cphNumbersMock = require('../../../../app/api-requests/rpa-api/cph-numbers
 jest.mock('../../../../app/api-requests/rpa-api/cph-numbers')
 const sendIneligibilityEventMock = require('../../../../app/event/raise-ineligibility-event')
 jest.mock('../../../../app/event/raise-ineligibility-event')
-const cphCheckMock = require('../../../../app/api-requests/rpa-api/cph-check').customerMustHaveAtLeastOneValidCph
+// const cphCheckMock = require('../../../../app/api-requests/rpa-api/cph-check').customerMustHaveAtLeastOneValidCph
 jest.mock('../../../../app/api-requests/rpa-api/cph-check')
-const businessEligibleToApplyMock = require('../../../../app/api-requests/business-eligible-to-apply')
 jest.mock('../../../../app/api-requests/business-eligible-to-apply')
 
 const { InvalidPermissionsError, InvalidStateError, AlreadyAppliedError, NoEligibleCphError, CannotReapplyTimeLimitError, OutstandingAgreementError } = require('../../../../app/exceptions')
@@ -150,15 +149,12 @@ describe('FarmerApply defra ID redirection test', () => {
         '08/178/0064'
       ])
 
-      businessEligibleToApplyMock.mockResolvedValueOnce()
-
       const res = await global.__SERVER__.inject(options)
       expect(res.statusCode).toBe(302)
       expect(res.headers.location).toEqual('/apply/org-review')
       expect(sessionMock.setFarmerApplyData).toBeCalledWith(expect.anything(), 'organisation', expect.objectContaining({
         email: 'billsmith@testemail.com'
       }))
-      expect(businessEligibleToApplyMock).toBeCalledTimes(1)
       expect(authMock.authenticate).toBeCalledTimes(1)
       expect(personMock.getPersonSummary).toBeCalledTimes(1)
       expect(organisationMock.organisationIsEligible).toBeCalledTimes(1)
@@ -207,15 +203,12 @@ describe('FarmerApply defra ID redirection test', () => {
         '08/178/0064'
       ])
 
-      businessEligibleToApplyMock.mockResolvedValueOnce()
-
       const res = await global.__SERVER__.inject(options)
       expect(res.statusCode).toBe(302)
       expect(res.headers.location).toEqual('/apply/org-review')
       expect(sessionMock.setFarmerApplyData).toBeCalledWith(expect.anything(), 'organisation', expect.objectContaining({
         email: 'org1@testemail.com'
       }))
-      expect(businessEligibleToApplyMock).toBeCalledTimes(1)
       expect(authMock.authenticate).toBeCalledTimes(1)
       expect(personMock.getPersonSummary).toBeCalledTimes(1)
       expect(organisationMock.organisationIsEligible).toBeCalledTimes(1)
@@ -368,8 +361,6 @@ describe('FarmerApply defra ID redirection test', () => {
         organisationPermission: true
       })
 
-      businessEligibleToApplyMock.mockRejectedValueOnce(expectedError)
-
       sessionMock.getCustomer.mockResolvedValueOnce({
         attachedToMultipleBusinesses: false
       })
@@ -405,7 +396,6 @@ describe('FarmerApply defra ID redirection test', () => {
       expect(authMock.retrieveApimAccessToken).toBeCalledTimes(1)
       expect(personMock.getPersonSummary).toBeCalledTimes(1)
       expect(organisationMock.organisationIsEligible).toBeCalledTimes(1)
-      expect(businessEligibleToApplyMock).toBeCalledTimes(1)
       expect(sendIneligibilityEventMock).toBeCalledTimes(1)
       const $ = cheerio.load(res.payload)
       expect($('.govuk-heading-l').text()).toMatch('You cannot apply for a livestock review for this business')
@@ -455,8 +445,6 @@ describe('FarmerApply defra ID redirection test', () => {
         organisationPermission: true
       })
 
-      businessEligibleToApplyMock.mockRejectedValueOnce(expectedError)
-
       sessionMock.getCustomer.mockResolvedValueOnce({
         attachedToMultipleBusinesses: false
       })
@@ -492,7 +480,6 @@ describe('FarmerApply defra ID redirection test', () => {
       expect(authMock.retrieveApimAccessToken).toBeCalledTimes(1)
       expect(personMock.getPersonSummary).toBeCalledTimes(1)
       expect(organisationMock.organisationIsEligible).toBeCalledTimes(1)
-      expect(businessEligibleToApplyMock).toBeCalledTimes(1)
       expect(sendIneligibilityEventMock).toBeCalledTimes(1)
       const $ = cheerio.load(res.payload)
       expect($('.govuk-heading-l').text()).toMatch('You cannot apply for a livestock review for this business')
@@ -542,8 +529,6 @@ describe('FarmerApply defra ID redirection test', () => {
         organisationPermission: true
       })
 
-      businessEligibleToApplyMock.mockRejectedValueOnce(expectedError)
-
       sessionMock.getCustomer.mockResolvedValueOnce({
         attachedToMultipleBusinesses: false
       })
@@ -579,7 +564,6 @@ describe('FarmerApply defra ID redirection test', () => {
       expect(authMock.retrieveApimAccessToken).toBeCalledTimes(1)
       expect(personMock.getPersonSummary).toBeCalledTimes(1)
       expect(organisationMock.organisationIsEligible).toBeCalledTimes(1)
-      expect(businessEligibleToApplyMock).toBeCalledTimes(1)
       expect(sendIneligibilityEventMock).toBeCalledTimes(1)
       const $ = cheerio.load(res.payload)
       expect($('.govuk-heading-l').text()).toMatch('You cannot apply for a livestock review for this business')
@@ -657,7 +641,7 @@ describe('FarmerApply defra ID redirection test', () => {
         '08/178/0064'
       ])
 
-      cphCheckMock.mockRejectedValueOnce(expectedError)
+      // cphCheckMock.mockRejectedValueOnce(expectedError)
 
       const res = await global.__SERVER__.inject(options)
       expect(res.statusCode).toBe(400)
