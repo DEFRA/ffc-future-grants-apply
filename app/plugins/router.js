@@ -1,4 +1,4 @@
-const config = require("../config");
+const config = require('../config')
 
 const routes = [].concat(
   require('../routes/accessibility'),
@@ -11,7 +11,7 @@ const routes = [].concat(
   require('../routes/org-review'),
   require('../routes/privacy-policy'),
   require('../routes/form-download'),
-  require('../routes/form-uploads'),
+  require('../routes/form-upload'),
   require('../routes/not-eligible'),
   require('../routes/check-answers'),
   require('../routes/terms-and-conditions'),
@@ -19,20 +19,20 @@ const routes = [].concat(
 )
 
 const registerYourInterestRoutes = [].concat(
-  require("../routes/register-your-interest/index"),
-  require("../routes/register-your-interest/registration-complete")
-);
+  require('../routes/register-your-interest/index'),
+  require('../routes/register-your-interest/registration-complete')
+)
 
 module.exports = {
   plugin: {
-    name: "router",
+    name: 'router',
     register: (server, _) => {
-      server.route(routes);
+      server.route(routes)
       if (config.registerYourInterest.enabled === true) {
-        server.route(registerYourInterestRoutes);
+        server.route(registerYourInterestRoutes)
       } else {
-        server.route(require("../routes/register-your-interest/index"));
+        server.route(require('../routes/register-your-interest/index'))
       }
-    },
-  },
-};
+    }
+  }
+}
