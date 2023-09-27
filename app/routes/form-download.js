@@ -6,7 +6,7 @@ module.exports = {
   options: {
     auth: false,
     handler: async (_, h) => {
-      return h.view("download-forms");
+      return h.view("form-download");
     },
   },
 };
