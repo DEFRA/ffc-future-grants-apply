@@ -4,8 +4,7 @@ const auth = require('../auth')
 const sessionKeys = require('../session/keys')
 const config = require('../config')
 const { farmerApply } = require('../constants/user-types')
-const { getPersonSummary, getPersonName, organisationIsEligible, getOrganisationAddress, cphCheck } = require('../api-requests/rpa-api')
-const businessEligibleToApply = require('../api-requests/business-eligible-to-apply')
+const { getPersonSummary, getPersonName, organisationIsEligible, getOrganisationAddress } = require('../api-requests/rpa-api')
 const { InvalidPermissionsError, AlreadyAppliedError, NoEligibleCphError, InvalidStateError, CannotReapplyTimeLimitError, OutstandingAgreementError } = require('../exceptions')
 const { raiseIneligibilityEvent } = require('../event')
 const appInsights = require('applicationinsights')
@@ -55,7 +54,7 @@ module.exports = [{
         const personSummary = await getPersonSummary(request, apimAccessToken) // sitiagi
         session.setCustomer(request, sessionKeys.customer.id, personSummary.id)
 
-        const organisationSummary = await organisationIsEligible(request, personSummary.id, apimAccessToken) //sitiagri
+        const organisationSummary = await organisationIsEligible(request, personSummary.id, apimAccessToken) // sitiagri
         setOrganisationSessionData(request, personSummary, organisationSummary)
 
         if (!organisationSummary.organisationPermission) {
