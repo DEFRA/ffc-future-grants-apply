@@ -2,11 +2,11 @@ const urlPrefix = require("../config/index").urlPrefix;
 
 module.exports = {
   method: "GET",
-  path: `${urlPrefix}/download-forms`,
+  path: `${urlPrefix}/upload-files`,
   options: {
     auth: false,
     handler: async (_, h) => {
-      return h.view("download-forms");
+      return h.view("upload-files");
     },
   },
 };
