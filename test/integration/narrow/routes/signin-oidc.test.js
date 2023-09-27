@@ -13,7 +13,6 @@ const sendIneligibilityEventMock = require('../../../../app/event/raise-ineligib
 jest.mock('../../../../app/event/raise-ineligibility-event')
 // const cphCheckMock = require('../../../../app/api-requests/rpa-api/cph-check').customerMustHaveAtLeastOneValidCph
 jest.mock('../../../../app/api-requests/rpa-api/cph-check')
-jest.mock('../../../../app/api-requests/business-eligible-to-apply')
 
 const { InvalidPermissionsError, InvalidStateError, AlreadyAppliedError, NoEligibleCphError, CannotReapplyTimeLimitError, OutstandingAgreementError } = require('../../../../app/exceptions')
 
