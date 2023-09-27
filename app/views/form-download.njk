@@ -1,27 +1,117 @@
 {% extends './layouts/layout.njk' %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
 
-{% block pageTitle %}Which livestock do you want a review for? - {{ serviceName }}{% endblock %}
-
+{% block pageTitle %}Download application forms - {{ serviceName }}
+{% endblock %}
+{% block header %}
+  {{ govukHeader({
+    homepageUrl: "#",
+    containerClasses: "app-width-container",
+    serviceName: "Farming grants service",
+    serviceUrl: "#",
+    navigation: [{text:"Sign-out",href:"#"}]
+  }) }}
+{% endblock %}
+{#    We need to add backLink later #}
 {% block beforeContent %}
+  {{ govukPhaseBanner({
+    tag: {
+      text: "Alpha"
+    },
+    html: 'This is a new service - your <a class="govuk-link" href="#">feedback</a> will help us to improve it.'
+  }) }}
   {{ govukBackLink({
-    text: "Back",
-    href: backLink,
-	  attributes: {id: "back"}
+    href: "#",
+    text: "Back"
   }) }}
 {% endblock %}
 
-{% block content %}
-<div class="govuk-grid-row">
-  <div class="govuk-grid-column-two-thirds">
-    <form method="POST" autocomplete="off" novalidate="novalidate">
-      <input type="hidden" name="crumb" value="{{crumb}}"/>
-      {{ govukRadios(radios) }}
-      {{ govukButton({
-        text: "Continue",
-        attributes: {id: "btnContinue"},
-        preventDoubleClick: true
-      }) }}
-    </form>
+{%block content%}
+  <p class="govuk-body govuk-!-font-size-27">Apply for a Water Management Grants</p>
+  <h1 class="govuk-heading-xl">Download application forms</h1>
+  <div class="govuk-grid-row govuk-!-margin-top-8">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-m govuk-!-margin-bottom-2">Forms</h1>
+      <p class="govuk-body ">Download the application form and appendix.</p>
+      <div class="govuk-grid-column-full govuk-!-padding-left-0">
+        <div class="img govuk-grid-column-one-quarter"></div>
+        <div class="govuk-grid-column-two-thirds govuk-!-padding-left-5">
+          <p class="govuk-!-font-size-27 govuk-!-margin-top-0 govuk-!-margin-bottom-3">
+            <a href="#" class="govuk-link govuk-link--no-visited-state">Application form</a>
+          </p>
+          <span class="govuk-caption-m">
+                        DOCX, 170 KB, 8 pages
+                    </span>
+        </div>
+      </div>
+
+      <hr class="govuk-section-break govuk-section-break--visible govuk-grid-column-full govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+
+      <div class="govuk-grid-column-full govuk-!-padding-left-0">
+        <div class="img govuk-grid-column-one-quarter"></div>
+        <div class="govuk-grid-column-two-thirds govuk-!-padding-left-5">
+          <p class="govuk-!-font-size-27 govuk-!-margin-top-0 govuk-!-margin-bottom-3">
+            <a href="#" class="govuk-link govuk-link--no-visited-state">Application appendix</a>
+          </p>
+          <span class="govuk-caption-m">
+                        XLSX, 189 KB, 6 tabs
+                    </span>
+        </div>
+      </div>
+
+      <hr class="govuk-section-break govuk-section-break--visible govuk-grid-column-full govuk-!-margin-top-4 govuk-!-margin-bottom-8">
+
+      <h1 class="govuk-heading-m govuk-!-margin-bottom-2">What you need to do</h1>
+      <p class="govuk-body ">Download the application form and appendix.</p>
+
+      <p class="govuk-body ">When you are ready, you can <a href="#">upload your application forms and evidence</a> and submit your application.</p>
+      {{ govukWarningText({
+  text: "Do not upload handwritten and scanned copies or PDFs.",
+  iconFallbackText: "Warning"
+}) }}
+      <p class="govuk-body ">Read more on <a href="#">how to fill in a grant application form</a>.</p>
+      <hr class="govuk-section-break govuk-section-break--visible govuk-grid-column-full govuk-!-margin-top-6 govuk-!-margin-bottom-8">
+      <h1 class="govuk-heading-m govuk-!-margin-bottom-2">Evidence you need to apply</h1>
+      <p class="govuk-body"> You should <a href="#">check the grant manual</a> to confirm what evidence you need to provide.</p>
+      <p class="govuk-body"> Evidence could include:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>financial accounts</li>
+        <li>linked businesses and their accounts</li>
+        <li>licences and permissions</li>
+        <li>project funding</li>
+        <li>quotes and tenders</li>
+        <li>plans and drawings</li>
+        <li>third-party agreements</li>
+        <li>letters of support</li>
+      </ul>
+      <div class="govuk-!-margin-top-8">
+        {{ govukButton({
+  text: "Continue",
+  href:"upload-files"
+}) }}
+      </div>
+      {#--- Text must be added later... ---#}
+      <div class="govuk-!-margin-top-8">
+        {{ govukDetails({
+  summaryText: "Questions about your application",
+  text: "Text must be added later..." 
+}) }}</div>
+
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <div>
+        <hr class="govuk-section-break govuk-section-break--m govuk-!-margin-0 govuk-section-break--visible">
+        <h3 class="govuk-heading-m govuk-!-margin-bottom-4 govuk-!-margin-top-2  ">Related content</h3>
+        <p class="govuk-body">
+          <a href="#" class="govuk-link" rel="noreferrer noopener" target="_blank">Read guidance on how to apply</a>
+        </p>
+        <p class="govuk-body">
+          <a href="#" class="govuk-link" rel="noreferrer noopener" target="_blank">Read the Water Management grant manual</a>
+        </p>
+      </div>
+    </div>
   </div>
-</div>
-{% endblock %}
+  {%endblock%}
