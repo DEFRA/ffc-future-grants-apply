@@ -1,6 +1,5 @@
 const config = require('../../../../app/config')
-const { CannotReapplyTimeLimitError, OutstandingAgreementError, AlreadyAppliedError } = require('../../../../app/exceptions')
-
+const { CannotReapplyTimeLimitError } = require('../../../../app/exceptions')
 
 describe('Business Eligible to Apply Tests', () => {
   let applicationApiMock
@@ -30,7 +29,6 @@ describe('Business Eligible to Apply Tests', () => {
     })
 
     test('No error is thrown', async () => {
-      const SBI = 123456789
       applicationApiMock.getLatestApplicationsBySbi.mockResolvedValueOnce([])
     })
   })
@@ -39,7 +37,6 @@ describe('Business Eligible to Apply Tests', () => {
     { apiResponse: null },
     { apiResponse: undefined }
   ])('Business is not eligible when application API response is null or undefined', async ({ apiResponse }) => {
-    const SBI = 123456789
     applicationApiMock.getLatestApplicationsBySbi.mockResolvedValueOnce(apiResponse)
   })
 
@@ -88,7 +85,6 @@ describe('Business Eligible to Apply Tests', () => {
           ]
         }
       ])('Business is eligible when the last previous application had a status of WITHDRAWN (2) or NOT AGREED (7)', async ({ latestApplications }) => {
-        const SBI = 123456789
         applicationApiMock.getLatestApplicationsBySbi.mockResolvedValueOnce(latestApplications)
       })
 
@@ -194,13 +190,11 @@ describe('Business Eligible to Apply Tests', () => {
               ]
             }
           ])('Status is DATA INPUTTED (3), CLAIMED (4), IN CHECK (5), ACCEPTED (6), PAID (8), READY TO PAY (9) or REJECTED (10)', async ({ latestApplications }) => {
-            const SBI = 123456789
             applicationApiMock.getLatestApplicationsBySbi.mockResolvedValueOnce(latestApplications)
           })
         })
 
         test('When the last previous application has a status of AGREED (1)', async () => {
-          const SBI = 123456789
           const apiResponse = [
             {
               data: {
@@ -321,13 +315,11 @@ describe('Business Eligible to Apply Tests', () => {
               ]
             }
           ])('status is DATA INPUTTED (3), CLAIMED (4), IN CHECK (5), ACCEPTED (6), PAID (8), READY TO PAY (9) or REJECTED (10)', async ({ latestApplications }) => {
-            const SBI = 123456789
             applicationApiMock.getLatestApplicationsBySbi.mockResolvedValueOnce(latestApplications)
           })
         })
       })
       test('Business is not eligible when the last previous application was longer than 10 months and has a status of AGREED (1)', async () => {
-        const SBI = 123456789
         const apiResponse = [
           {
             data: {
@@ -345,7 +337,6 @@ describe('Business Eligible to Apply Tests', () => {
     })
 
     test('Last application and next application dates are returned with a CannotReapplyTimeLimitError', async () => {
-      const SBI = 123456789
       const apiResponse = [
         {
           data: {
@@ -417,7 +408,6 @@ describe('Business Eligible to Apply Tests', () => {
             ]
           }
         ])('Business is eligible when the last previous application had a status of WITHDRAWN (2) or NOT AGREED (7)', async ({ latestApplications }) => {
-          const SBI = 123456789
           applicationApiMock.getLatestApplicationsBySbi.mockResolvedValueOnce(latestApplications)
         })
 
@@ -524,13 +514,11 @@ describe('Business Eligible to Apply Tests', () => {
                 ]
               }
             ])('Status is DATA INPUTTED (3), CLAIMED (4), IN CHECK (5), ACCEPTED (6), PAID (8), READY TO PAY (9) or REJECTED (10)', async ({ latestApplications }) => {
-              const SBI = 123456789
               applicationApiMock.getLatestApplicationsBySbi.mockResolvedValueOnce(latestApplications)
             })
           })
 
           test('Business is not eligible when the last previous application was within 10 months and has a status of AGREED (1)', async () => {
-            const SBI = 123456789
             const apiResponse = [
               {
                 data: {
@@ -652,13 +640,11 @@ describe('Business Eligible to Apply Tests', () => {
                 ]
               }
             ])('status is DATA INPUTTED (3), CLAIMED (4), IN CHECK (5), ACCEPTED (6), PAID (8), READY TO PAY (9) or REJECTED (10)', async ({ latestApplications }) => {
-              const SBI = 123456789
               applicationApiMock.getLatestApplicationsBySbi.mockResolvedValueOnce(latestApplications)
             })
           })
         })
         test('Business is not eligible when the last previous application was longer than 10 months and has a status of AGREED (1)', async () => {
-          const SBI = 123456789
           const apiResponse = [
             {
               data: {

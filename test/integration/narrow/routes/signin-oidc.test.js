@@ -149,7 +149,6 @@ describe('FarmerApply defra ID redirection test', () => {
         '08/178/0064'
       ])
 
-
       const res = await global.__SERVER__.inject(options)
       expect(res.statusCode).toBe(302)
       expect(res.headers.location).toEqual('/apply/org-review')
@@ -203,7 +202,6 @@ describe('FarmerApply defra ID redirection test', () => {
       cphNumbersMock.mockResolvedValueOnce([
         '08/178/0064'
       ])
-
 
       const res = await global.__SERVER__.inject(options)
       expect(res.statusCode).toBe(302)
