@@ -52,19 +52,15 @@ module.exports = [{
 
         const apimAccessToken = await auth.retrieveApimAccessToken()
 
-        const personSummary = await getPersonSummary(request, apimAccessToken)
+        const personSummary = await getPersonSummary(request, apimAccessToken) // sitiagi
         session.setCustomer(request, sessionKeys.customer.id, personSummary.id)
 
-        const organisationSummary = await organisationIsEligible(request, personSummary.id, apimAccessToken)
+        const organisationSummary = await organisationIsEligible(request, personSummary.id, apimAccessToken) //sitiagri
         setOrganisationSessionData(request, personSummary, organisationSummary)
 
         if (!organisationSummary.organisationPermission) {
           throw new InvalidPermissionsError(`Person id ${personSummary.id} does not have the required permissions for organisation id ${organisationSummary.organisation.id}`)
         }
-
-        await cphCheck.customerMustHaveAtLeastOneValidCph(request, apimAccessToken)
-
-        await businessEligibleToApply(organisationSummary.organisation.sbi)
 
         auth.setAuthCookie(request, personSummary.email, farmerApply)
         appInsights.defaultClient.trackEvent({
