@@ -11,6 +11,7 @@ const routes = [].concat(
   require('../routes/org-review'),
   require('../routes/privacy-policy'),
   require('../routes/form-download'),
+  require('../routes/form-uploads'),
   require('../routes/species-eligibility'),
   require('../routes/not-eligible'),
   require('../routes/check-answers'),
