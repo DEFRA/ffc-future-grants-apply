@@ -44,10 +44,6 @@ container:
   googleTagManagerKey:
   imagePullPolicy: IfNotPresent
   messageQueueHost: namespace.servicebus.windows.net
-  notifyApiKey:
-  notifyTemplateIdFarmerRegisterYourInterestDefraId:
-  notifyTemplateIdFarmerRegisterYourInterestAccessGranted:
-  notifyTemplateIdFarmerRegisterYourInterestAccessNotGranted:
   port: 3000
   redisHostname: redis-hostname.default
   redisPartition: ffc-future-grants-apply
