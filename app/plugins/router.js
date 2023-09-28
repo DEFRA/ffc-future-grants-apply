@@ -12,12 +12,9 @@ const routes = [].concat(
   require("../routes/privacy-policy"),
   require("../routes/form-download"),
   require("../routes/form-upload"),
-  require("../routes/species-eligibility"),
   require("../routes/not-eligible"),
   require("../routes/check-answers"),
-  require("../routes/declaration"),
   require("../routes/terms-and-conditions"),
-  require("../routes/vet-technical"),
   require("../routes/signin-oidc")
 );
 
