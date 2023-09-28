@@ -10,7 +10,7 @@ function createModel (errorMessage) {
     formActionPage: currentPath,
     // Define multiple upload buttons, each with a unique ID and name
     applicationFormUploadButton: {
-      id: 'application-form',
+      id: 'applicationForm',
       name: 'applicationForm',
       label: 'Upload Application Form (DOC/DOCX)'
     },
@@ -47,38 +47,8 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      try {
-        // Get the uploaded file details
-        const applicationFormFile = request.payload.applicationForm
-        const appendixFile = request.payload.appendix
-
-        if (!applicationFormFile && !appendixFile) {
-          // No files were uploaded
-          return h
-            .view(viewTemplate, createModel('No files selected'))
-            .takeover()
-        }
-
-        // Upload the files to Azure Blob Storage (if they exist)
-        if (applicationFormFile) {
-          const applicationFormBuffer = applicationFormFile._data
-          const applicationFormFilename = applicationFormFile.hapi.filename
-          await uploadFile(applicationFormBuffer, applicationFormFilename)
-        }
-
-        if (appendixFile) {
-          const appendixBuffer = appendixFile._data
-          const appendixFilename = appendixFile.hapi.filename
-          await uploadFile(appendixBuffer, appendixFilename)
-        }
-
-        return h.redirect(nextPath)
-      } catch (error) {
-        console.error('Error uploading file(s):', error)
-        return h
-          .view(viewTemplate, createModel('Error uploading file(s)'))
-          .takeover()
-      }
+return h.view(viewTemplate, createModel(null))
+      
     }
   }
 ]

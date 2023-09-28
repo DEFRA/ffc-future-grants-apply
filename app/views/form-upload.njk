@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block header %}
-    {{ govukHeader({
+  {{ govukHeader({
     homepageUrl: "#",
     containerClasses: "app-width-container",
     serviceName: "Farming grants service",
@@ -19,60 +19,57 @@
 {% endblock %}
 
 {% block beforeContent %}
-    {{ govukPhaseBanner({
+  {{ govukPhaseBanner({
     tag: {
       text: "Alpha"
     },
     html: 'This is a new service - your <a class="govuk-link" href="#">feedback</a> will help us to improve it.'
   }) }}
-    {{ govukBackLink({
+  {{ govukBackLink({
     href: "#",
     text: "Back"
   }) }}
 {% endblock %}
 
 {%block content%}
-    <p class="govuk-!-font-size-36 govuk-!-margin-bottom-3">Upload application forms</p>
-    <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4">Application form and appendix</h1>
-    <p class="govuk-body">Upload the completed application form and appendix</p>
+  <p class="govuk-!-font-size-36 govuk-!-margin-bottom-3">Upload application forms</p>
+  <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4">Application form and appendix</h1>
+  <p class="govuk-body">Upload the completed application form and appendix</p>
 
-    {{ govukWarningText({
+  {{ govukWarningText({
   text: "Do not upload scanned copies or PDFs of these appendix.",
   iconFallbackText: "Warning"
      }) }}
-    <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-8">1. Application form</h1>
-    <span class="govuk-caption-m">Supported file types are DOC or DOCX. Maximum file size is 20MB.</span>
-    <form method="POST" action={{formActionPage}} class="govuk-!-margin-top-8" enctype="multipart/form-data">
-        <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Upload a file</h2>
-        {{
-  govukFileUpload(uploadButton)
-}}
-        {{ govukButton({
-id:"doc",
-name:"doc",
-  text: "Upload file",
+  <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-8">1. Application form</h1>
+  <span class="govuk-caption-m">Supported file types are DOC or DOCX. Maximum file size is 20MB.</span>
+
+  <form method="POST" action={{formActionPage}} class="govuk-!-margin-top-8" enctype="multipart/form-data">
+    <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Upload a file</h2>
+    {{
+  govukFileUpload({
+id:"applicationForm",
+name:"applicationForm",
   classes: "govuk-button--secondary"
-}) }}
-    </form>
-
-    <hr/>
-    <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-6">2. Appendix</h1>
-    <span class="govuk-caption-m">Supported file types are XLS or XLSX. Maximum file size is 20MB.</span>
-
-    <form method="POST" action={{formActionPage}} class="govuk-!-margin-top-8" enctype="multipart/form-data">
-        <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Upload a file</h2>
-        {{
-  govukFileUpload(uploadButton)
+})
 }}
-        {{ govukButton({
-id:"xls",
-name:"xls",
-  text: "Upload file",
-  classes: "govuk-button--secondary"
-}) }}
-    </form>
+    {{ govukButton({text:"Upload file"}) }}
+  </form>
 
-    <button class="govuk-button govuk-!-margin-top-8" data-module="govuk-button">
+  <hr/>
+  <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-6">2. Appendix</h1>
+  <span class="govuk-caption-m">Supported file types are XLS or XLSX. Maximum file size is 20MB.</span>
+
+  <form method="POST" action={{formActionPage}} class="govuk-!-margin-top-8"  enctype="multipart/form-data">
+    <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Upload a file</h2>
+    {{govukFileUpload({
+id:"appendix",
+name:"appendix",
+  classes: "govuk-button--secondary"
+})}}
+    {{ govukButton({text:"Upload file"}) }}
+  </form>
+
+  <button class="govuk-button govuk-!-margin-top-8" data-module="govuk-button">
  Continue
 </button>
 </div>
