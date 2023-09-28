@@ -43,7 +43,7 @@ module.exports = [{
           confirmCheckDetails,
           request.payload[confirmCheckDetails]
         )
-        return h.redirect(`${config.urlPrefix}/which-review`)
+        return h.redirect(`${config.urlPrefix}/form-download`)
       }
       return h.view('update-details', {
         ruralPaymentsAgency: config.ruralPaymentsAgency

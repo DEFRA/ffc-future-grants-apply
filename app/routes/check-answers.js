@@ -18,7 +18,7 @@ module.exports = {
         {
           key: { text: 'Type of review' },
           value: { html: content[species].reviewType },
-          actions: { items: [{ href: `${urlPrefix}/which-review`, text: 'Change', visuallyHiddenText: 'change livestock' }] }
+          actions: { items: [{ href: `${urlPrefix}/form-download`, text: 'Change', visuallyHiddenText: 'change livestock' }] }
         },
         {
           key: { text: 'Number of livestock' },
