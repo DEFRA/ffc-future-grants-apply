@@ -18,11 +18,10 @@ const schema = Joi.object({
 
 // Build config
 const config = {
-  connectionStr:
-    "DefaultEndpointsProtocol=https;AccountName=devffcinfst1001;AccountKey=KWCmotG9/1U0r4pxHplFtv0u5C8w2HxCmN+Ooq6eV3HxDOGA/08c/Czk6RlVtqAZYfqvSgU/7DiEhnHTQz/Tng==;EndpointSuffix=core.windows.net",
-  storageAccountName: "devffcinfst1001",
-  containerName: "ffc-grants-water-dev",
-  useConnectionStr: true,
+  connectionStr: process.env.BLOB_STORAGE_CONNECTION_STRING,
+  storageAccountName: process.env.BLOB_STORAGE_ACCOUNT_NAME,
+  containerName: process.env.BLOB_STORAGE_CONTAINER_NAME,
+  useConnectionStr: process.env.USE_BLOB_STORAGE_CONNECTION_STRING,
 };
 console.log(config);
 // Validate config
