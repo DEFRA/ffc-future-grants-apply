@@ -1,7 +1,7 @@
 environment: development
 name: ffc-future-grants-apply
-namespace: ffc-ahwr
-workstream: ffc-ahwr
+namespace: ffc-future-grants
+workstream: ffc-future-grants
 image: ffc-future-grants-apply
 
 labels: {}
@@ -37,10 +37,10 @@ container:
   requestCpu: 120m
   limitMemory: 400Mi
   limitCpu: 400m
-  applicationRequestQueueAddress: ffc-ahwr-application-request
-  applicationResponseQueueAddress: ffc-ahwr-application-response
+  applicationRequestQueueAddress: ffc-future-grants-application-request
+  applicationResponseQueueAddress: ffc-future-grants-application-response
   cookiePassword: who-likes-cookies-i-like-cookies-everybody-likes-cookies
-  eventQueueAddress: ffc-ahwr-event
+  eventQueueAddress: ffc-future-grants-event
   googleTagManagerKey:
   imagePullPolicy: IfNotPresent
   messageQueueHost: namespace.servicebus.windows.net
@@ -60,7 +60,7 @@ container:
   eligibilityApiUri:
   applicationApiUri:
   registerYourInterestEnabled:
-  registerYourInterestRequestQueueAddress: ffc-ahwr-register-your-interest-request
+  registerYourInterestRequestQueueAddress: ffc-future-grants-register-your-interest-request
   defraIdTenant:
   defraIdRedirectUri:
   defraIdJwtIssuerId:
