@@ -74,7 +74,7 @@ describe('Org review page test', () => {
       expect(values.eq(2).text()).toMatch(org.sbi)
       expect(keys.eq(3).text()).toMatch('Address')
       expect(values.eq(3).text()).toMatch(org.address)
-      expect($('title').text()).toEqual('Check your details - Annual health and welfare review of livestock')
+      expect($('title').text()).toEqual('Check your details - Apply for a farming grant')
       expect($('.govuk-back-link').attr('href')).toContain('https://somedefraidlogin')
       expect($('legend').text().trim()).toEqual('Are your details correct?')
       expect($('.govuk-radios__item').length).toEqual(2)
@@ -114,7 +114,7 @@ describe('Org review page test', () => {
       const res = await global.__SERVER__.inject(options)
 
       expect(res.statusCode).toBe(302)
-      expect(res.headers.location).toEqual('/apply/which-review')
+      expect(res.headers.location).toEqual('/apply/form-download')
     })
 
     test('returns 200 with update your details recognised when no is answered', async () => {
