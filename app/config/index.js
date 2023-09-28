@@ -107,6 +107,7 @@ const config = {
   claimServiceUri: process.env.CLAIM_SERVICE_URI,
   useRedis: process.env.NODE_ENV !== 'test',
   urlPrefix: process.env.URL_PREFIX,
+  
   ruralPaymentsAgency: {
     loginUri: 'https://www.ruralpayments.service.gov.uk',
     callChargesUri: 'https://www.gov.uk/call-charges',
