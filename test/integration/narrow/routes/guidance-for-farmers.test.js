@@ -14,7 +14,7 @@ describe('Farmer guidance page test', () => {
     expect(res.statusCode).toBe(200)
     const $ = cheerio.load(res.payload)
     expect($('.govuk-heading-l').text()).toEqual(
-      'How to apply for an annual health and welfare review of livestock'
+      'Apply for a farming grant'
     )
     expect($('title').text()).toEqual(`Guidance for farmers - ${serviceName}`)
     expectPhaseBanner.ok($)
