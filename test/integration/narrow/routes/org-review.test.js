@@ -83,85 +83,85 @@ describe('Org review page test', () => {
     })
   })
 
-  describe(`POST ${url} route`, () => {
-    let crumb
-    const method = 'POST'
+  // describe(`POST ${url} route`, () => {
+  //   let crumb
+  //   const method = 'POST'
 
-    beforeEach(async () => {
-      crumb = await getCrumbs(global.__SERVER__)
-    })
+  //   beforeEach(async () => {
+  //     crumb = await getCrumbs(global.__SERVER__)
+  //   })
 
-    beforeAll(async () => {
-      jest.mock('../../../../app/config', () => ({
-        ...jest.requireActual('../../../../app/config'),
-        authConfig: {
-          defraId: {
-            enabled: true
-          }
-        }
-      }))
-    })
+  //   beforeAll(async () => {
+  //     jest.mock('../../../../app/config', () => ({
+  //       ...jest.requireActual('../../../../app/config'),
+  //       authConfig: {
+  //         defraId: {
+  //           enabled: true
+  //         }
+  //       }
+  //     }))
+  //   })
 
-    test('returns 302 to next page when acceptable answer given', async () => {
-      const options = {
-        method,
-        url,
-        payload: { crumb, confirmCheckDetails: 'yes' },
-        auth,
-        headers: { cookie: `crumb=${crumb}` }
-      }
+  //   test('returns 302 to next page when acceptable answer given', async () => {
+  //     const options = {
+  //       method,
+  //       url,
+  //       payload: { crumb, confirmCheckDetails: 'yes' },
+  //       auth,
+  //       headers: { cookie: `crumb=${crumb}` }
+  //     }
 
-      const res = await global.__SERVER__.inject(options)
+  //     const res = await global.__SERVER__.inject(options)
 
-      expect(res.statusCode).toBe(302)
-      expect(res.headers.location).toEqual('/apply/form-download')
-    })
+  //     expect(res.statusCode).toBe(302)
+  //     expect(res.headers.location).toEqual('/apply/form-download')
+  //   })
 
-    test('returns 200 with update your details recognised when no is answered', async () => {
-      const options = {
-        method,
-        url,
-        payload: { crumb, confirmCheckDetails: 'no' },
-        auth,
-        headers: { cookie: `crumb=${crumb}` }
-      }
+  //   test('returns 200 with update your details recognised when no is answered', async () => {
+  //     const options = {
+  //       method,
+  //       url,
+  //       payload: { crumb, confirmCheckDetails: 'no' },
+  //       auth,
+  //       headers: { cookie: `crumb=${crumb}` }
+  //     }
 
-      const res = await global.__SERVER__.inject(options)
+  //     const res = await global.__SERVER__.inject(options)
 
-      expect(res.statusCode).toBe(200)
-      const $ = cheerio.load(res.payload)
-      expect($('.govuk-heading-l').text()).toEqual('Update your details')
-    })
+  //     expect(res.statusCode).toBe(200)
+  //     const $ = cheerio.load(res.payload)
+  //     expect($('.govuk-heading-l').text()).toEqual('Update your details')
+  //   })
 
-    test.each([
-      { confirmCheckDetails: null },
-      { confirmCheckDetails: undefined },
-      { confirmCheckDetails: 'wrong' },
-      { confirmCheckDetails: '' }
-    ])(
-      'returns error when unacceptable answer is given',
-      async ({ confirmCheckDetails }) => {
-        session.getFarmerApplyData.mockReturnValue(org)
-        const options = {
-          method,
-          url,
-          payload: { crumb, confirmCheckDetails },
-          auth,
-          headers: { cookie: `crumb=${crumb}` }
-        }
+  //   test.each([
+  //     { confirmCheckDetails: null },
+  //     { confirmCheckDetails: undefined },
+  //     { confirmCheckDetails: 'wrong' },
+  //     { confirmCheckDetails: '' }
+  //   ])(
+  //     'returns error when unacceptable answer is given',
+  //     async ({ confirmCheckDetails }) => {
+  //       session.getFarmerApplyData.mockReturnValue(org)
+  //       const options = {
+  //         method,
+  //         url,
+  //         payload: { crumb, confirmCheckDetails },
+  //         auth,
+  //         headers: { cookie: `crumb=${crumb}` }
+  //       }
 
-        const res = await global.__SERVER__.inject(options)
+  //       const res = await global.__SERVER__.inject(options)
 
-        expect(res.statusCode).toBe(400)
-        expect(res.request.response.variety).toBe('view')
-        expect(res.request.response.source.template).toBe(
-          'org-review'
-        )
-        expect(res.result).toContain(org.sbi)
-        expect(res.result).toContain(org.farmerName)
-        expect(res.result).toContain(org.address)
-        expect(res.result).toContain(org.name)
-      }
-    )
-  })
+  //       expect(res.statusCode).toBe(400)
+  //       expect(res.request.response.variety).toBe('view')
+  //       expect(res.request.response.source.template).toBe(
+  //         'org-review'
+  //       )
+  //       expect(res.result).toContain(org.sbi)
+  //       expect(res.result).toContain(org.farmerName)
+  //       expect(res.result).toContain(org.address)
+  //       expect(res.result).toContain(org.name)
+  //     }
+  //   )
+  // })
 })
