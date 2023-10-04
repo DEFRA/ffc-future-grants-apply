@@ -54,7 +54,6 @@ container:
   urlPrefix: /apply
   termsAndConditionsUrl:
   eligibilityApiUri:
-  applicationApiUri:
   registerYourInterestEnabled:
   registerYourInterestRequestQueueAddress: ffc-ahwr-register-your-interest-request
   defraIdTenant:
