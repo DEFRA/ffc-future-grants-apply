@@ -49,8 +49,6 @@ container:
   redisPartition: ffc-future-grants-apply
   redisPassword: redis
   redisPort: 6379
-  serviceUri:
-  claimServiceUri:
   urlPrefix: /apply
   termsAndConditionsUrl:
   registerYourInterestEnabled:

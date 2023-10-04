@@ -13,7 +13,6 @@ const routes = [].concat(
   require('../routes/form-download'),
   require('../routes/form-upload'),
   require('../routes/not-eligible'),
-  require('../routes/terms-and-conditions'),
   require('../routes/signin-oidc')
 )
 

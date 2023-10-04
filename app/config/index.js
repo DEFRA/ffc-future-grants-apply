@@ -40,8 +40,6 @@ const schema = Joi.object({
   googleTagManagerKey: Joi.string().allow(null, ''),
   isDev: Joi.boolean().default(false),
   port: Joi.number().default(3000),
-  serviceUri: Joi.string().uri(),
-  claimServiceUri: Joi.string().uri(),
   serviceName: Joi.string().default('Apply for a farming grant'),
   useRedis: Joi.boolean().default(false),
   urlPrefix: Joi.string().default(urlPrefix),
@@ -100,8 +98,6 @@ const config = {
   googleTagManagerKey: process.env.GOOGLE_TAG_MANAGER_KEY,
   isDev: process.env.NODE_ENV === 'development',
   port: process.env.PORT,
-  serviceUri: process.env.SERVICE_URI,
-  claimServiceUri: process.env.CLAIM_SERVICE_URI,
   useRedis: process.env.NODE_ENV !== 'test',
   urlPrefix: process.env.URL_PREFIX,
   ruralPaymentsAgency: {
