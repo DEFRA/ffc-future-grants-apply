@@ -29,7 +29,6 @@ services:
       CLAIM_SERVICE_URI: http://localhost:3004/claim
       URL_PREFIX: "/apply"
       REGISTER_YOUR_INTEREST_ENABLED: ${REGISTER_YOUR_INTEREST_ENABLED:-true}
-      ELIGIBILITY_API_URI: http://host.docker.internal:3010/api
       DEFRA_ID_TENANT: ${DEFRA_ID_TENANT:-azdcuspoc5}
       DEFRA_ID_POLICY: ${DEFRA_ID_POLICY:-B2C_1A_SIGNUPSIGNINSFI}
       DEFRA_ID_REDIRECT_URI: ${DEFRA_ID_REDIRECT_URI:-http://localhost:3000/apply/signin-oidc}
