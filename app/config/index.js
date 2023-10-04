@@ -128,9 +128,6 @@ const config = {
   dateOfTesting: {
     enabled: process.env.DATE_OF_TESTING_ENABLED
   },
-  tenMonthRule: {
-    enabled: process.env.TEN_MONTH_RULE_ENABLED
-  },
   reapplyTimeLimitMonths: 10
 }
 

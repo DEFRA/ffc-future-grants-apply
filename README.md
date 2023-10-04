@@ -36,7 +36,6 @@ Please ask a developer for an example `.env` file that you can include in the ro
 | MESSAGE_QUEUE_PASSWORD                      | Azure Service Bus SAS policy key                                                                 |
 | MESSAGE_QUEUE_SUFFIX                        | Developer initials                                                                               |
 | MESSAGE_QUEUE_USER                          | Azure Service Bus SAS policy name, e.g. `RootManageSharedAccessKey`                              |
-| NOTIFY_API_KEY                              | GOV.UK Notify API Key                                                                            |
 | NOTIFY_TEMPLATE_ID_FARMER_APPLY_LOGIN       | Id of email template used for future grants apply login email                                    |
 | NOTIFY_TEMPLATE_ID_FARMER_CLAIM_LOGIN       | Id of email template used for farmer claim login email                                           |
 | NOTIFY_TEMPLATE_ID_VET_LOGIN                | Id of email template used for vet login email                                                    |

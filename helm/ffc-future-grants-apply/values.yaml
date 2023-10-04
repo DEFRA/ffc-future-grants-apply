@@ -76,7 +76,6 @@ container:
   apimClientSecret:
   apimScope:
   dateOfTestingEnabled:
-  tenMonthRuleEnabled:
 
 ingress:
   class: nginx
