@@ -58,7 +58,6 @@ const schema = Joi.object({
     enabled: Joi.bool().default(true)
   },
   eligibilityApi: require('../api-requests/eligibility-api.config.schema'),
-  applicationApi: require('../api-requests/application-api.config.schema'),
   wreckHttp: {
     timeoutMilliseconds: Joi.number().default(10000)
   },
@@ -119,7 +118,6 @@ const config = {
     enabled: process.env.REGISTER_YOUR_INTEREST_ENABLED
   },
   eligibilityApi: require('../api-requests/eligibility-api.config'),
-  applicationApi: require('../api-requests/application-api.config'),
   wreckHttp: {
     timeoutMilliseconds: process.env.WRECK_HTTP_TIMEOUT_MILLISECONDS
   },
