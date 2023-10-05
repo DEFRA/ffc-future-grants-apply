@@ -5,7 +5,7 @@ const CommonActions = require('./common-actions')
 const START_BUTTON = 'a[role="button"]'
 const BUSINESS_EMAIL = '1105110119@email.com'
 const RPA_CONTACT = '.govuk-details'
-const PAGE_TITLE = 'Annual health and welfare review of livestock'
+const PAGE_TITLE = 'Apply for a farming grant'
 const SELECT_BUSINESS = 'Which business'
 const BUSINESS_NAME = 'Farm'
 const CONTACT = 'Telephone'
@@ -39,7 +39,7 @@ const SUCCESS_MESSAGE = '.govuk-panel__title'
 const ACCURATE_ANSWER = 'Check your answers'
 const AGREED = 'declaration'
 const REVIEW_AGREED = 'agreement'
-const TERMS = 'Annual health and welfare review of livestock terms and conditions'
+const TERMS = 'Apply for a farming grant terms and conditions'
 const MESSAGE = 'Application complete'
 const LIVESTOCK_NUMBER = 'eligible for funding'
 
@@ -147,7 +147,7 @@ class SelectBusinessPage extends CommonActions {
     }
   }
 
- 
+
   async continueTheApplication() { await this.clickOn(CONTINUE_BUTTON) }
   // eligible livestock
   async minimumRequirement() {
@@ -221,10 +221,10 @@ class SelectBusinessPage extends CommonActions {
   async signInWithDefraId(business) {
     const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs))
     await sleep(10000)
-    if (business=='Single'){
-        await this.inputValidCrn(process.env.CRN_USERNAME)
-   
-    }else if (business=='Multiple'){
+    if (business == 'Single') {
+      await this.inputValidCrn(process.env.CRN_USERNAME)
+
+    } else if (business == 'Multiple') {
       console.log(process.env.CRN_MULTI_USERNAME)
       await this.inputValidCrn(process.env.CRN_MULTI_USERNAME)
     }
