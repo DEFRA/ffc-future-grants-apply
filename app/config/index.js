@@ -37,7 +37,6 @@ const schema = Joi.object({
   env: Joi.string().valid('development', 'test', 'production').default(
     'development'
   ),
-  googleTagManagerKey: Joi.string().allow(null, ''),
   isDev: Joi.boolean().default(false),
   port: Joi.number().default(3000),
   serviceName: Joi.string().default('Apply for a farming grant'),
@@ -57,10 +56,6 @@ const schema = Joi.object({
   },
   wreckHttp: {
     timeoutMilliseconds: Joi.number().default(10000)
-  },
-  latestTermsAndConditionsUri: Joi.string().required(),
-  dateOfTesting: {
-    enabled: Joi.bool().default(false)
   },
   tenMonthRule: {
     enabled: Joi.bool().default(false)
@@ -95,7 +90,6 @@ const config = {
     password: process.env.COOKIE_PASSWORD
   },
   env: process.env.NODE_ENV,
-  googleTagManagerKey: process.env.GOOGLE_TAG_MANAGER_KEY,
   isDev: process.env.NODE_ENV === 'development',
   port: process.env.PORT,
   useRedis: process.env.NODE_ENV !== 'test',
@@ -109,15 +103,8 @@ const config = {
   customerSurvey: {
     uri: 'https://defragroup.eu.qualtrics.com/jfe/form/SV_0lxBrd2XeDnn2hU'
   },
-  registerYourInterest: {
-    enabled: process.env.REGISTER_YOUR_INTEREST_ENABLED
-  },
   wreckHttp: {
     timeoutMilliseconds: process.env.WRECK_HTTP_TIMEOUT_MILLISECONDS
-  },
-  latestTermsAndConditionsUri: process.env.TERMS_AND_CONDITIONS_URL,
-  dateOfTesting: {
-    enabled: process.env.DATE_OF_TESTING_ENABLED
   },
   reapplyTimeLimitMonths: 10
 }
