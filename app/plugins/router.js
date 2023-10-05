@@ -22,7 +22,6 @@ const routes = [].concat(
 module.exports = {
   plugin: {
     name: 'router',
-    name: 'router',
     register: (server, _) => {
       server.route(routes)
       // server.route(registerYourInterestRoutes)
