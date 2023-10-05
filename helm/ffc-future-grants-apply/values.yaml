@@ -1,7 +1,7 @@
 environment: development
 name: ffc-future-grants-apply
-namespace: ffc-ahwr
-workstream: ffc-ahwr
+namespace: ffc-future-grants
+workstream: ffc-future-grants
 image: ffc-future-grants-apply
 
 labels: {}
