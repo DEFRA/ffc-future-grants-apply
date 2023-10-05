@@ -52,12 +52,10 @@ module.exports = [
         const appendixFile = request.payload.appendix
 
         if (!applicationFormFile && !appendixFile) {
-          // No files were uploaded
           return h
             .view(viewTemplate, createModel('No files selected'))
             .takeover()
         }
-
         // Upload the files to Azure Blob Storage (if they exist)
         if (applicationFormFile) {
           const applicationFormBuffer = applicationFormFile._data

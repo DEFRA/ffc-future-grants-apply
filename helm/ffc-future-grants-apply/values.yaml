@@ -37,8 +37,8 @@ container:
   requestCpu: 120m
   limitMemory: 400Mi
   limitCpu: 400m
-  applicationRequestQueueAddress: ffc-ahwr-application-request
-  applicationResponseQueueAddress: ffc-ahwr-application-response
+  applicationRequestQueueAddress: ffc-future-grants-application-request
+  applicationResponseQueueAddress: ffc-future-grants-application-response
   cookiePassword: who-likes-cookies-i-like-cookies-everybody-likes-cookies
   eventQueueAddress: ffc-ahwr-event
   imagePullPolicy: IfNotPresent
