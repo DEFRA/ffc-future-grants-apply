@@ -41,7 +41,6 @@ container:
   applicationResponseQueueAddress: ffc-ahwr-application-response
   cookiePassword: who-likes-cookies-i-like-cookies-everybody-likes-cookies
   eventQueueAddress: ffc-ahwr-event
-  googleTagManagerKey:
   imagePullPolicy: IfNotPresent
   messageQueueHost: namespace.servicebus.windows.net
   port: 3000
@@ -50,8 +49,6 @@ container:
   redisPassword: redis
   redisPort: 6379
   urlPrefix: /apply
-  termsAndConditionsUrl:
-  registerYourInterestEnabled:
   registerYourInterestRequestQueueAddress: ffc-ahwr-register-your-interest-request
   defraIdTenant:
   defraIdRedirectUri:
@@ -71,7 +68,6 @@ container:
   apimClientId:
   apimClientSecret:
   apimScope:
-  dateOfTestingEnabled:
 
 ingress:
   class: nginx

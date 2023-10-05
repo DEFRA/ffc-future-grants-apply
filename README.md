@@ -41,7 +41,6 @@ Please ask a developer for an example `.env` file that you can include in the ro
 | NOTIFY_TEMPLATE_ID_VET_LOGIN                | Id of email template used for vet login email                                                    |
 | NOTIFY_TEMPLATE_ID_FARMER_REGISTER_INTEREST | Id of email template used for registration of interest                                           |
 | AZURE_STORAGE_CREATE_CONTAINERS             | Set true to use connection string, false to connect using azure credentials for blobstorage      |
-| REGISTER_YOUR_INTEREST_ENABLED              | Feature flag for the register your interest journey                                              |
 | DEFRA_ID_TENANT                             | The Azure tenant for Defra Id                                                                    |
 | DEFRA_ID_POLICY                             | Defra Id policy                                                                                  |
 | DEFRA_ID_REDIRECT_URI                       | Defra Id redirect URI                                                                            |
@@ -59,7 +58,6 @@ Please ask a developer for an example `.env` file that you can include in the ro
 | APIM_CLIENT_ID                              | Client Id as registered with Azure API management                                                |
 | APIM_CLIENT_SECRET                          | Client Secret as registered with Azure API management                                            |
 | APIM_SCOPE                                  | Scope of the access token being requested from Azure API management                              |
-| TERMS_AND_CONDITIONS_URL                    | URL for latest service terms and conditions                                                      |
 
 ## Running the application
 

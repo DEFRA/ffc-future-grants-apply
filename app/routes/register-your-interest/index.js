@@ -19,9 +19,9 @@ module.exports = [
     options: {
       auth: false,
       handler: async (request, h) => {
-        if (config.registerYourInterest.enabled) {
-          return h.view('register-your-interest/index', { ruralPaymentsAgency })
-        }
+        // if (config.registerYourInterest.enabled) {
+        //   return h.view('register-your-interest/index', { ruralPaymentsAgency })
+        // }
         return h.redirect(config.urlPrefix)
       }
     }

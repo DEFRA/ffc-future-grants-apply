@@ -14,7 +14,6 @@ services:
       APPLICATIONRESPONSE_QUEUE_ADDRESS: ${APPLICATIONRESPONSE_QUEUE_ADDRESS:-ffc-ahwr-application-response}${MESSAGE_QUEUE_SUFFIX}
       COOKIE_PASSWORD: who-likes-cookies-i-like-cookies-everybody-likes-cookies
       EVENT_QUEUE_ADDRESS: ${EVENT_QUEUE_ADDRESS:-ffc-ahwr-event}${MESSAGE_QUEUE_SUFFIX}
-      GOOGLE_TAG_MANAGER_KEY: ${GOOGLE_TAG_MANAGER_KEY}
       MESSAGE_QUEUE_HOST: ${MESSAGE_QUEUE_HOST:-notset}
       MESSAGE_QUEUE_PASSWORD: ${MESSAGE_QUEUE_PASSWORD:-notset}
       MESSAGE_QUEUE_USER: ${MESSAGE_QUEUE_USER:-notset}
@@ -26,7 +25,6 @@ services:
       REDIS_PASSWORD: ""
       REGISTER_YOUR_INTEREST_REQUEST_QUEUE_ADDRESS: ${REGISTER_YOUR_INTEREST_REQUEST_QUEUE_ADDRESS:-ffc-ahwr-register-your-interest-request}${MESSAGE_QUEUE_SUFFIX}
       URL_PREFIX: "/apply"
-      REGISTER_YOUR_INTEREST_ENABLED: ${REGISTER_YOUR_INTEREST_ENABLED:-true}
       DEFRA_ID_TENANT: ${DEFRA_ID_TENANT:-azdcuspoc5}
       DEFRA_ID_POLICY: ${DEFRA_ID_POLICY:-B2C_1A_SIGNUPSIGNINSFI}
       DEFRA_ID_REDIRECT_URI: ${DEFRA_ID_REDIRECT_URI:-http://localhost:3000/apply/signin-oidc}
@@ -45,8 +43,6 @@ services:
       APIM_CLIENT_ID: ${APIM_CLIENT_ID:-changeme}
       APIM_CLIENT_SECRET: ${APIM_CLIENT_SECRET:-changeme}
       APIM_SCOPE: ${APIM_SCOPE:-api://dev-futuretrade-int.defra.gov.uk/.default}
-      TERMS_AND_CONDITIONS_URL: ${TERMS_AND_CONDITIONS_URL:-http://localhost:3000/apply/terms/v3}
-      DATE_OF_TESTING_ENABLED: ${DATE_OF_TESTING_ENABLED:-false}
       BLOB_STORAGE_CONNECTION_STRING: ${BLOB_STORAGE_CONNECTION_STRING:-DefaultEndpointsProtocol=https;AccountName=devffcinfst1001;AccountKey=KWCmotG9/1U0r4pxHplFtv0u5C8w2HxCmN+Ooq6eV3HxDOGA/08c/Czk6RlVtqAZYfqvSgU/7DiEhnHTQz/Tng==;EndpointSuffix=core.windows.net}
       BLOB_STORAGE_ACCOUNT_NAME: ${BLOB_STORAGE_ACCOUNT_NAME:-devffcinfst1001}
       BLOB_STORAGE_CONTAINER_NAME: ${BLOB_STORAGE_CONTAINER_NAME:-ffc-grants-water-dev}
