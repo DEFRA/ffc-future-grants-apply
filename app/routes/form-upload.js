@@ -1,9 +1,10 @@
+const Joi = require('joi');
+
 const { urlPrefix } = require('../config/index')
 const {
   uploadFile,
   deleteFile
 } = require('../services/blob-storage') // Import your uploadFile function
-
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
 
@@ -16,7 +17,29 @@ function formatFileSize (bytes) {
   } else {
     const kilobytes = num / 1024
     return kilobytes.toFixed(2) + ' KB'
+}
+}
+function fileCheck(claimFormFile){
+  const acceptableExtensions=["doc", "docx","xls", "xlsx","pdf","jpg", "jpeg", "png","mpg", "mp4", "wmv", "mov"]
+ const claimFormFilename= claimFormFile.hapi.filename
+ const fileExtension=claimFormFilename.split('.').pop();
+ const isExtensionAllowed= acceptableExtensions.includes(fileExtension);
+  const allowedFileSize=5000 * 1024;
+  const claimFormBuffer = claimFormFile._data
+  const fileSizeBytes = claimFormBuffer.byteLength
+  const isAllowedSize=allowedFileSize>= Number(fileSizeBytes)
+ if(!claimFormFilename){
+  return {isCheckPassed:false,errorMessage:"No file selected. Select a file to upload."}
+ }else if(!isExtensionAllowed){
+  return {isCheckPassed:false,errorMessage:"The selected file must be a DOC, DOCX, XLS, XLSX, PDF, JPG, JPEG, PNG, MPG, MP4, WMV or MOV"}
+} else if(!isAllowedSize){
+    return {isCheckPassed:false,errorMessage:"The selected file must be smaller than 5MB"}
+  } 
+  else{
+    const fileSizeFormatted = formatFileSize(fileSizeBytes);
+    return {isCheckPassed:true,fileBuffer:claimFormBuffer,fileSizeFormatted,claimFormFilename}
   }
+
 }
 function createModel (errorMessage, isClaimFormUploaded, file) {
   return {
@@ -48,46 +71,62 @@ module.exports = [
     path: currentPath,
     options: {
       auth: false,
+      validate:{
+        payload:Joi.object({
+          claimForm:Joi.object({
+            hapi:Joi.object({
+              filename:Joi.string().regex(/\.(doc|docx|xls|xlsx|pdf|jpg|jpeg|png|mpg|mp4|wmv|mov)$/i).required()
+            }).unknown()
+          }).unknown(),
+          action:Joi.string(),
+          fileName:Joi.string(),
+          fileDelete:Joi.object().unknown()
+        }),
+        failAction:"ignore"
+      },
+      
       payload: {
+       
         output: 'stream',
         parse: true,
         multipart: true,
-        maxBytes: 20971520
-      }
+        maxBytes: 1073741824,
+        timeout:false,
+        failAction: (request, h, error) => {
+          console.log("ERROR====>>> ",error)
+          const errorMessage = 'Invalid input: ' + error.output.payload.mesage;
+          return h.view(viewTemplate, createModel(errorMessage, false)).takeover();
+        },
+      },
+     
     },
     handler: async (request, h) => {
       const { action } = request.payload
       if (action === 'upload') {
-        console.log(request.payload)
         try {
           const claimFormFile = request.payload.claimForm
-          if (!claimFormFile) {
-            return h
-              .view(viewTemplate, createModel('No files selected'))
+            const fileCheckDetails=fileCheck(claimFormFile);
+            if(fileCheckDetails.errorMessage){
+              return h
+              .view(viewTemplate, createModel(fileCheckDetails.errorMessage,false))
               .takeover()
-          }
-          if (claimFormFile) {
-            const claimFormBuffer = claimFormFile._data
-            const claimFormFilename = claimFormFile.hapi.filename
-            const fileSizeBytes = claimFormBuffer.byteLength
-            const fileSizeFormatted = formatFileSize(fileSizeBytes)
-            const fileUploaded = await uploadFile(claimFormBuffer, claimFormFilename)
-            console.log(fileUploaded)
-            return h.view(
-              viewTemplate,
-              createModel(null, fileUploaded.isUploaded, {
-                originalFileName: fileUploaded.originalFileName,
-                fileSize: fileSizeFormatted,
-                fileName: fileUploaded.fileName
-              })
-            )
-          }
+            }else{
+              const fileUploaded = await uploadFile(fileCheckDetails.fileBuffer, fileCheckDetails.claimFormFilename)
+              return h.view(
+                viewTemplate,
+                createModel(null, fileUploaded.isUploaded, {
+                  originalFileName: fileUploaded.originalFileName,
+                  fileSize:fileCheckDetails.fileSizeFormatted,
+                  fileName: fileUploaded.fileName
+                })
+              )
+            }
         } catch (error) {
-          console.error('Error uploading file(s):', error)
+          console.error('The selected file could not be uploaded – try again',error)
           return h
             .view(
               viewTemplate,
-              createModel('Error uploading file(s)', false, false)
+              createModel('The selected file could not be uploaded – try again', false, null)
             )
             .takeover()
         }
@@ -106,7 +145,7 @@ module.exports = [
           return h
             .view(
               viewTemplate,
-              createModel('File deleted successfully', false, null)
+              createModel(null, false, null)
             )
             .takeover()
         } else {
@@ -118,3 +157,24 @@ module.exports = [
     }
   }
 ]
+
+
+// {
+//   method: 'POST',
+//   path: `${urlPrefix}/which-review`,
+//   options: {
+//     validate: {
+//       payload: Joi.object({
+//         [whichReview]: Joi.string().valid('sheep', 'pigs', 'dairy', 'beef').required()
+//       }),
+//       failAction: (request, h, _err) => {
+//         return h.view('which-review', {
+//           ...speciesRadios(legendText, whichReview, session.getFarmerApplyData(request, whichReview), errorText, radioOptions),
+//           backLink
+//         }).code(400).takeover()
+//       }
+//     },
+//     handler: async (request, h) => {
+//       session.setFarmerApplyData(request, whichReview, request.payload[whichReview])
+//       return h.redirect(`${urlPrefix}/${request.payload[whichReview]}-eligibility`)
+//     }
