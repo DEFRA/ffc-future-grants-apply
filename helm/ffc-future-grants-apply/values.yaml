@@ -31,6 +31,8 @@ deployment:
   priorityClassName: high
   replicas: 2
   restartPolicy: Always
+  redeployOnChange: update this field to force a change
+
 
 container:
   requestMemory: 120Mi

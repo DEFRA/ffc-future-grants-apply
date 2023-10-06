@@ -2,26 +2,26 @@ const Joi = require('joi')
 
 // Define config schema
 const schema = Joi.object({
-  connectionStr: Joi.string().when('useConnectionStr', {
+  blobStorageConnectionString: Joi.string().when('useBlobStorageConnectionString', {
     is: true,
     then: Joi.required(),
     otherwise: Joi.allow('').optional()
   }),
-  storageAccountName: Joi.string().when('useConnectionStr', {
+  blobStorageAccountName: Joi.string().when('useBlobStorageConnectionString', {
     is: true,
     then: Joi.allow('').optional(),
     otherwise: Joi.required()
   }),
-  containerName: Joi.string().required(),
-  useConnectionStr: Joi.boolean().default(false)
+  blobStorageContainerName: Joi.string().required(),
+  useBlobStorageConnectionString: Joi.boolean().default(false)
 })
 
 // Build config
 const config = {
-  connectionStr: process.env.BLOB_STORAGE_CONNECTION_STRING,
-  storageAccountName: process.env.BLOB_STORAGE_ACCOUNT_NAME,
-  containerName: process.env.BLOB_STORAGE_CONTAINER_NAME,
-  useConnectionStr: process.env.USE_BLOB_STORAGE_CONNECTION_STRING
+  blobStorageConnectionString: process.env.BLOB_STORAGE_CONNECTION_STRING,
+  blobStorageAccountName: process.env.BLOB_STORAGE_ACCOUNT_NAME,
+  blobStorageContainerName: process.env.BLOB_STORAGE_CONTAINER_NAME,
+  useBlobStorageConnectionString: process.env.USE_BLOB_STORAGE_CONNECTION_STRING
 }
 console.log(config)
 // Validate config
