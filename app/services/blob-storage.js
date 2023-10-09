@@ -4,7 +4,7 @@ const config = require('../config/blob-storage')
 let blobServiceClient
 
 if (config.useBlobStorageConnectionString) {
-  console.log('Using connection string for BlobServiceClient')
+  console.log('Using connection string for BlobServiceClient', config.blobStorageConnectionString)
   blobServiceClient = BlobServiceClient.fromConnectionString(
     config.blobStorageConnectionString
   )
