@@ -31,6 +31,8 @@ deployment:
   priorityClassName: high
   replicas: 2
   restartPolicy: Always
+  redeployOnChange: update this field to force a change
+
 
 container:
   requestMemory: 120Mi
@@ -40,27 +42,16 @@ container:
   applicationRequestQueueAddress: ffc-future-grants-application-request
   applicationResponseQueueAddress: ffc-future-grants-application-response
   cookiePassword: who-likes-cookies-i-like-cookies-everybody-likes-cookies
-  eventQueueAddress: ffc-future-grants-event
-  googleTagManagerKey:
+  eventQueueAddress: ffc-ahwr-event
   imagePullPolicy: IfNotPresent
   messageQueueHost: namespace.servicebus.windows.net
-  notifyApiKey:
-  notifyTemplateIdFarmerRegisterYourInterestDefraId:
-  notifyTemplateIdFarmerRegisterYourInterestAccessGranted:
-  notifyTemplateIdFarmerRegisterYourInterestAccessNotGranted:
   port: 3000
   redisHostname: redis-hostname.default
   redisPartition: ffc-future-grants-apply
   redisPassword: redis
   redisPort: 6379
-  serviceUri:
-  claimServiceUri:
   urlPrefix: /apply
-  termsAndConditionsUrl:
-  eligibilityApiUri:
-  applicationApiUri:
-  registerYourInterestEnabled:
-  registerYourInterestRequestQueueAddress: ffc-future-grants-register-your-interest-request
+  registerYourInterestRequestQueueAddress: ffc-ahwr-register-your-interest-request
   defraIdTenant:
   defraIdRedirectUri:
   defraIdJwtIssuerId:
@@ -69,6 +60,10 @@ container:
   defraIdServiceId:
   defraIdPolicy:
   rpaHostname:
+  blobStorageAccountName: blob-account
+  blobStorageContainerName: not-a-real-container
+  blobStorageConnectionString: dummy
+  useBlobStorageConnectionString: false
   rpaGetPersonSummaryUrl:
   rpaGetOrganisationPermissionsUrl:
   rpaGetOrganisationUrl:
@@ -79,8 +74,6 @@ container:
   apimClientId:
   apimClientSecret:
   apimScope:
-  dateOfTestingEnabled:
-  tenMonthRuleEnabled:
 
 ingress:
   class: nginx

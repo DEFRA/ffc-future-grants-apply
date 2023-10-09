@@ -35,13 +35,13 @@ async function createServer () {
     }
   })
 
-  await server.register(require('./plugins/crumb'))
+  // await server.register(require('./plugins/crumb'))
   await server.register(require('@hapi/cookie'))
   await server.register(require('@hapi/inert'))
   await server.register(require('./plugins/auth-plugin'))
   await server.register(require('./plugins/cookies'))
   await server.register(require('./plugins/error-pages'))
-  // await server.register(require('./plugins/logging'))
+  await server.register(require('./plugins/logging'))
   await server.register(require('./plugins/router'))
   await server.register(require('./plugins/session'))
   await server.register(require('./plugins/view-context'))
@@ -52,7 +52,6 @@ async function createServer () {
       keys: [
         { key: 'X-Frame-Options', value: 'deny' },
         { key: 'X-Content-Type-Options', value: 'nosniff' },
-        { key: 'Access-Control-Allow-Origin', value: config.serviceUri },
         { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
         { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
         { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
