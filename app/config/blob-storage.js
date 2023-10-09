@@ -13,7 +13,7 @@ const schema = Joi.object({
     otherwise: Joi.required()
   }),
   blobStorageContainerName: Joi.string().required(),
-  useBlobStorageConnectionString: Joi.boolean().default(false)
+  useBlobStorageConnectionString: Joi.string().default(false)
 })
 
 // Build config
