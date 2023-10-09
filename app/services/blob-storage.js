@@ -18,7 +18,7 @@ const blobContainerClient = blobServiceClient.getContainerClient(
   config.blobStorageContainerName
 )
 
-async function uploadFile(buffer, filename) {
+async function uploadFile (buffer, filename) {
   const blockBlobClient = blobContainerClient.getBlockBlobClient(filename)
   await blockBlobClient.upload(buffer, buffer.byteLength)
   console.log('Blob was uploaded successfully')
