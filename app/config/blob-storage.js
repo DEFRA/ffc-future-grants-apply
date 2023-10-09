@@ -31,6 +31,7 @@ const result = schema.validate(config, {
 
 // Throw if config is invalid
 if (result.error) {
+  console.log(process.env.USE_BLOB_STORAGE_CONNECTION_STRING, 'USE CONNECTION STRING')
   throw new Error(
     `The blob storage config is invalid. ${result.error.message}`
   )
