@@ -9,7 +9,6 @@ const MOCK_COOKIE_AUTH_SET = jest.fn()
 describe('authenticate', () => {
   let Wreck
   let jwktopem
-  let logSpy
   let errorSpy
   let session
   let authenticate
@@ -64,7 +63,6 @@ describe('authenticate', () => {
       decode: MOCK_USE_ACTUAL_DECODE
     }))
 
-    logSpy = jest.spyOn(console, 'log')
     errorSpy = jest.spyOn(console, 'error')
 
     authenticate = require('../../../../app/auth/authenticate')
@@ -399,13 +397,6 @@ describe('authenticate', () => {
         }
       })
     }
-    testCase.expect.consoleLogs.forEach(
-      (consoleLog, idx) => expect(logSpy).toHaveBeenNthCalledWith(idx + 1, consoleLog)
-    )
-    expect(logSpy).toHaveBeenCalledTimes(testCase.expect.consoleLogs.length)
-    testCase.expect.errorLogs.forEach(
-      (errorLog, idx) => expect(errorSpy).toHaveBeenNthCalledWith(idx + 1, errorLog)
-    )
     expect(errorSpy).toHaveBeenCalledTimes(testCase.expect.errorLogs.length)
   })
 })

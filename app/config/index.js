@@ -1,6 +1,5 @@
 const Joi = require('joi')
 const mqConfig = require('./messaging')
-const notifyConfig = require('./notify')
 const authConfig = require('./auth')
 const urlPrefix = '/apply'
 
@@ -38,11 +37,8 @@ const schema = Joi.object({
   env: Joi.string().valid('development', 'test', 'production').default(
     'development'
   ),
-  googleTagManagerKey: Joi.string().allow(null, ''),
   isDev: Joi.boolean().default(false),
   port: Joi.number().default(3000),
-  serviceUri: Joi.string().uri(),
-  claimServiceUri: Joi.string().uri(),
   serviceName: Joi.string().default('Apply for a farming grant'),
   useRedis: Joi.boolean().default(false),
   urlPrefix: Joi.string().default(urlPrefix),
@@ -58,14 +54,8 @@ const schema = Joi.object({
   registerYourInterest: {
     enabled: Joi.bool().default(true)
   },
-  eligibilityApi: require('../api-requests/eligibility-api.config.schema'),
-  applicationApi: require('../api-requests/application-api.config.schema'),
   wreckHttp: {
     timeoutMilliseconds: Joi.number().default(10000)
-  },
-  latestTermsAndConditionsUri: Joi.string().required(),
-  dateOfTesting: {
-    enabled: Joi.bool().default(false)
   },
   tenMonthRule: {
     enabled: Joi.bool().default(false)
@@ -100,11 +90,8 @@ const config = {
     password: process.env.COOKIE_PASSWORD
   },
   env: process.env.NODE_ENV,
-  googleTagManagerKey: process.env.GOOGLE_TAG_MANAGER_KEY,
   isDev: process.env.NODE_ENV === 'development',
   port: process.env.PORT,
-  serviceUri: process.env.SERVICE_URI,
-  claimServiceUri: process.env.CLAIM_SERVICE_URI,
   useRedis: process.env.NODE_ENV !== 'test',
   urlPrefix: process.env.URL_PREFIX,
   ruralPaymentsAgency: {
@@ -116,20 +103,8 @@ const config = {
   customerSurvey: {
     uri: 'https://defragroup.eu.qualtrics.com/jfe/form/SV_0lxBrd2XeDnn2hU'
   },
-  registerYourInterest: {
-    enabled: process.env.REGISTER_YOUR_INTEREST_ENABLED
-  },
-  eligibilityApi: require('../api-requests/eligibility-api.config'),
-  applicationApi: require('../api-requests/application-api.config'),
   wreckHttp: {
     timeoutMilliseconds: process.env.WRECK_HTTP_TIMEOUT_MILLISECONDS
-  },
-  latestTermsAndConditionsUri: process.env.TERMS_AND_CONDITIONS_URL,
-  dateOfTesting: {
-    enabled: process.env.DATE_OF_TESTING_ENABLED
-  },
-  tenMonthRule: {
-    enabled: process.env.TEN_MONTH_RULE_ENABLED
   },
   reapplyTimeLimitMonths: 10
 }
@@ -144,7 +119,6 @@ if (result.error) {
 
 const value = result.value
 value.mqConfig = mqConfig
-value.notifyConfig = notifyConfig
 value.authConfig = authConfig
 
 module.exports = value

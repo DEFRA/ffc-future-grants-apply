@@ -3,7 +3,6 @@ const ruralPaymentsAgency = require('../../config/index').ruralPaymentsAgency
 const BUSINESS_EMAIL_SCHEMA = require('../../schemas/business-email.schema.js')
 const { sendDefraIdRegisterYourInterestMessage } = require('../../messaging/register-your-interest')
 const { checkWaitingList } = require('../../api-requests/eligibility-api')
-const sendEmail = require('../../lib/email/send-email')
 const config = require('../../config')
 const Joi = require('joi')
 const boom = require('@hapi/boom')
@@ -20,9 +19,9 @@ module.exports = [
     options: {
       auth: false,
       handler: async (request, h) => {
-        if (config.registerYourInterest.enabled) {
-          return h.view('register-your-interest/index', { ruralPaymentsAgency })
-        }
+        // if (config.registerYourInterest.enabled) {
+        //   return h.view('register-your-interest/index', { ruralPaymentsAgency })
+        // }
         return h.redirect(config.urlPrefix)
       }
     }
@@ -60,21 +59,9 @@ module.exports = [
     },
     handler: async (request, h) => {
       try {
-        const { alreadyRegistered, accessGranted } = await checkWaitingList(request.payload.emailAddress)
+        const { alreadyRegistered } = await checkWaitingList(request.payload.emailAddress)
         if (!alreadyRegistered) {
-          sendEmail(config.notifyConfig.emailTemplates.registerYourInterest, request.payload.emailAddress)
           sendDefraIdRegisterYourInterestMessage(request.payload.emailAddress)
-        } else {
-          sendEmail(
-            accessGranted ? config.notifyConfig.emailTemplates.accessGranted : config.notifyConfig.emailTemplates.accessNotGranted,
-            request.payload.emailAddress,
-            {
-              personalisation: {
-                applyGuidanceUrl: config.serviceUri,
-                applyVetGuidanceUrl: config.serviceUri + '/guidance-for-vet'
-              }
-            }
-          )
         }
       } catch (error) {
         console.error(`${new Date().toISOString()} Registration of interest submission failed: ${JSON.stringify({
