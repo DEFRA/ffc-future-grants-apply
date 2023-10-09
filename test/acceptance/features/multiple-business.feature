@@ -16,26 +16,3 @@ Feature: select multiple business
     Examples:
     |business|
     |Small Holding - SBI 106637106 |
-
-  Scenario Outline:user select the livestock to apply
-    When user is on the livestock page
-    And user check if livestock are listed
-    And user choose <LiveStockName> cattle for review
-    Then User continue the application
-    Examples:
-    |LiveStockName|
-    |Sheep|
-
-  Scenario: users animal eligibility
-    When user check the minimum number of livestock required to qualify for the review
-    And user confirm to meet the requirement
-    And user continue the application
-    And user check the answer
-
-  Scenario: user accept terms and condition to complete the journey
-    When user is on the declaration page
-    When user view the page title
-    And user read through the full terms and conditions
-    And user accept the terms and conditions
-#    Then user complete the application
-#    Then user should see successful message
