@@ -25,7 +25,7 @@ exports.config = {
     {
       'bstack:options': {
         os: 'Windows',
-        'projectName': 'DEFRA/ffc-ahwr/Vet-Visit',
+        'projectName': 'DEFRA/ffc-future-grants/apply',
         osVersion: '10',
         browserVersion: '112.0',
         browserName: 'Chrome',
