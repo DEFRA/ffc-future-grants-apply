@@ -60,6 +60,10 @@ container:
   defraIdServiceId:
   defraIdPolicy:
   rpaHostname:
+  blobStorageAccountName: blob-account
+  blobStorageContainerName: not-a-real-container
+  blobStorageConnectionString: dummy
+  useBlobStorageConnectionString: false
   rpaGetPersonSummaryUrl:
   rpaGetOrganisationPermissionsUrl:
   rpaGetOrganisationUrl:

@@ -43,7 +43,6 @@ services:
       APIM_CLIENT_ID: ${APIM_CLIENT_ID:-changeme}
       APIM_CLIENT_SECRET: ${APIM_CLIENT_SECRET:-changeme}
       APIM_SCOPE: ${APIM_SCOPE:-api://dev-futuretrade-int.defra.gov.uk/.default}
-      BLOB_STORAGE_CONNECTION_STRING: ${BLOB_STORAGE_CONNECTION_STRING:-notset}
-      BLOB_STORAGE_ACCOUNT_NAME: ${BLOB_STORAGE_ACCOUNT_NAME:-notset}
       BLOB_STORAGE_CONTAINER_NAME: ${BLOB_STORAGE_CONTAINER_NAME:-notset}
-      USE_BLOB_STORAGE_CONNECTION_STRING: ${USE_BLOB_STORAGE_CONNECTION_STRING:-notset}
+      BLOB_STORAGE_CONNECTION_STRING: ${BLOB_STORAGE_CONNECTION_STRING:-DefaultEndpointsProtocol=https;AccountName=dummy;AccountKey=dummy;EndpointSuffix=core.windows.net}
+      USE_BLOB_STORAGE_CONNECTION_STRING: "true"
