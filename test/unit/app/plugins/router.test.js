@@ -1,14 +1,7 @@
 describe('routes plugin test', () => {
-  const registerYourInterestEnabledKey = process.env.REGISTER_YOUR_INTEREST_ENABLED
   beforeEach(() => {
     jest.resetModules()
-    delete process.env.REGISTER_YOUR_INTEREST_ENABLED
-    process.env = Object.assign(process.env, { REGISTER_YOUR_INTEREST_ENABLED: false })
     jest.clearAllMocks()
-  })
-
-  afterAll(() => {
-    process.env.REGISTER_YOUR_INTEREST_ENABLED = registerYourInterestEnabledKey
   })
 
   test('register your interest routes not included - feature disabled', async () => {

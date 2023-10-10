@@ -5,19 +5,19 @@ const { BlobServiceClient } = require('@azure/storage-blob')
 const config = require('../config/blob-storage')
 let blobServiceClient
 
-if (config.useConnectionStr) {
-  console.log('Using connection string for BlobServiceClient')
+if (config.useBlobStorageConnectionString) {
+  console.log('Using connection string for BlobServiceClient', config.blobStorageConnectionString)
   blobServiceClient = BlobServiceClient.fromConnectionString(
-    config.connectionStr
+    config.blobStorageConnectionString
   )
 } else {
   console.log('Using DefaultAzureCredential for BlobServiceClient')
-  const uri = `https://${config.storageAccountName}.blob.core.windows.net`
+  const uri = `https://${config.blobStorageAccountName}.blob.core.windows.net`
   blobServiceClient = new BlobServiceClient(uri, new DefaultAzureCredential())
 }
 
 const blobContainerClient = blobServiceClient.getContainerClient(
-  config.containerName
+  config.blobStorageContainerName
 )
 
 async function uploadFile (buffer, filename) {

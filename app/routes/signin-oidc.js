@@ -114,8 +114,7 @@ module.exports = [{
           hasMultipleBusinesses: attachedToMultipleBusinesses,
           backLink: auth.requestAuthorizationCodeUrl(session, request),
           sbiText: organisation?.sbi !== undefined ? ` - SBI ${organisation.sbi}` : null,
-          organisationName: organisation?.name,
-          guidanceLink: config.serviceUri
+          organisationName: organisation?.name
         }).code(400).takeover()
       }
     }

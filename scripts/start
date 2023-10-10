@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
-if [ -z "$(docker network ls --filter name=^ffc-ahwr$ --format={{.Name}})" ]; then
-  echo "Creating ffc-ahwr Docker network"
-  docker network create ffc-ahwr
+if [ -z "$(docker network ls --filter name=^ffc-future-grants$ --format={{.Name}})" ]; then
+  echo "Creating ffc-future-grants Docker network"
+  docker network create ffc-future-grants
 fi
 
 set -e
