@@ -45,4 +45,5 @@ services:
       APIM_SCOPE: ${APIM_SCOPE:-api://dev-futuretrade-int.defra.gov.uk/.default}
       BLOB_STORAGE_CONTAINER_NAME: ${BLOB_STORAGE_CONTAINER_NAME:-notset}
       BLOB_STORAGE_CONNECTION_STRING: ${BLOB_STORAGE_CONNECTION_STRING:-DefaultEndpointsProtocol=https;AccountName=dummy;AccountKey=dummy;EndpointSuffix=core.windows.net}
-      USE_BLOB_STORAGE_CONNECTION_STRING: "true"
+      USE_BLOB_STORAGE_CONNECTION_STRING: ${USE_BLOB_STORAGE_CONNECTION_STRING:-true}
+      CLAIM_FORM_DOWNLOAD_URL: ${CLAIM_FORM_DOWNLOAD_URL:-https://devffcinfst1001.blob.core.windows.net/ffc-grants-water-dev/Water%20FA%20form.docx?sp=rw&st=2023-10-03T16:21:34Z&se=2025-02-28T01:21:34Z&sv=2022-11-02&sr=b&sig=6BK%2BERuRkmRxbQ%2FFwlKTSgLPWFn%2FL89h0qPyoDmoARo%3D}
