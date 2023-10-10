@@ -4,6 +4,8 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/accordion/macro.njk" import govukAccordion %}
 
 {% block pageTitle %}Upload application forms - {{ serviceName }}
 {% endblock %}
@@ -32,47 +34,162 @@
 {% endblock %}
 
 {%block content%}
-  <p class="govuk-!-font-size-36 govuk-!-margin-bottom-3">Upload application forms</p>
-  <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4">Application form and appendix</h1>
-  <p class="govuk-body">Upload the completed application form and appendix</p>
+  <div class="govuk-grid-row govuk-!-margin-top-8">
+    <div class="govuk-grid-column-two-thirds">
+      <p class="govuk-!-font-size-36 govuk-!-margin-bottom-3">Claim for a Water Management Grant</p>
+      <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4">Upload claim form and evidence</h1>
 
-  {{ govukWarningText({
+      <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-8">1. Claim form</h1>
+      <span class="govuk-caption-m govuk-!-margin-bottom-5">Supported file types are DOC or DOCX. Maximum file size is 20MB.</span>
+      {{ govukWarningText({
   text: "Do not upload scanned copies or PDFs of these appendix.",
   iconFallbackText: "Warning"
      }) }}
-  <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-8">1. Application form</h1>
-  <span class="govuk-caption-m">Supported file types are DOC or DOCX. Maximum file size is 20MB.</span>
+      <h2 class="govuk-heading-m govuk-!-margin-bottom-2 govuk-!-margin-top-6">
+        {% if isClaimFormUploaded %} Files added {% else %} Upload a file
+        {% endif %}
+      </h2>
+      {% if isClaimFormUploaded %}
+        <div class="govuk-grid-row">
+          <p class="govuk-grid-column-two-thirds">{{file.originalFileName}}, {{file.fileSize}}</p>
 
-  <form method="POST" action={{formActionPage}} class="govuk-!-margin-top-8" enctype="multipart/form-data">
-    <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Upload a file</h2>
-    {{
-  govukFileUpload({
-id:"applicationForm",
-name:"applicationForm",
-  classes: "govuk-button--secondary"
-})
-}}
-    {{ govukButton({text:"Upload file"}) }}
-  </form>
+          <form method="POST" action="{{formActionPage}}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+            {{ govukButton({
+                  name:'action',
+                  value:'delete',
+                  text: "Delete file",
+                  classes: "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
+                  })
+             }}
+            {{
+               govukFileUpload({
+                id:"fileDelete",
+                name:"fileDelete",
+                classes:"govuk-visually-hidden"
+               })
+            }}
+            {{
+              govukInput({
+                  label: {
+                    text: "",
+                    isPageHeading: false
+                  },
+                  id: "fileName",
+                  name: "fileName",
+                   classes: " govuk-visually-hidden",
+                  value:file.fileName
+              })
+            }}
+          </form>
 
-  <hr/>
-  <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-6">2. Appendix</h1>
-  <span class="govuk-caption-m">Supported file types are XLS or XLSX. Maximum file size is 20MB.</span>
+        </div>
+      {% else %}
+        <form method="POST" action="{{formActionPage}}" enctype="multipart/form-data">
+          {%if errorMessage%}
+            {{
+            govukFileUpload({
+            id:"claimForm",
+            name:"claimForm",
+           errorMessage: {text: errorMessage}
+            })
+          }}
+            {{
+            govukButton({text:"Upload file",classes: "govuk-button--secondary",name:"action",value:"upload"  
+            }) 
+          }}
+            {%else%}
+            {{
+            govukFileUpload({
+            id:"claimForm",
+            name:"claimForm"
+            })
+          }}
+            {{
+            govukButton({text:"Upload file",classes: "govuk-button--secondary",name:"action",value:"upload"  
+            }) 
+          }}
+            {%endif%}
 
-  <form method="POST" action={{formActionPage}} class="govuk-!-margin-top-8"  enctype="multipart/form-data">
-    <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Upload a file</h2>
-    {{govukFileUpload({
-id:"appendix",
-name:"appendix",
-  classes: "govuk-button--secondary"
-})}}
-    {{ govukButton({text:"Upload file"}) }}
-  </form>
+          </form>
+        {% endif %}
+        <hr/>
 
-  <button class="govuk-button govuk-!-margin-top-8" data-module="govuk-button">
- Continue
-</button>
-</div>
-</div>
+        <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-6">2. Evidence</h1>
+        <span class="govuk-caption-m">Supported file types are XLS or XLSX. Maximum file size is 20MB.</span>
+        {{ govukWarningText({
+            text: "You must add evidence for each item you are claiming for.",
+            iconFallbackText: "Warning",
+            classes:"govuk-!-margin-top-4"
+          })
+       }}
 
-{% endblock %}
+        {# {{ govukAccordion({
+            id: "accordion-with-summary-sections",
+            items: [
+                    {
+                      heading: {
+                        text: "Proof items have been purchased"
+                      },
+                      summary: {
+                        text: "For example, invoices"
+                      },
+                      content: {
+                            html:
+                            '<ul class="govuk-list">
+                          <li>
+                            <a class="govuk-link" href="#">Content will be added here..</a>
+                          </li>
+                          <li>
+                            <a class="govuk-link" href="#">Agile methods: an introduction</a>
+                          </li>
+                          <li>
+                            <a class="govuk-link" href="#">Core principles of agile</a>
+                          </li>
+                          </ul>'
+                      },
+                    },
+                    {
+                      heading: {
+                        text: "Proof items have been paid for"
+                      },
+                      summary: {
+                        text: "For example, recipts and bank statements(you can croos out other transactions)"
+                      },
+                      content: {
+                        html:
+                      '<p class="govuk-body">Content will be added here...</P>'
+                      }
+                    },
+                    {
+                      heading: {
+                        text: "Proof items are in place and working"
+                      },
+                      summary: {
+                        text: "For example, photos and videos"
+                      },
+                      content: {
+                        html:
+                        '<p class="govuk-body">Content will be added here...</P>'
+                      }
+                    },
+                    {
+                      heading: {
+                        text: "Proof conditions and outputs have been met"
+                      },
+                      summary: {
+                        text: "Only for for projects with grant-specific conditions and outputs"
+                      },
+                      content: {
+                        html:
+                        '<p class="govuk-body">Content will be added here...</P>'
+                      }
+                    }
+            ],
+            hideSectionText:"Hide",
+            showSectionText:"Show"
+       })
+     }} #}
+
+      </div>
+    </div>
+  {% endblock %}
