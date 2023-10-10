@@ -27,6 +27,7 @@ function fileCheck(claimFormFile){
   const allowedFileSize=5000 * 1024;
   const claimFormBuffer = claimFormFile._data
   const fileSizeBytes = claimFormBuffer.byteLength
+
   const isAllowedSize=allowedFileSize>= Number(fileSizeBytes)
  if(!claimFormFilename){
   return {isCheckPassed:false,errorMessage:"No file selected. Select a file to upload."}
@@ -75,8 +76,12 @@ module.exports = [
         payload:Joi.object({
           claimForm:Joi.object({
             hapi:Joi.object({
-              filename:Joi.string().regex(/\.(doc|docx|xls|xlsx|pdf|jpg|jpeg|png|mpg|mp4|wmv|mov)$/i).required()
-            }).unknown()
+              filename:Joi.string().regex(/\.(doc|docx|xls|xlsx|pdf|jpg|jpeg|png|mpg|mp4|wmv|mov)$/i).required(),
+             
+            }).unknown(),
+            _data:Joi.object({
+              byteLength:Joi.number().max(204800)
+            })
           }).unknown(),
           action:Joi.string(),
           fileName:Joi.string(),
@@ -84,25 +89,31 @@ module.exports = [
         }),
         failAction:"ignore"
       },
-      
+      pre: [{
+        method: async (request, h, err) => {
+          
+            if (request.headers['content-length'] > 200000) {
+              return "The selected file must be smaller than 5MB"
+            }
+            return ""
+         
+        },
+        assign:"m1"
+      }],      
       payload: {
-       
         output: 'stream',
         parse: true,
         multipart: true,
-        maxBytes: 1073741824,
+        maxBytes: 5000 * 1024,
         timeout:false,
-        failAction: (request, h, error) => {
-          console.log("ERROR====>>> ",error)
-          const errorMessage = 'Invalid input: ' + error.output.payload.mesage;
-          return h.view(viewTemplate, createModel(errorMessage, false)).takeover();
-        },
+        failAction:"ignore"
       },
      
     },
     handler: async (request, h) => {
       const { action } = request.payload
       if (action === 'upload') {
+      
         try {
           const claimFormFile = request.payload.claimForm
             const fileCheckDetails=fileCheck(claimFormFile);
