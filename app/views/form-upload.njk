@@ -7,6 +7,11 @@
 {% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/accordion/macro.njk" import govukAccordion %}
 
+{%- from "govuk/components/file-upload/macro.njk" import govukFileUpload -%}
+{%- from "govuk/components/button/macro.njk" import govukButton -%}
+{%- from "govuk/components/error-summary/macro.njk" import govukErrorSummary -%}
+{%- from "moj/components/multi-file-upload/macro.njk" import mojMultiFileUpload -%}
+
 {% block pageTitle %}Upload application forms - {{ serviceName }}
 {% endblock %}
 
@@ -122,73 +127,52 @@
             classes:"govuk-!-margin-top-4"
           })
        }}
+        <div class="govuk-grid-row">
+          <div class="govuk-grid-column-two-thirds">
 
-        {# {{ govukAccordion({
-            id: "accordion-with-summary-sections",
-            items: [
-                    {
-                      heading: {
-                        text: "Proof items have been purchased"
-                      },
-                      summary: {
-                        text: "For example, invoices"
-                      },
-                      content: {
-                            html:
-                            '<ul class="govuk-list">
-                          <li>
-                            <a class="govuk-link" href="#">Content will be added here..</a>
-                          </li>
-                          <li>
-                            <a class="govuk-link" href="#">Agile methods: an introduction</a>
-                          </li>
-                          <li>
-                            <a class="govuk-link" href="#">Core principles of agile</a>
-                          </li>
-                          </ul>'
-                      },
-                    },
-                    {
-                      heading: {
-                        text: "Proof items have been paid for"
-                      },
-                      summary: {
-                        text: "For example, recipts and bank statements(you can croos out other transactions)"
-                      },
-                      content: {
-                        html:
-                      '<p class="govuk-body">Content will be added here...</P>'
-                      }
-                    },
-                    {
-                      heading: {
-                        text: "Proof items are in place and working"
-                      },
-                      summary: {
-                        text: "For example, photos and videos"
-                      },
-                      content: {
-                        html:
-                        '<p class="govuk-body">Content will be added here...</P>'
-                      }
-                    },
-                    {
-                      heading: {
-                        text: "Proof conditions and outputs have been met"
-                      },
-                      summary: {
-                        text: "Only for for projects with grant-specific conditions and outputs"
-                      },
-                      content: {
-                        html:
-                        '<p class="govuk-body">Content will be added here...</P>'
-                      }
-                    }
-            ],
-            hideSectionText:"Hide",
-            showSectionText:"Show"
-       })
-     }} #}
+            {% if errorSummary.items.length %}
+              {{ govukErrorSummary({
+        titleText: 'There is a problem',
+        errorList: errorSummary.items
+      }) }}
+            {% endif %}
+
+            <h1 class="govuk-heading-xl">Upload files</h1>
+
+            <form action="/components/multi-file-upload/examples/default" method="post" enctype="multipart/form-data">
+              {% set uploadHtml %}
+              {{ govukFileUpload({
+          id: "documents",
+          name: "documents",
+          classes: 'moj-multi-file-upload__input',
+          label: {
+            text: "Upload a file",
+            classes: 'govuk-label--m'
+          },
+          attributes: { multiple: '' },
+          errorMessage: errorMessage
+        }) }}
+
+              {{govukButton({
+          text: 'Upload file',
+          classes: 'govuk-button--secondary moj-multi-file-upload__button'
+        })}}
+              {% endset %}
+
+              {{ mojMultiFileUpload({
+        uploadedFiles: {
+          heading: { text: 'Files added' },
+          items: uploadedFiles
+        },
+        uploadHtml: uploadHtml
+      }) }}
+
+              {{govukButton({
+        text: 'Continue'
+      })}}
+            </form>
+          </div>
+        </div>
 
       </div>
     </div>
