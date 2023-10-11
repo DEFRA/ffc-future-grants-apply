@@ -47,17 +47,17 @@
          })
        }}
       <h2 class="govuk-heading-m govuk-!-margin-bottom-2 govuk-!-margin-top-6">
-        {% if isClaimFormUploaded %} Files added {% else %} Upload a file
+        {% if state.isClaimFormUploaded %} Files added {% else %} Upload a file
         {% endif %}
       </h2>
-      {% if isClaimFormUploaded %}
+      {% if state.isClaimFormUploaded %}
         <div class="govuk-grid-row">
-          <p class="govuk-grid-column-two-thirds">{{file.originalFileName}}, {{file.fileSize}}</p>
+          <p class="govuk-grid-column-two-thirds">{{state.claimForm.originalFileName}}, {{state.claimForm.fileSize}}</p>
 
           <form method="POST" action="{{formActionPage}}" class="govuk-!-text-align-right" enctype="multipart/form-data">
             {{ govukButton({
                   name:'action',
-                  value:'delete',
+                  value:'singleDelete',
                   text: "Delete file",
                   classes: "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
                   })
@@ -78,7 +78,7 @@
                   id: "fileName",
                   name: "fileName",
                    classes: " govuk-visually-hidden",
-                  value:file.fileName
+                  value:state.claimForm.fileName
               })
             }}
           </form>
@@ -106,7 +106,7 @@
             })
           }}
             {{
-            govukButton({text:"Upload file",classes: "govuk-button--secondary",name:"action",value:"upload"  
+            govukButton({text:"Upload file",classes: "govuk-button--secondary",name:"action",value:"singleUpload"  
             }) 
           }}
             {%endif%}
@@ -130,8 +130,23 @@
              govukButton({text:"Upload file",classes: "govuk-button--secondary",name:"action",value:"multiUpload"  
               })
           }}
+
+          {{
+           govukInput({
+                  label: {
+                    text: "",
+                    isPageHeading: false
+                  },
+                  id: "state",
+                  name: "state",
+                  classes: " govuk-visually-hidden",
+                  value:state
+              })
+          }}
+
         </form>
-        {% for file in files %}
+        {% for file in state.multiFilesState.purchasedForms %}
+
           <p class="govuk-grid-column-two-thirds">{{file.claimFormFilename}}, {{file.fileSizeFormatted}}</p>
         {% endfor %}
       </div>

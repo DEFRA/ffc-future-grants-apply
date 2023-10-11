@@ -38,6 +38,7 @@ function fileCheck (claimFormFile) {
   const fileSizeBytes = claimFormBuffer.byteLength
 
   const isAllowedSize = allowedFileSize >= Number(fileSizeBytes)
+  console.log(isAllowedSize)
   if (!claimFormFilename) {
     return {
       isCheckPassed: false,
@@ -64,18 +65,17 @@ function fileCheck (claimFormFile) {
     }
   }
 }
-function createModel (errorMessage, isClaimFormUploaded, file) {
+function createModel (errorMessage, isClaimFormUploaded, claimForm,multiFilesState) {
   return {
-    formActionPage: currentPath,
-    claimFormUploadButton: {
-      id: 'claimForm',
-      name: 'claimForm',
-      label: 'Upload Claim Form (DOC/DOCX)'
+    state:{
+      multiFilesState:{...multiFilesState},
+      isClaimFormUploaded,
+      claimForm:claimForm
     },
+    formActionPage: currentPath,
     errorMessage,
-    isClaimFormUploaded,
-    file
-  }
+   
+  };
 }
 
 module.exports = [
@@ -108,7 +108,7 @@ module.exports = [
           action: Joi.string(),
           fileName: Joi.string(),
           fileDelete: Joi.object().unknown()
-        }),
+        }).unknown(),
         failAction: async (request, h, error) => {
           if (
             error.output.payload.message.includes('match the required pattern')
@@ -131,6 +131,7 @@ module.exports = [
               )
               .takeover()
           } else {
+        console.log(request.payload);  
             return h
               .view(
                 viewTemplate,
@@ -171,7 +172,8 @@ module.exports = [
     },
     handler: async (request, h) => {
       const { action } = request.payload
-      if (action === 'upload') {
+   
+      if (action === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
           const fileCheckDetails = fileCheck(claimFormFile)
@@ -179,7 +181,7 @@ module.exports = [
             return h
               .view(
                 viewTemplate,
-                createModel(fileCheckDetails.errorMessage, false)
+                createModel(fileCheckDetails.errorMessage,false,null,null)
               )
               .takeover()
           } else {
@@ -189,11 +191,11 @@ module.exports = [
             )
             return h.view(
               viewTemplate,
-              createModel(null, fileUploaded.isUploaded, {
+              createModel(null, fileUploaded.isUploaded,{
                 originalFileName: fileUploaded.originalFileName,
                 fileSize: fileCheckDetails.fileSizeFormatted,
                 fileName: fileUploaded.fileName
-              })
+              },null)
             )
           }
         } catch (error) {
@@ -209,7 +211,7 @@ module.exports = [
             .takeover()
         }
       }
-      if (action === 'delete') {
+      if (action === 'singleDelete') {
         const fileName = request.payload.fileName
         if (!fileName) {
           return h
@@ -227,6 +229,25 @@ module.exports = [
             .view(viewTemplate, createModel('Error deleting file', true, null))
             .takeover()
         }
+      } 
+       if(action==='multiUpload'){
+      const test=request.payload.state.multiFilesState
+      console.log({...test})
+   
+   
+      
+       
+        const filesArray = request.payload.multiFile
+        const newArr=[]
+        for (const file of filesArray) {
+          const fileCheckDetails = fileCheck(file)
+          newArr.push(fileCheckDetails)
+        }      
+        return h.view(
+          viewTemplate,
+          createModel(null,false,null,{purchasedForms:newArr})
+        )
+   
       }
     }
   }
