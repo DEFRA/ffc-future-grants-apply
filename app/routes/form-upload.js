@@ -65,17 +65,21 @@ function fileCheck (claimFormFile) {
     }
   }
 }
-function createModel (errorMessage, isClaimFormUploaded, claimForm,multiFilesState) {
+function createModel (
+  errorMessage,
+  isClaimFormUploaded,
+  claimForm,
+  multiFilesState
+) {
   return {
-    state:{
-      multiFilesState:{...multiFilesState},
+    state: {
+      multiFilesState: { ...multiFilesState },
       isClaimFormUploaded,
-      claimForm:claimForm
+      claimForm: claimForm
     },
     formActionPage: currentPath,
-    errorMessage,
-   
-  };
+    errorMessage
+  }
 }
 
 module.exports = [
@@ -131,7 +135,7 @@ module.exports = [
               )
               .takeover()
           } else {
-        console.log(request.payload);  
+            console.log(request.payload)
             return h
               .view(
                 viewTemplate,
@@ -172,7 +176,7 @@ module.exports = [
     },
     handler: async (request, h) => {
       const { action } = request.payload
-   
+
       if (action === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
@@ -181,7 +185,7 @@ module.exports = [
             return h
               .view(
                 viewTemplate,
-                createModel(fileCheckDetails.errorMessage,false,null,null)
+                createModel(fileCheckDetails.errorMessage, false, null, null)
               )
               .takeover()
           } else {
@@ -191,11 +195,16 @@ module.exports = [
             )
             return h.view(
               viewTemplate,
-              createModel(null, fileUploaded.isUploaded,{
-                originalFileName: fileUploaded.originalFileName,
-                fileSize: fileCheckDetails.fileSizeFormatted,
-                fileName: fileUploaded.fileName
-              },null)
+              createModel(
+                null,
+                fileUploaded.isUploaded,
+                {
+                  originalFileName: fileUploaded.originalFileName,
+                  fileSize: fileCheckDetails.fileSizeFormatted,
+                  fileName: fileUploaded.fileName
+                },
+                null
+              )
             )
           }
         } catch (error) {
@@ -229,25 +238,18 @@ module.exports = [
             .view(viewTemplate, createModel('Error deleting file', true, null))
             .takeover()
         }
-      } 
-       if(action==='multiUpload'){
-      const test=request.payload.state.multiFilesState
-      console.log({...test})
-   
-   
-      
-       
+      }
+      if (action === 'multiUpload') {
         const filesArray = request.payload.multiFile
-        const newArr=[]
+        const newArr = []
         for (const file of filesArray) {
           const fileCheckDetails = fileCheck(file)
           newArr.push(fileCheckDetails)
-        }      
+        }
         return h.view(
           viewTemplate,
-          createModel(null,false,null,{purchasedForms:newArr})
+          createModel(null, false, null, { purchasedForms: newArr })
         )
-   
       }
     }
   }
