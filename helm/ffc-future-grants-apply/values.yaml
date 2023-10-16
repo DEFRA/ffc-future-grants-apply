@@ -77,10 +77,8 @@ container:
 
 ingress:
   class: nginx
-  endpoint: ffc-future-grants
+  endpoint: ffc-future-grants-apply
   server: value.replaced.from.app.config
-  path: /apply
-  type: minion
 
 livenessProbe:
   path: /healthz

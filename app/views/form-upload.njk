@@ -6,10 +6,10 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/accordion/macro.njk" import govukAccordion %}
-{%- from "govuk/components/file-upload/macro.njk" import govukFileUpload -%}
-{%- from "govuk/components/button/macro.njk" import govukButton -%}
-{%- from "govuk/components/error-summary/macro.njk" import govukErrorSummary -%}
-{%- from "moj/components/multi-file-upload/macro.njk" import mojMultiFileUpload -%}
+{%- from "govuk/components/file-upload/macro.njk" import govukFileUpload %}
+{%- from "govuk/components/button/macro.njk" import govukButton %}
+{%- from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{%- from "moj/components/multi-file-upload/macro.njk" import mojMultiFileUpload %}
 {% block pageTitle %}Upload application forms - {{ serviceName }}
 {% endblock %}
 
@@ -166,34 +166,6 @@
       }) }}
 
     </form>
-
-
-
-          {# <form action="{{formActionPage}}" method="POST" enctype="multipart/form-data">
-            {% set purchasedItemsUploadHtml %}
-            {{ govukFileUpload({
-                 id: "purchasedItems",
-                 name: "purchasedItems",
-                 classes: 'moj-multi-file-upload__input',
-                 label: {
-                    text: "Upload a file",
-                    classes: 'govuk-label--m'
-                  },
-                 attributes: { multiple: 'asdas' },
-                 errorMessage: purchasedItemsErrorMessage
-                })
-              }}
-            {% endset %} #}
-
-            {# {{ mojMultiFileUpload({
-                  uploadedFiles: {
-                  heading: { text: 'Files added' },
-                  items: purchasedItemsFilesUploaded
-                   },
-                  uploadHtml: purchasedItemsUploadHtml
-                })
-              }} 
-          </form>#}
         </div>
         <hr/>
         <div>
