@@ -6,7 +6,10 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/accordion/macro.njk" import govukAccordion %}
-
+{%- from "govuk/components/file-upload/macro.njk" import govukFileUpload %}
+{%- from "govuk/components/button/macro.njk" import govukButton %}
+{%- from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{%- from "moj/components/multi-file-upload/macro.njk" import mojMultiFileUpload %}
 {% block pageTitle %}Upload application forms - {{ serviceName }}
 {% endblock %}
 
@@ -28,7 +31,7 @@
     html: 'This is a new service - your <a class="govuk-link" href="#">feedback</a> will help us to improve it.'
   }) }}
   {{ govukBackLink({
-    href: "#",
+    href: backLink,
     text: "Back"
   }) }}
 {% endblock %}
@@ -42,21 +45,22 @@
       <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-8">1. Claim form</h1>
       <span class="govuk-caption-m govuk-!-margin-bottom-5">Supported file types are DOC or DOCX. Maximum file size is 20MB.</span>
       {{ govukWarningText({
-  text: "Do not upload scanned copies or PDFs of these appendix.",
-  iconFallbackText: "Warning"
-     }) }}
+          text: "Do not upload scanned copies or PDFs of these appendix.",
+          iconFallbackText: "Warning"
+         })
+       }}
       <h2 class="govuk-heading-m govuk-!-margin-bottom-2 govuk-!-margin-top-6">
-        {% if isClaimFormUploaded %} Files added {% else %} Upload a file
+        {% if state.isClaimFormUploaded %} Files added {% else %} Upload a file
         {% endif %}
       </h2>
-      {% if isClaimFormUploaded %}
+      {% if state.isClaimFormUploaded %}
         <div class="govuk-grid-row">
-          <p class="govuk-grid-column-two-thirds">{{file.originalFileName}}, {{file.fileSize}}</p>
+          <p class="govuk-grid-column-two-thirds">{{state.claimForm.originalFileName}}, {{state.claimForm.fileSize}}</p>
 
           <form method="POST" action="{{formActionPage}}" class="govuk-!-text-align-right" enctype="multipart/form-data">
             {{ govukButton({
                   name:'action',
-                  value:'delete',
+                  value:'singleDelete',
                   text: "Delete file",
                   classes: "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
                   })
@@ -77,7 +81,7 @@
                   id: "fileName",
                   name: "fileName",
                    classes: " govuk-visually-hidden",
-                  value:file.fileName
+                  value:state.claimForm.fileName
               })
             }}
           </form>
@@ -105,7 +109,7 @@
             })
           }}
             {{
-            govukButton({text:"Upload file",classes: "govuk-button--secondary",name:"action",value:"upload"  
+            govukButton({text:"Upload file",classes: "govuk-button--secondary",name:"action",value:"singleUpload"  
             }) 
           }}
             {%endif%}
@@ -121,75 +125,178 @@
             iconFallbackText: "Warning",
             classes:"govuk-!-margin-top-4"
           })
-       }}
+        }}
+        <hr/>
+        <div>
+          <h3 class="govuk-heading-m govuk-!-margin-bottom-3">Proof items have been purchased</h3>
+          <p class="govuk-body">For example, invoices</p>
+          {% if purchasedItemsErrorSummary.items.length %}
+            {{ govukErrorSummary({
+               titleText: 'There is a problem',
+               errorList: errorSummary.items
+                })
+              }}
+          {% endif %}
 
-        {# {{ govukAccordion({
-            id: "accordion-with-summary-sections",
-            items: [
-                    {
-                      heading: {
-                        text: "Proof items have been purchased"
-                      },
-                      summary: {
-                        text: "For example, invoices"
-                      },
-                      content: {
-                            html:
-                            '<ul class="govuk-list">
-                          <li>
-                            <a class="govuk-link" href="#">Content will be added here..</a>
-                          </li>
-                          <li>
-                            <a class="govuk-link" href="#">Agile methods: an introduction</a>
-                          </li>
-                          <li>
-                            <a class="govuk-link" href="#">Core principles of agile</a>
-                          </li>
-                          </ul>'
-                      },
-                    },
-                    {
-                      heading: {
-                        text: "Proof items have been paid for"
-                      },
-                      summary: {
-                        text: "For example, recipts and bank statements(you can croos out other transactions)"
-                      },
-                      content: {
-                        html:
-                      '<p class="govuk-body">Content will be added here...</P>'
-                      }
-                    },
-                    {
-                      heading: {
-                        text: "Proof items are in place and working"
-                      },
-                      summary: {
-                        text: "For example, photos and videos"
-                      },
-                      content: {
-                        html:
-                        '<p class="govuk-body">Content will be added here...</P>'
-                      }
-                    },
-                    {
-                      heading: {
-                        text: "Proof conditions and outputs have been met"
-                      },
-                      summary: {
-                        text: "Only for for projects with grant-specific conditions and outputs"
-                      },
-                      content: {
-                        html:
-                        '<p class="govuk-body">Content will be added here...</P>'
-                      }
-                    }
-            ],
-            hideSectionText:"Hide",
-            showSectionText:"Show"
-       })
-     }} #}
+<form action="" method="post" enctype="multipart/form-data">
+      {% set uploadHtml %}
+        {{ govukFileUpload({
+          id: "documents",
+          name: "documents",
+          classes: 'moj-multi-file-upload__input',
+          label: {
+            text: "Upload a file",
+            classes: 'govuk-label--m'
+          },
+          attributes: { multiple: '' }
+        }) }}
+
+        {{govukButton({
+          text: 'Upload file',
+          classes: 'govuk-button--secondary moj-multi-file-upload__button'
+        })}}
+      {% endset %}
+
+      {{ mojMultiFileUpload({
+        uploadedFiles: {
+          heading: { text: 'Files added' },
+          items: []
+        },
+        uploadHtml: uploadHtml
+      }) }}
+
+    </form>
+        </div>
+        <hr/>
+        <div>
+          <h3 class="govuk-heading-m govuk-!-margin-bottom-3">Proof items have been paid for</h3>
+          <p class="govuk-body">For example, recipts and bank statements(you can cross out other transactions)</p>
+          {% if PaidItemsErrorSummary.items.length %}
+            {{ govukErrorSummary({
+               titleText: 'There is a problem',
+               errorList: errorSummary.items
+                })
+              }}
+          {% endif %}
+          <form action="{{formActionPage}}" method="POST" enctype="multipart/form-data">
+            {% set PaidItemsUploadHtml %}
+            {{ govukFileUpload({
+                 id: "PaidItems",
+                 name: "PaidItems",
+                 classes: 'moj-multi-file-upload__input',
+                 label: {
+                    text: "Upload a file",
+                    classes: 'govuk-label--m'
+                  },
+                 attributes: { multiple: '' },
+                 errorMessage: PaidItemsErrorMessage
+                })
+              }}
+                {{govukButton({
+          text: 'Upload file',
+          classes: 'govuk-button--secondary moj-multi-file-upload__button'
+        })}}
+            {% endset %}
+
+            {{ mojMultiFileUpload({
+                  uploadedFiles: {
+                  heading: { text: 'Files added' },
+                  items: PaidItemsUploadedFiles
+                   },
+                  uploadHtml: PaidItemsUploadHtml
+                })
+              }}
+          </form>
+        </div>
+        <hr/>
+        <div>
+          <h3 class="govuk-heading-m govuk-!-margin-bottom-3">Proof items are in place</h3>
+          <p class="govuk-body">For example, photos and videos</p>
+          {% if inPlaceItemsErrorSummary.items.length %}
+            {{ govukErrorSummary({
+               titleText: 'There is a problem',
+               errorList: inPlaceItemsrrorSummary.items
+                })
+              }}
+          {% endif %}
+          <form action="{{formActionPage}}" method="POST" enctype="multipart/form-data">
+            {% set inPlaceItemsUploadHtml %}
+            {{ govukFileUpload({
+                 id: "inPlaceItems",
+                 name: "inPlaceItems",
+                 classes: 'moj-multi-file-upload__input',
+                 label: {
+                    text: "Upload a file",
+                    classes: 'govuk-label--m'
+                  },
+                 attributes: { multiple: '' },
+                 errorMessage: inPlaceItemsErrorMessage
+                })
+              }}
+                {{govukButton({
+          text: 'Upload file',
+          classes: 'govuk-button--secondary moj-multi-file-upload__button'
+        })}}
+            {% endset %}
+
+            {{ mojMultiFileUpload({
+                  uploadedFiles: {
+                  heading: { text: 'Files added' },
+                  items: inPlaceItemsUploadedFiles
+                   },
+                  uploadHtml: inPlaceItemsUploadHtml
+                })
+              }}
+          </form>
+        </div>
+        <hr/>
+        <div>
+          <h3 class="govuk-heading-m govuk-!-margin-bottom-3">Proof conditions and outputs have been met</h3>
+          <p class="govuk-body">Only for projects with grant-specefic conditions and outputs</p>
+          {% if inPlaceItemsErrorSummary.items.length %}
+            {{ govukErrorSummary({
+               titleText: 'There is a problem',
+               errorList: inPlaceItemsErrorSummary.items
+                })
+              }}
+          {% endif %}
+          <form action="{{formActionPage}}" method="POST" enctype="multipart/form-data">
+            {% set inPlaceItemsUploadHtml %}
+            {{ govukFileUpload({
+                 id: "inPlaceItems",
+                 name: "inPlaceItems",
+                 classes: 'moj-multi-file-upload__input',
+                 label: {
+                    text: "Upload a file",
+                    classes: 'govuk-label--m'
+                  },
+                 attributes: { multiple: '' },
+                 errorMessage: inPlaceItemsErrorMessage
+                })
+              }}
+                {{govukButton({
+          text: 'Upload file',
+          classes: 'govuk-button--secondary moj-multi-file-upload__button'
+        })}}
+            {% endset %}
+
+            {{ mojMultiFileUpload({
+                  uploadedFiles: {
+                  heading: { text: 'Files added' },
+                  items: inPlaceItemsUploadedFiles
+                   },
+                  uploadHtml: inPlaceItemsUploadHtml
+                })
+              }}
+
+      {{govukButton({
+        text: 'Continue'
+      })}}
+          </form>
+        </div>
 
       </div>
+
     </div>
+
   {% endblock %}
