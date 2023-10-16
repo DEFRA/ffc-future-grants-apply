@@ -31,7 +31,7 @@
     html: 'This is a new service - your <a class="govuk-link" href="#">feedback</a> will help us to improve it.'
   }) }}
   {{ govukBackLink({
-    href: "#",
+    href: backLink,
     text: "Back"
   }) }}
 {% endblock %}
@@ -137,7 +137,39 @@
                 })
               }}
           {% endif %}
-          <form action="{{formActionPage}}" method="POST" enctype="multipart/form-data">
+
+<form action="" method="post" enctype="multipart/form-data">
+      {% set uploadHtml %}
+        {{ govukFileUpload({
+          id: "documents",
+          name: "documents",
+          classes: 'moj-multi-file-upload__input',
+          label: {
+            text: "Upload a file",
+            classes: 'govuk-label--m'
+          },
+          attributes: { multiple: '' }
+        }) }}
+
+        {{govukButton({
+          text: 'Upload file',
+          classes: 'govuk-button--secondary moj-multi-file-upload__button'
+        })}}
+      {% endset %}
+
+      {{ mojMultiFileUpload({
+        uploadedFiles: {
+          heading: { text: 'Files added' },
+          items: []
+        },
+        uploadHtml: uploadHtml
+      }) }}
+
+    </form>
+
+
+
+          {# <form action="{{formActionPage}}" method="POST" enctype="multipart/form-data">
             {% set purchasedItemsUploadHtml %}
             {{ govukFileUpload({
                  id: "purchasedItems",
@@ -151,17 +183,17 @@
                  errorMessage: purchasedItemsErrorMessage
                 })
               }}
-            {% endset %}
+            {% endset %} #}
 
-            {{ mojMultiFileUpload({
+            {# {{ mojMultiFileUpload({
                   uploadedFiles: {
                   heading: { text: 'Files added' },
                   items: purchasedItemsFilesUploaded
                    },
                   uploadHtml: purchasedItemsUploadHtml
                 })
-              }}
-          </form>
+              }} 
+          </form>#}
         </div>
         <hr/>
         <div>
@@ -188,6 +220,10 @@
                  errorMessage: PaidItemsErrorMessage
                 })
               }}
+                {{govukButton({
+          text: 'Upload file',
+          classes: 'govuk-button--secondary moj-multi-file-upload__button'
+        })}}
             {% endset %}
 
             {{ mojMultiFileUpload({
@@ -225,6 +261,10 @@
                  errorMessage: inPlaceItemsErrorMessage
                 })
               }}
+                {{govukButton({
+          text: 'Upload file',
+          classes: 'govuk-button--secondary moj-multi-file-upload__button'
+        })}}
             {% endset %}
 
             {{ mojMultiFileUpload({
@@ -262,6 +302,10 @@
                  errorMessage: inPlaceItemsErrorMessage
                 })
               }}
+                {{govukButton({
+          text: 'Upload file',
+          classes: 'govuk-button--secondary moj-multi-file-upload__button'
+        })}}
             {% endset %}
 
             {{ mojMultiFileUpload({
@@ -272,6 +316,10 @@
                   uploadHtml: inPlaceItemsUploadHtml
                 })
               }}
+
+      {{govukButton({
+        text: 'Continue'
+      })}}
           </form>
         </div>
 

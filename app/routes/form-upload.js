@@ -4,6 +4,7 @@ const { urlPrefix } = require('../config/index')
 const { uploadFile, deleteFile } = require('../services/blob-storage') // Import your uploadFile function
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
+const backLink = `${urlPrefix}/form-download`
 
 function formatFileSize (bytes) {
   const num = Number(bytes)
@@ -78,7 +79,8 @@ function createModel (
       claimForm: claimForm
     },
     formActionPage: currentPath,
-    errorMessage
+    errorMessage,
+    backLink
   }
 }
 
