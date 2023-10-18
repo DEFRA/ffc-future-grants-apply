@@ -16,7 +16,7 @@ function formatFileSize (bytes) {
     return kilobytes.toFixed(2) + ' KB'
   }
 }
-function fileCheck (claimFormFile) {
+function fileCheck (uploadedFile) {
   const acceptableExtensions = [
     'doc',
     'docx',
@@ -31,16 +31,16 @@ function fileCheck (claimFormFile) {
     'wmv',
     'mov'
   ]
-  const claimFormFilename = claimFormFile.hapi.filename
-  const fileExtension = claimFormFilename.split('.').pop()
+  const uploadedFileName = uploadedFile.hapi.filename
+  const fileExtension = uploadedFileName.split('.').pop()
   const isExtensionAllowed = acceptableExtensions.includes(fileExtension)
   const allowedFileSize = 5000 * 1024
-  const claimFormBuffer = claimFormFile._data
+  const claimFormBuffer = uploadedFile._data
   const fileSizeBytes = claimFormBuffer.byteLength
 
   const isAllowedSize = allowedFileSize >= Number(fileSizeBytes)
-  console.log(isAllowedSize)
-  if (!claimFormFilename) {
+
+  if (!uploadedFileName) {
     return {
       isCheckPassed: false,
       errorMessage: 'No file selected. Select a file to upload.'
@@ -62,24 +62,19 @@ function fileCheck (claimFormFile) {
       isCheckPassed: true,
       fileBuffer: claimFormBuffer,
       fileSizeFormatted,
-      claimFormFilename
+      uploadedFileName
     }
   }
 }
-function createModel (
-  errorMessage,
-  isClaimFormUploaded,
-  claimForm,
-  multiFilesState
-) {
+function createModel (claimForm, multiForms) {
   return {
-    state: {
-      multiFilesState: { ...multiFilesState },
-      isClaimFormUploaded,
-      claimForm: claimForm
-    },
+    multiForms: { ...multiForms },
+    claimForm: claimForm,
     formActionPage: currentPath,
-    errorMessage,
+    errorMessage: {
+      calimFormErrors: null,
+      multiFormErrors: null
+    },
     backLink
   }
 }
@@ -91,8 +86,11 @@ module.exports = [
     options: {
       auth: false
     },
+
     handler: (request, h) => {
-      return h.view(viewTemplate, createModel(null))
+      const state = createModel(null, null)
+      request.yar.set('state', state)
+      return h.view(viewTemplate, state)
     }
   },
   {
@@ -137,7 +135,6 @@ module.exports = [
               )
               .takeover()
           } else {
-            console.log(request.payload)
             return h
               .view(
                 viewTemplate,
@@ -178,36 +175,40 @@ module.exports = [
     },
     handler: async (request, h) => {
       const { action } = request.payload
-
+      const actionPath = action.split('-')
+      let state = request.yar.get('state')
       if (action === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
           const fileCheckDetails = fileCheck(claimFormFile)
           if (fileCheckDetails.errorMessage) {
-            return h
-              .view(
-                viewTemplate,
-                createModel(fileCheckDetails.errorMessage, false, null, null)
-              )
-              .takeover()
+            state = {
+              ...state,
+              errorMessage: {
+                ...state.errorMessage,
+                claimFormErrors: fileCheckDetails.errorMessage
+              },
+              claimForm: null
+            }
+            request.yar.set('state', state)
+            return h.view(viewTemplate, state).takeover()
           } else {
             const fileUploaded = await uploadFile(
               fileCheckDetails.fileBuffer,
-              fileCheckDetails.claimFormFilename
+              fileCheckDetails.uploadedFileName
             )
-            return h.view(
-              viewTemplate,
-              createModel(
-                null,
-                fileUploaded.isUploaded,
-                {
-                  originalFileName: fileUploaded.originalFileName,
-                  fileSize: fileCheckDetails.fileSizeFormatted,
-                  fileName: fileUploaded.fileName
-                },
-                null
-              )
-            )
+
+            state = {
+              ...state,
+              claimForm: {
+                originalFileName: fileUploaded.originalFileName,
+                fileSize: fileCheckDetails.fileSizeFormatted,
+                fileName: fileUploaded.fileName
+              }
+            }
+
+            request.yar.set('state', state)
+            return h.view(viewTemplate, state)
           }
         } catch (error) {
           return h
@@ -222,36 +223,94 @@ module.exports = [
             .takeover()
         }
       }
-      if (action === 'singleDelete') {
+      if (actionPath[0] === 'delete') {
         const fileName = request.payload.fileName
         if (!fileName) {
-          return h
-            .view(viewTemplate, createModel('Invalid file name', false, null))
-            .takeover()
+          state = {
+            ...state,
+            errorMessage: {
+              ...state.errorMessage,
+              claimFormErrors: 'Invalid file name'
+            }
+          }
+          request.yar.set('state', state)
+          return h.view(viewTemplate, state).takeover()
         }
         const isDeleted = await deleteFile(fileName)
 
-        if (isDeleted) {
-          return h
-            .view(viewTemplate, createModel(null, false, null))
-            .takeover()
+        if (isDeleted && actionPath[1] === 'claim') {
+          state = {
+            ...state,
+            errorMessage: { ...state.errorMessage, claimFormErrors: null },
+            claimForm: null
+          }
+          request.yar.set('state', state)
+          return h.view(viewTemplate, state)
+        } else if (isDeleted && actionPath[1] !== 'claim') {
+          const filteredArray = state.multiForms[actionPath[1]].filter(
+            (item) => item.uploadedFileName !== fileName
+          )
+          state = {
+            ...state,
+            multiForms: { ...state.multiforms, [actionPath[1]]: filteredArray }
+          }
+          request.yar.set('state', state)
+          return h.view(viewTemplate, state)
         } else {
-          return h
-            .view(viewTemplate, createModel('Error deleting file', true, null))
-            .takeover()
+          state = {
+            ...state,
+            errorMessage: {
+              ...state.errorMessage,
+              claimFormErrors: 'Error deleting file'
+            }
+          }
+          request.yar.set('state', state)
+          return h.view(viewTemplate, state).takeover()
         }
       }
-      if (action === 'multiUpload') {
-        const filesArray = request.payload.multiFile
-        const newArr = []
-        for (const file of filesArray) {
-          const fileCheckDetails = fileCheck(file)
-          newArr.push(fileCheckDetails)
+      if (actionPath[0] === 'multiUpload') {
+        const filesArray = request.payload[actionPath[1]]
+        const newFilesArray = []
+        const errorArray = []
+        if (filesArray.length) {
+          for (const file of filesArray) {
+            const fileCheckDetails = fileCheck(file)
+            if (!fileCheckDetails.errorMessage) {
+              const fileUploaded = await uploadFile(
+                fileCheckDetails.fileBuffer,
+                fileCheckDetails.uploadedFileName
+              )
+              fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
+            } else {
+              errorArray.push(fileCheckDetails.errorMessage)
+            }
+          }
+        } else {
+          const fileCheckDetails = fileCheck(filesArray)
+          if (!fileCheckDetails.errorMessage) {
+            newFilesArray.push(fileCheckDetails)
+          } else {
+            errorArray.push(fileCheckDetails.errorMessage)
+          }
         }
-        return h.view(
-          viewTemplate,
-          createModel(null, false, null, { purchasedForms: newArr })
-        )
+        if (!errorArray.length) {
+          state = {
+            ...state,
+            multiForms: { ...state.multiForms, [actionPath[1]]: newFilesArray }
+          }
+          request.yar.set('state', state)
+          return h.view(viewTemplate, state)
+        } else {
+          state = {
+            ...state,
+            errorMessage: {
+              ...state.errorMessage,
+              multiFormErrors: errorArray
+            }
+          }
+          request.yar.set('state', state)
+          return h.view(viewTemplate, state).takeover()
+        }
       }
     }
   }
