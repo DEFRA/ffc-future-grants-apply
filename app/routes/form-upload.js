@@ -135,6 +135,7 @@ module.exports = [
               )
               .takeover()
           } else {
+            console.log(request.payload)
             return h
               .view(
                 viewTemplate,
@@ -311,6 +312,18 @@ module.exports = [
           request.yar.set('state', state)
           return h.view(viewTemplate, state).takeover()
         }
+      }
+      if (action === 'multiUpload') {
+        const filesArray = request.payload.multiFile
+        const newArr = []
+        for (const file of filesArray) {
+          const fileCheckDetails = fileCheck(file)
+          newArr.push(fileCheckDetails)
+        }
+        return h.view(
+          viewTemplate,
+          createModel(null, false, null, { purchasedForms: newArr })
+        )
       }
     }
   }
