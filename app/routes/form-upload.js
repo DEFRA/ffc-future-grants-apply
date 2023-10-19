@@ -1,5 +1,3 @@
-const Joi = require('joi')
-
 const { urlPrefix } = require('../config/index')
 const { uploadFile, deleteFile } = require('../services/blob-storage') // Import your uploadFile function
 const viewTemplate = 'form-upload'
@@ -16,55 +14,55 @@ function formatFileSize (bytes) {
     return kilobytes.toFixed(2) + ' KB'
   }
 }
-function fileCheck (uploadedFile) {
-  const acceptableExtensions = [
-    'doc',
-    'docx',
-    'xls',
-    'xlsx',
-    'pdf',
-    'jpg',
-    'jpeg',
-    'png',
-    'mpg',
-    'mp4',
-    'wmv',
-    'mov'
-  ]
+
+function fileCheck (uploadedFile, inputName) {
+  let errorObject = {
+    text: '',
+    fileName: '',
+    inputName,
+    isCheckPassed: true
+  }
+  const acceptableExtensions = ['doc', 'docx', 'xls', 'xlsx']
   const uploadedFileName = uploadedFile.hapi.filename
+  if (!uploadedFileName || !uploadedFileName.length) {
+    return (errorObject = {
+      ...errorObject,
+      isCheckPassed: false,
+      text: 'No file selected. Select a file to upload.'
+    })
+  }
+  errorObject.fileName = uploadedFileName
   const fileExtension = uploadedFileName.split('.').pop()
   const isExtensionAllowed = acceptableExtensions.includes(fileExtension)
-  const allowedFileSize = 5000 * 1024
+  const allowedFileSize = 20000 * 1024
   const claimFormBuffer = uploadedFile._data
   const fileSizeBytes = claimFormBuffer.byteLength
 
   const isAllowedSize = allowedFileSize >= Number(fileSizeBytes)
 
-  if (!uploadedFileName) {
-    return {
+  if (!isExtensionAllowed) {
+    errorObject = {
+      ...errorObject,
       isCheckPassed: false,
-      errorMessage: 'No file selected. Select a file to upload.'
-    }
-  } else if (!isExtensionAllowed) {
-    return {
-      isCheckPassed: false,
-      errorMessage:
-        'The selected file must be a DOC, DOCX, XLS, XLSX, PDF, JPG, JPEG, PNG, MPG, MP4, WMV or MOV'
+      text: `${errorObject.fileName} must be a DOC, DOCX, XLS or XLSX`
     }
   } else if (!isAllowedSize) {
-    return {
+    errorObject = {
+      ...errorObject,
       isCheckPassed: false,
-      errorMessage: 'The selected file must be smaller than 5MB'
+      text: `${errorObject.fileName} must be smaller than 20MB`
     }
   } else {
     const fileSizeFormatted = formatFileSize(fileSizeBytes)
-    return {
+    errorObject = {
+      ...errorObject,
       isCheckPassed: true,
       fileBuffer: claimFormBuffer,
       fileSizeFormatted,
       uploadedFileName
     }
   }
+  return errorObject
 }
 function createModel (claimForm, multiForms) {
   return {
@@ -72,8 +70,11 @@ function createModel (claimForm, multiForms) {
     claimForm: claimForm,
     formActionPage: currentPath,
     errorMessage: {
-      calimFormErrors: null,
-      multiFormErrors: null
+      claim: null,
+      purchased: null,
+      paid: null,
+      inPlace: null,
+      conditions: null
     },
     backLink
   }
@@ -97,77 +98,36 @@ module.exports = [
     path: currentPath,
     options: {
       auth: false,
-      validate: {
-        payload: Joi.object({
-          claimForm: Joi.object({
-            hapi: Joi.object({
-              filename: Joi.string()
-                .regex(
-                  /\.(doc|docx|xls|xlsx|pdf|jpg|jpeg|png|mpg|mp4|wmv|mov)$/i
-                )
-                .required()
-            }).unknown()
-          }).unknown(),
-          action: Joi.string(),
-          fileName: Joi.string(),
-          fileDelete: Joi.object().unknown()
-        }).unknown(),
-        failAction: async (request, h, error) => {
-          if (
-            error.output.payload.message.includes('match the required pattern')
-          ) {
-            return h
-              .view(
-                viewTemplate,
-                createModel(
-                  'The selected file must be a DOC, DOCX, XLS, XLSX, PDF, JPG, JPEG, PNG, MPG, MP4, WMV or MOV',
-                  false,
-                  null
-                )
-              )
-              .takeover()
-          } else if (error.output.payload.message.includes('empty')) {
-            return h
-              .view(
-                viewTemplate,
-                createModel('No file selected. Select a file to upload.')
-              )
-              .takeover()
-          } else {
-            return h
-              .view(
-                viewTemplate,
-                createModel(error.output.payload.message, false, null)
-              )
-              .takeover()
-          }
-        }
-      },
       payload: {
         output: 'stream',
         parse: true,
         multipart: true,
-        maxBytes: 5000 * 1024,
+        maxBytes: 20000000 * 1024,
         failAction: async (request, h, error) => {
+          const inputName = request.payload.action.split('-')[1]
+          let state = request.yar.get('state')
           if (
             error.output.payload.message.includes(
               'Payload content length greater than maximum '
             )
           ) {
-            return h
-              .view(
-                viewTemplate,
-                createModel(
-                  'The selected file must be smaller than 5MB',
-                  false,
-                  null
-                )
-              )
-              .takeover()
+            state = {
+              ...state,
+              errorMessage: {
+                ...state.errorMessage,
+                [inputName]: {
+                  text: 'The selected file must be smaller than 20MB'
+                }
+              }
+            }
+            request.yar.set('state', state)
+            return h.view(viewTemplate, state).takeover()
           }
-          return h
-            .view(viewTemplate, createModel(error, false, null))
-            .takeover()
+          state = {
+            ...state,
+            errorMessage: { ...state.errorMessage, [inputName]: error }
+          }
+          return h.view(viewTemplate, state).takeover()
         }
       }
     },
@@ -175,16 +135,16 @@ module.exports = [
       const { action } = request.payload
       const actionPath = action.split('-')
       let state = request.yar.get('state')
-      if (action === 'singleUpload') {
+      if (actionPath[0] === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
-          const fileCheckDetails = fileCheck(claimFormFile)
-          if (fileCheckDetails.errorMessage) {
+          const fileCheckDetails = fileCheck(claimFormFile, 'claim')
+          if (!fileCheckDetails.isCheckPassed) {
             state = {
               ...state,
               errorMessage: {
                 ...state.errorMessage,
-                claimFormErrors: fileCheckDetails.errorMessage
+                claim: fileCheckDetails
               },
               claimForm: null
             }
@@ -202,6 +162,10 @@ module.exports = [
                 originalFileName: fileUploaded.originalFileName,
                 fileSize: fileCheckDetails.fileSizeFormatted,
                 fileName: fileUploaded.fileName
+              },
+              errorMessage: {
+                ...state.errorMessage,
+                claim: null
               }
             }
             request.yar.set('state', state)
@@ -273,35 +237,51 @@ module.exports = [
         const errorArray = []
         for (const file of filesArray) {
           const fileCheckDetails = fileCheck(file)
-          if (!fileCheckDetails.errorMessage) {
+          if (fileCheckDetails.isCheckPassed) {
             const fileUploaded = await uploadFile(
               fileCheckDetails.fileBuffer,
               fileCheckDetails.uploadedFileName
             )
             fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
           } else {
-            errorArray.push(fileCheckDetails.errorMessage)
+            errorArray.push(fileCheckDetails.text)
           }
         }
 
-        if (!errorArray.length) {
+        if (newFilesArray.length) {
           state = {
             ...state,
             multiForms: { ...state.multiForms, [actionPath[1]]: newFilesArray }
           }
           request.yar.set('state', state)
-          return h.view(viewTemplate, state)
+        } else {
+          state = {
+            ...state,
+            multiForms: { ...state.multiForms, [actionPath[1]]: null }
+          }
+          request.yar.set('state', state)
+        }
+
+        if (errorArray.length) {
+          const allFilesErrors = errorArray.join('<br/>')
+          state = {
+            ...state,
+            errorMessage: {
+              ...state.errorMessage,
+              [actionPath[1]]: { html: allFilesErrors }
+            }
+          }
         } else {
           state = {
             ...state,
             errorMessage: {
               ...state.errorMessage,
-              multiFormErrors: errorArray
+              [actionPath[1]]: null
             }
           }
           request.yar.set('state', state)
-          return h.view(viewTemplate, state).takeover()
         }
+        return h.view(viewTemplate, state).takeover()
       }
     }
   }

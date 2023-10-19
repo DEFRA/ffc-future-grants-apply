@@ -99,12 +99,11 @@
     </div>
     {% else %}
     <form method="POST" action="{{ formActionPage }}" enctype="multipart/form-data">
-      {%if errorMessage.claimFormErrors%}
       {{
         govukFileUpload({
           id: "claimForm",
           name: "claimForm",
-          errorMessage: { text: errorMessage.claimFormErrors }
+          errorMessage: errorMessage.claim
         })
       }}
       {{
@@ -115,22 +114,7 @@
           value: "singleUpload-claim"
         })
       }}
-      {%else%}
-      {{
-        govukFileUpload({
-          id: "claimForm",
-          name: "claimForm"
-        })
-      }}
-      {{
-        govukButton({
-          text: "Upload file",
-          classes: "govuk-button--secondary",
-          name: "action",
-          value: "singleUpload"
-        })
-      }}
-      {%endif%}
+      
     </form>
     {% endif %}
     <hr />
@@ -172,7 +156,8 @@
               text: "Upload a file",
               classes: "govuk-label--m"
             },
-            attributes: { multiple: "" }
+            attributes: { multiple: "" },
+            errorMessage:errorMessage.purchased
           })
         }}
 
@@ -247,14 +232,6 @@
         For example, recipts and bank statements(you can cross out other
         transactions)
       </p>
-      {% if PaidItemsErrorSummary.items.length %}
-      {{
-        govukErrorSummary({
-          titleText: "There is a problem",
-          errorList: errorSummary.items
-        })
-      }}
-      {% endif %}
       <form action="{{ formActionPage }}" method="POST" enctype="multipart/form-data">
         {% set paidItemsUploadHtml %}
         {{
@@ -266,7 +243,8 @@
               text: "Upload a file",
               classes: "govuk-label--m"
             },
-            attributes: { multiple: "" }
+            attributes: { multiple: "" },
+            errorMessage:errorMessage.paid
           })
         }}
         {{
@@ -359,7 +337,8 @@
               text: "Upload a file",
               classes: "govuk-label--m"
             },
-            attributes: { multiple: "" }
+            attributes: { multiple: "" },
+            errorMessage:errorMessage.inPlace
           })
         }}
         {{
@@ -454,7 +433,8 @@
               text: "Upload a file",
               classes: "govuk-label--m"
             },
-            attributes: { multiple: "" }
+            attributes: { multiple: "" },
+            errorMessage:errorMessage.conditions
           })
         }}
         {{
