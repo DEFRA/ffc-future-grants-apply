@@ -86,7 +86,6 @@ module.exports = [
     options: {
       auth: false
     },
-
     handler: (request, h) => {
       const state = createModel(null, null)
       request.yar.set('state', state)
@@ -135,7 +134,6 @@ module.exports = [
               )
               .takeover()
           } else {
-            console.log(request.payload)
             return h
               .view(
                 viewTemplate,
@@ -145,7 +143,6 @@ module.exports = [
           }
         }
       },
-
       payload: {
         output: 'stream',
         parse: true,
@@ -207,7 +204,6 @@ module.exports = [
                 fileName: fileUploaded.fileName
               }
             }
-
             request.yar.set('state', state)
             return h.view(viewTemplate, state)
           }
@@ -223,10 +219,9 @@ module.exports = [
             )
             .takeover()
         }
-      }
-      if (actionPath[0] === 'delete') {
+      } else if (actionPath[0] === 'delete') {
         const fileName = request.payload.fileName
-        if (!fileName) {
+        if (!fileName || !fileName.length) {
           state = {
             ...state,
             errorMessage: {
@@ -251,9 +246,10 @@ module.exports = [
           const filteredArray = state.multiForms[actionPath[1]].filter(
             (item) => item.uploadedFileName !== fileName
           )
+
           state = {
             ...state,
-            multiForms: { ...state.multiforms, [actionPath[1]]: filteredArray }
+            multiForms: { ...state.multiForms, [actionPath[1]]: filteredArray }
           }
           request.yar.set('state', state)
           return h.view(viewTemplate, state)
@@ -268,32 +264,26 @@ module.exports = [
           request.yar.set('state', state)
           return h.view(viewTemplate, state).takeover()
         }
-      }
-      if (actionPath[0] === 'multiUpload') {
-        const filesArray = request.payload[actionPath[1]]
+      } else if (actionPath[0] === 'multiUpload') {
+        let filesArray = request.payload[actionPath[1]]
+        if (!filesArray.length) {
+          filesArray = [filesArray]
+        }
         const newFilesArray = []
         const errorArray = []
-        if (filesArray.length) {
-          for (const file of filesArray) {
-            const fileCheckDetails = fileCheck(file)
-            if (!fileCheckDetails.errorMessage) {
-              const fileUploaded = await uploadFile(
-                fileCheckDetails.fileBuffer,
-                fileCheckDetails.uploadedFileName
-              )
-              fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
-            } else {
-              errorArray.push(fileCheckDetails.errorMessage)
-            }
-          }
-        } else {
-          const fileCheckDetails = fileCheck(filesArray)
+        for (const file of filesArray) {
+          const fileCheckDetails = fileCheck(file)
           if (!fileCheckDetails.errorMessage) {
-            newFilesArray.push(fileCheckDetails)
+            const fileUploaded = await uploadFile(
+              fileCheckDetails.fileBuffer,
+              fileCheckDetails.uploadedFileName
+            )
+            fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
           } else {
             errorArray.push(fileCheckDetails.errorMessage)
           }
         }
+
         if (!errorArray.length) {
           state = {
             ...state,
@@ -312,18 +302,6 @@ module.exports = [
           request.yar.set('state', state)
           return h.view(viewTemplate, state).takeover()
         }
-      }
-      if (action === 'multiUpload') {
-        const filesArray = request.payload.multiFile
-        const newArr = []
-        for (const file of filesArray) {
-          const fileCheckDetails = fileCheck(file)
-          newArr.push(fileCheckDetails)
-        }
-        return h.view(
-          viewTemplate,
-          createModel(null, false, null, { purchasedForms: newArr })
-        )
       }
     }
   }
