@@ -22,7 +22,7 @@ function fileCheck (uploadedFile, inputName) {
     inputName,
     isCheckPassed: true
   }
-  const acceptableExtensions = ['doc', 'docx', 'xls', 'xlsx']
+  const acceptableExtensions = inputName==='claim'?['doc', 'docx', 'xls', 'xlsx']:['doc', 'docx', 'xls', 'xlsx','pdf','jpg','jpeg','png','mpg','mp4','wmv','mov']
   const uploadedFileName = uploadedFile.hapi.filename
   if (!uploadedFileName || !uploadedFileName.length) {
     return (errorObject = {
@@ -44,7 +44,7 @@ function fileCheck (uploadedFile, inputName) {
     errorObject = {
       ...errorObject,
       isCheckPassed: false,
-      text: `${errorObject.fileName} must be a DOC, DOCX, XLS or XLSX`
+      text: inputName==='claim'?`${errorObject.fileName} must be a DOC, DOCX, XLS, XLSX`:`${errorObject.fileName} must be a DOC, DOCX, XLS, XLSX, PDF, JPG, JPEG, PNG, MPG, MP4, WMV, MOV`
     }
   } else if (!isAllowedSize) {
     errorObject = {
