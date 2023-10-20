@@ -3,7 +3,7 @@ const { uploadFile, deleteFile } = require('../services/blob-storage') // Import
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
-const {fileCheck} =require('../utils/uploadHelperFunctions');
+const { fileCheck } = require('../utils/uploadHelperFunctions')
 
 function createModel (claimForm, multiForms) {
   return {
@@ -174,12 +174,12 @@ module.exports = [
         if (!filesArray.length) {
           filesArray = [filesArray]
         }
-        if (filesArray.length>15) {
+        if (filesArray.length > 15) {
           state = {
             ...state,
             errorMessage: {
               ...state.errorMessage,
-              [actionPath[1]]: { text:'Uploaded files must be less than 15 files.' }
+              [actionPath[1]]: { text: 'Uploaded files must be less than 15 files.' }
             }
           }
           request.yar.set('state', state)
