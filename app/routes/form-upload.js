@@ -174,6 +174,17 @@ module.exports = [
         if (!filesArray.length) {
           filesArray = [filesArray]
         }
+        if (filesArray.length>15) {
+          state = {
+            ...state,
+            errorMessage: {
+              ...state.errorMessage,
+              [actionPath[1]]: { text:'Uploaded files must be less than 15 files.' }
+            }
+          }
+          request.yar.set('state', state)
+          return h.view(viewTemplate, state)
+        }
         const newFilesArray = []
         const errorArray = []
         for (const file of filesArray) {
@@ -222,7 +233,7 @@ module.exports = [
           }
           request.yar.set('state', state)
         }
-        return h.view(viewTemplate, state).takeover()
+        return h.view(viewTemplate, state)
       }
     }
   }
