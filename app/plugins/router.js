@@ -14,11 +14,6 @@ const routes = [].concat(
   require('../routes/signin-oidc')
 )
 
-// const registerYourInterestRoutes = [].concat(
-//   require('../routes/register-your-interest/index'),
-//   require('../routes/register-your-interest/registration-complete')
-// )
-
 module.exports = {
   plugin: {
     name: 'router',
