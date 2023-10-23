@@ -5,7 +5,7 @@ let errorObject = {
   isCheckPassed: true
 }
 
-function formatFileSize(bytes) {
+function formatFileSize (bytes) {
   const num = Number(bytes)
   const megabytes = num / (1024 * 1024)
   if (megabytes >= 1) {
