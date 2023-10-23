@@ -1,4 +1,11 @@
-function formatFileSize (bytes) {
+let errorObject = {
+  text: '',
+  fileName: '',
+  inputName: '',
+  isCheckPassed: true
+}
+
+function formatFileSize(bytes) {
   const num = Number(bytes)
   const megabytes = num / (1024 * 1024)
   if (megabytes >= 1) {
@@ -8,13 +15,8 @@ function formatFileSize (bytes) {
     return kilobytes.toFixed(2) + ' KB'
   }
 }
+
 function fileCheck (uploadedFile, inputName) {
-  let errorObject = {
-    text: '',
-    fileName: '',
-    inputName,
-    isCheckPassed: true
-  }
   const acceptableExtensions =
     inputName === 'claim'
       ? ['doc', 'docx', 'xls', 'xlsx']
@@ -32,14 +34,8 @@ function fileCheck (uploadedFile, inputName) {
           'wmv',
           'mov'
         ]
+
   const uploadedFileName = uploadedFile.hapi.filename
-  if (!uploadedFileName || !uploadedFileName.length) {
-    return (errorObject = {
-      ...errorObject,
-      isCheckPassed: false,
-      text: 'No file selected. Select a file to upload.'
-    })
-  }
   errorObject.fileName = uploadedFileName
   const fileExtension = uploadedFileName.split('.').pop()
   const isExtensionAllowed = acceptableExtensions.includes(fileExtension)
@@ -47,6 +43,16 @@ function fileCheck (uploadedFile, inputName) {
   const claimFormBuffer = uploadedFile._data
   const fileSizeBytes = claimFormBuffer.byteLength
   const isAllowedSize = allowedFileSize >= Number(fileSizeBytes)
+
+  if (!uploadedFileName || !uploadedFileName.length) {
+    return (errorObject = {
+      ...errorObject,
+      inputName,
+      isCheckPassed: false,
+      text: 'No file selected. Select a file to upload.'
+    })
+  }
+
   if (!isExtensionAllowed) {
     errorObject = {
       ...errorObject,
