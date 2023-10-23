@@ -12,291 +12,496 @@
 {%- from "moj/components/multi-file-upload/macro.njk" import mojMultiFileUpload %}
 {% block pageTitle %}Upload application forms - {{ serviceName }}
 {% endblock %}
-
 {% block header %}
-  {{ govukHeader({
+{{
+  govukHeader({
     homepageUrl: "#",
     containerClasses: "app-width-container",
     serviceName: "Farming grants service",
     serviceUrl: "#",
-    navigation: [{text:"Sign-out",href:"#"}]
-  }) }}
+    navigation: [{ text: "Sign-out", href: "#" }]
+  })
+}}
 {% endblock %}
-
 {% block beforeContent %}
-  {{ govukPhaseBanner({
-    tag: {
-      text: "Alpha"
-    },
-    html: 'This is a new service - your <a class="govuk-link" href="#">feedback</a> will help us to improve it.'
-  }) }}
-  {{ govukBackLink({
+{{ govukPhaseBanner({ tag: { text:
+"Alpha" }, html: 'This is a new service - your
+<a class="govuk-link" href="#">feedback</a> will help us to improve it.' }) }}
+{{
+  govukBackLink({
     href: backLink,
     text: "Back"
-  }) }}
+  })
+}}
 {% endblock %}
-
 {%block content%}
-  <div class="govuk-grid-row govuk-!-margin-top-8">
-    <div class="govuk-grid-column-two-thirds">
-      <p class="govuk-!-font-size-36 govuk-!-margin-bottom-3">Claim for a Water Management Grant</p>
-      <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4">Upload claim form and evidence</h1>
+<div class="govuk-grid-row govuk-!-margin-top-8">
+  <div class="govuk-grid-column-two-thirds">
+    <p class="govuk-!-font-size-36 govuk-!-margin-bottom-3">
+      Claim for a Water Management Grant
+    </p>
+    <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4">
+      Upload claim form and evidence
+    </h1>
 
-      <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-8">1. Claim form</h1>
-      <span class="govuk-caption-m govuk-!-margin-bottom-5">Supported file types are DOC or DOCX. Maximum file size is 20MB.</span>
-      {{ govukWarningText({
-          text: "Do not upload scanned copies or PDFs of these appendix.",
-          iconFallbackText: "Warning"
-         })
-       }}
-      <h2 class="govuk-heading-m govuk-!-margin-bottom-2 govuk-!-margin-top-6">
-        {% if state.isClaimFormUploaded %} Files added {% else %} Upload a file
-        {% endif %}
-      </h2>
-      {% if state.isClaimFormUploaded %}
-        <div class="govuk-grid-row">
-          <p class="govuk-grid-column-two-thirds">{{state.claimForm.originalFileName}}, {{state.claimForm.fileSize}}</p>
+    <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-8">
+      1. Claim form
+    </h1>
+    <span class="govuk-caption-m govuk-!-margin-bottom-5">Supported file types are DOC or DOCX. Maximum file size is
+      20MB.</span>
+    {{
+      govukWarningText({
+        text: "Do not upload scanned copies or PDFs of these
+    appendix.",
+        iconFallbackText: "Warning"
+      })
+    }}
+    <h2 class="govuk-heading-m govuk-!-margin-bottom-2 govuk-!-margin-top-6">
+      {% if claimForm %} Files added {% else %} Upload a file {% endif %}
+    </h2>
+    {% if claimForm %}
+    <div class="govuk-grid-row">
+      <p class="govuk-grid-column-two-thirds">
+        {{ claimForm.fileName }},
+        {{ claimForm.fileSize }}
+      </p>
 
-          <form method="POST" action="{{formActionPage}}" class="govuk-!-text-align-right" enctype="multipart/form-data">
-            {{ govukButton({
-                  name:'action',
-                  value:'singleDelete',
+      <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+        {{
+          govukButton({
+            name: "action",
+            value: "delete-claim",
+            text: "Delete file",
+            classes:
+              "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
+          })
+        }}
+        {{
+          govukFileUpload({
+            id: "fileDelete",
+            name: "fileDelete",
+            classes: "govuk-visually-hidden"
+          })
+        }}
+        {{
+          govukInput({
+            label: {
+              text: "",
+              isPageHeading: false
+            },
+            id: "fileName",
+            name: "fileName",
+            classes: " govuk-visually-hidden",
+            value: claimForm.fileName
+          })
+        }}
+      </form>
+    </div>
+    {% else %}
+    <form method="POST" action="{{ formActionPage }}" enctype="multipart/form-data">
+      {{
+        govukFileUpload({
+          id: "claimForm",
+          name: "claimForm",
+          errorMessage: errorMessage.claim
+        })
+      }}
+      {{
+        govukButton({
+          text: "Upload file",
+          classes: "govuk-button--secondary",
+          name: "action",
+          value: "singleUpload-claim"
+        })
+      }}
+      
+    </form>
+    {% endif %}
+    <hr />
+
+    <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-6">
+      2. Evidence
+    </h1>
+    <span class="govuk-caption-m">Supported file types are DOC, DOCX, XLS, XLSX, PDF, JPG, JPEG, PNG, MPG, MP4, WMV, MOV. Maximum file size is 20MB.</span>
+    {{
+      govukWarningText({
+        text: "You must add evidence for each item you are
+    claiming for.",
+        iconFallbackText: "Warning",
+        classes: "govuk-!-margin-top-4"
+      })
+    }}
+    <hr />
+    <div>
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+        Proof items have been purchased
+      </h3>
+      <p class="govuk-body">For example, invoices</p>
+      {% if purchasedItemsErrorSummary.items.length %}
+      {{
+          govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorSummary.items
+          })
+        }}
+      {% endif %}
+      <form action="{{ formActionPage }}" method="POST" enctype="multipart/form-data">
+        {% set purchasedItemsUploadHtml %}
+        {{
+          govukFileUpload({
+            id: "purchased",
+            name: "purchased",
+            classes: "moj-multi-file-upload__input",
+            label: {
+              text: "Upload a file",
+              classes: "govuk-label--m"
+            },
+            attributes: { multiple: "" },
+            errorMessage:errorMessage.purchased
+          })
+        }}
+
+        {{
+          govukButton({
+          id:"purchasedItemsButton",
+          name:"action",
+          value:"multiUpload-purchased",
+          text: "Upload file",
+          classes: "govuk-button--secondary moj-multi-file-upload__button"
+          })
+        }}
+        {% endset %}
+
+        {{
+          mojMultiFileUpload({
+            uploadedFiles: {
+              heading: { text: "Files added" },
+              items: []
+            },
+            uploadHtml: purchasedItemsUploadHtml
+          })
+        }}
+      </form>
+
+      {% if multiForms.purchased %}
+      {% for file in multiForms.purchased %}
+      <p class="govuk-grid-column-two-thirds">
+        {{ file.uploadedFileName }},
+        {{ file.fileSizeFormatted }}
+      </p>
+
+      <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+        {{
+                govukButton({
+                  name: "action",
+                  value: "delete-purchased",
                   text: "Delete file",
-                  classes: "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
-                  })
-             }}
-            {{
-               govukFileUpload({
-                id:"fileDelete",
-                name:"fileDelete",
-                classes:"govuk-visually-hidden"
-               })
-            }}
-            {{
-              govukInput({
+                  classes:
+                    "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
+                })
+              }}
+        {{
+                govukFileUpload({
+                  id: "fileDelete",
+                  name: "fileDelete",
+                  classes: "govuk-visually-hidden"
+                })
+              }}
+        {{
+                govukInput({
                   label: {
                     text: "",
                     isPageHeading: false
                   },
                   id: "fileName",
                   name: "fileName",
-                   classes: " govuk-visually-hidden",
-                  value:state.claimForm.fileName
-              })
-            }}
-          </form>
-
-        </div>
-      {% else %}
-        <form method="POST" action="{{formActionPage}}" enctype="multipart/form-data">
-          {%if errorMessage%}
-            {{
-            govukFileUpload({
-            id:"claimForm",
-            name:"claimForm",
-           errorMessage: {text: errorMessage}
-            })
-          }}
-            {{
-            govukButton({text:"Upload file",classes: "govuk-button--secondary",name:"action",value:"upload"  
-            }) 
-          }}
-            {%else%}
-            {{
-            govukFileUpload({
-            id:"claimForm",
-            name:"claimForm"
-            })
-          }}
-            {{
-            govukButton({text:"Upload file",classes: "govuk-button--secondary",name:"action",value:"singleUpload"  
-            }) 
-          }}
-            {%endif%}
-
-          </form>
-        {% endif %}
-        <hr/>
-
-        <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-6">2. Evidence</h1>
-        <span class="govuk-caption-m">Supported file types are XLS or XLSX. Maximum file size is 20MB.</span>
-        {{ govukWarningText({
-            text: "You must add evidence for each item you are claiming for.",
-            iconFallbackText: "Warning",
-            classes:"govuk-!-margin-top-4"
+                  classes: " govuk-visually-hidden",
+                  value: file.uploadedFileName
+                })
+              }}
+      </form>
+      {% endfor %}
+      {% endif %}
+    </div>
+    <hr />
+    <div>
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+        Proof items have been paid for
+      </h3>
+      <p class="govuk-body">
+        For example, recipts and bank statements(you can cross out other
+        transactions)
+      </p>
+      <form action="{{ formActionPage }}" method="POST" enctype="multipart/form-data">
+        {% set paidItemsUploadHtml %}
+        {{
+          govukFileUpload({
+            id: "paid",
+            name: "paid",
+            classes: "moj-multi-file-upload__input",
+            label: {
+              text: "Upload a file",
+              classes: "govuk-label--m"
+            },
+            attributes: { multiple: "" },
+            errorMessage:errorMessage.paid
           })
         }}
-        <hr/>
-        <div>
-          <h3 class="govuk-heading-m govuk-!-margin-bottom-3">Proof items have been purchased</h3>
-          <p class="govuk-body">For example, invoices</p>
-          {% if purchasedItemsErrorSummary.items.length %}
-            {{ govukErrorSummary({
-               titleText: 'There is a problem',
-               errorList: errorSummary.items
+        {{
+          govukButton({
+          id:"paidItemsButton",
+          name:"action",
+          value:"multiUpload-paid",
+            text: "Upload file",
+            classes: "govuk-button--secondary moj-multi-file-upload__button"
+          })
+        }}
+        {% endset %}
+
+        {{
+          mojMultiFileUpload({
+            uploadedFiles: {
+              heading: { text: "Files added" },
+              items: []
+            },
+            uploadHtml: paidItemsUploadHtml
+          })
+        }}
+      </form>
+      {% if multiForms.paid %}
+      {% for file in multiForms.paid %}
+      <p class="govuk-grid-column-two-thirds">
+        {{ file.uploadedFileName }},
+        {{ file.fileSizeFormatted }}
+      </p>
+
+      <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+        {{
+                govukButton({
+                  name: "action",
+                  value: "delete-paid",
+                  text: "Delete file",
+                  classes:
+                    "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
                 })
               }}
-          {% endif %}
-
-<form action="" method="post" enctype="multipart/form-data">
-      {% set uploadHtml %}
-        {{ govukFileUpload({
-          id: "documents",
-          name: "documents",
-          classes: 'moj-multi-file-upload__input',
-          label: {
-            text: "Upload a file",
-            classes: 'govuk-label--m'
-          },
-          attributes: { multiple: '' }
-        }) }}
-
-        {{govukButton({
-          text: 'Upload file',
-          classes: 'govuk-button--secondary moj-multi-file-upload__button'
-        })}}
-      {% endset %}
-
-      {{ mojMultiFileUpload({
-        uploadedFiles: {
-          heading: { text: 'Files added' },
-          items: []
-        },
-        uploadHtml: uploadHtml
-      }) }}
-
-    </form>
-        </div>
-        <hr/>
-        <div>
-          <h3 class="govuk-heading-m govuk-!-margin-bottom-3">Proof items have been paid for</h3>
-          <p class="govuk-body">For example, recipts and bank statements(you can cross out other transactions)</p>
-          {% if PaidItemsErrorSummary.items.length %}
-            {{ govukErrorSummary({
-               titleText: 'There is a problem',
-               errorList: errorSummary.items
+        {{
+                govukFileUpload({
+                  id: "fileDelete",
+                  name: "fileDelete",
+                  classes: "govuk-visually-hidden"
                 })
               }}
-          {% endif %}
-          <form action="{{formActionPage}}" method="POST" enctype="multipart/form-data">
-            {% set PaidItemsUploadHtml %}
-            {{ govukFileUpload({
-                 id: "PaidItems",
-                 name: "PaidItems",
-                 classes: 'moj-multi-file-upload__input',
-                 label: {
-                    text: "Upload a file",
-                    classes: 'govuk-label--m'
+        {{
+                govukInput({
+                  label: {
+                    text: "",
+                    isPageHeading: false
                   },
-                 attributes: { multiple: '' },
-                 errorMessage: PaidItemsErrorMessage
+                  id: "fileName",
+                  name: "fileName",
+                  classes: " govuk-visually-hidden",
+                  value: file.uploadedFileName
                 })
               }}
-                {{govukButton({
-          text: 'Upload file',
-          classes: 'govuk-button--secondary moj-multi-file-upload__button'
-        })}}
-            {% endset %}
-
-            {{ mojMultiFileUpload({
-                  uploadedFiles: {
-                  heading: { text: 'Files added' },
-                  items: PaidItemsUploadedFiles
-                   },
-                  uploadHtml: PaidItemsUploadHtml
-                })
-              }}
-          </form>
-        </div>
-        <hr/>
-        <div>
-          <h3 class="govuk-heading-m govuk-!-margin-bottom-3">Proof items are in place</h3>
-          <p class="govuk-body">For example, photos and videos</p>
-          {% if inPlaceItemsErrorSummary.items.length %}
-            {{ govukErrorSummary({
-               titleText: 'There is a problem',
-               errorList: inPlaceItemsrrorSummary.items
-                })
-              }}
-          {% endif %}
-          <form action="{{formActionPage}}" method="POST" enctype="multipart/form-data">
-            {% set inPlaceItemsUploadHtml %}
-            {{ govukFileUpload({
-                 id: "inPlaceItems",
-                 name: "inPlaceItems",
-                 classes: 'moj-multi-file-upload__input',
-                 label: {
-                    text: "Upload a file",
-                    classes: 'govuk-label--m'
-                  },
-                 attributes: { multiple: '' },
-                 errorMessage: inPlaceItemsErrorMessage
-                })
-              }}
-                {{govukButton({
-          text: 'Upload file',
-          classes: 'govuk-button--secondary moj-multi-file-upload__button'
-        })}}
-            {% endset %}
-
-            {{ mojMultiFileUpload({
-                  uploadedFiles: {
-                  heading: { text: 'Files added' },
-                  items: inPlaceItemsUploadedFiles
-                   },
-                  uploadHtml: inPlaceItemsUploadHtml
-                })
-              }}
-          </form>
-        </div>
-        <hr/>
-        <div>
-          <h3 class="govuk-heading-m govuk-!-margin-bottom-3">Proof conditions and outputs have been met</h3>
-          <p class="govuk-body">Only for projects with grant-specefic conditions and outputs</p>
-          {% if inPlaceItemsErrorSummary.items.length %}
-            {{ govukErrorSummary({
-               titleText: 'There is a problem',
-               errorList: inPlaceItemsErrorSummary.items
-                })
-              }}
-          {% endif %}
-          <form action="{{formActionPage}}" method="POST" enctype="multipart/form-data">
-            {% set inPlaceItemsUploadHtml %}
-            {{ govukFileUpload({
-                 id: "inPlaceItems",
-                 name: "inPlaceItems",
-                 classes: 'moj-multi-file-upload__input',
-                 label: {
-                    text: "Upload a file",
-                    classes: 'govuk-label--m'
-                  },
-                 attributes: { multiple: '' },
-                 errorMessage: inPlaceItemsErrorMessage
-                })
-              }}
-                {{govukButton({
-          text: 'Upload file',
-          classes: 'govuk-button--secondary moj-multi-file-upload__button'
-        })}}
-            {% endset %}
-
-            {{ mojMultiFileUpload({
-                  uploadedFiles: {
-                  heading: { text: 'Files added' },
-                  items: inPlaceItemsUploadedFiles
-                   },
-                  uploadHtml: inPlaceItemsUploadHtml
-                })
-              }}
-
-      {{govukButton({
-        text: 'Continue'
-      })}}
-          </form>
-        </div>
-
-      </div>
-
+      </form>
+      {% endfor %}
+      {% endif %}
     </div>
+    <hr />
+    <div>
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+        Proof items are in place
+      </h3>
+      <p class="govuk-body">For example, photos and videos</p>
+      {% if inPlaceItemsErrorSummary.items.length %}
+      {{
+        govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: inPlaceItemsrrorSummary.items
+        })
+      }}
+      {% endif %}
+      <form
+        action="{{ formActionPage }}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        {% set inPlaceItemsUploadHtml %}
+        {{
+          govukFileUpload({
+            id: "inPlace",
+            name: "inPlace",
+            classes: "moj-multi-file-upload__input",
+            label: {
+              text: "Upload a file",
+              classes: "govuk-label--m"
+            },
+            attributes: { multiple: "" },
+            errorMessage:errorMessage.inPlace
+          })
+        }}
+        {{
+          govukButton({
+            id:"inPlaceItemsButton",
+            name:"action",
+            value:"multiUpload-inPlace",
+            text: "Upload file",
+            classes: "govuk-button--secondary moj-multi-file-upload__button"
+          })
+        }}
+        {% endset %}
 
-  {% endblock %}
+         {{
+          mojMultiFileUpload({
+            uploadedFiles: {
+              heading: { text: "Files added" },
+              items: []
+            },
+            uploadHtml: inPlaceItemsUploadHtml
+          })
+        }}
+      </form>
+       {% if multiForms.inPlace %}
+            {% for file in multiForms.inPlace %}
+              <p class="govuk-grid-column-two-thirds">
+                {{ file.uploadedFileName }},
+              {{ file.fileSizeFormatted }}
+              </p>
+
+              <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+                {{
+                govukButton({
+                  name: "action",
+                  value: "delete-inPlace",
+                  text: "Delete file",
+                  classes:
+                    "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
+                })
+              }}
+                {{
+                govukFileUpload({
+                  id: "fileDelete",
+                  name: "fileDelete",
+                  classes: "govuk-visually-hidden"
+                })
+              }}
+                {{
+                govukInput({
+                  label: {
+                    text: "",
+                    isPageHeading: false
+                  },
+                  id: "fileName",
+                  name: "fileName",
+                  classes: " govuk-visually-hidden",
+                  value: file.uploadedFileName
+                })
+              }}
+              </form>
+            {% endfor %}
+          {% endif %}
+    </div>
+    <hr /> 
+    <div>
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+        Proof conditions and outputs have been met
+      </h3>
+      <p class="govuk-body">
+        Only for projects with grant-specefic conditions and outputs
+      </p>
+      {% if conditionsErrorSummary.items.length %}
+      {{
+        govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: conditionsErrorSummary.items
+        })
+      }}
+      {% endif %}
+      <form
+        action="{{ formActionPage }}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        {% set conditionsUploadHtml %}
+        {{
+          govukFileUpload({
+            id: "conditions",
+            name: "conditions",
+            classes: "moj-multi-file-upload__input",
+            label: {
+              text: "Upload a file",
+              classes: "govuk-label--m"
+            },
+            attributes: { multiple: "" },
+            errorMessage:errorMessage.conditions
+          })
+        }}
+        {{
+          govukButton({
+            name:"action",
+            value:"multiUpload-conditions",
+            text: "Upload file",
+            classes: "govuk-button--secondary moj-multi-file-upload__button"
+          })
+        }}
+        {% endset %}
+        {{
+          mojMultiFileUpload({
+            uploadedFiles: {
+              heading: { text: "Files added" },
+              items: conditionsUploadedFiles
+            },
+            uploadHtml: conditionsUploadHtml
+          })
+        }}
+      </form>
+      {% if multiForms.conditions %}
+            {% for file in multiForms.conditions %}
+              <p class="govuk-grid-column-two-thirds">
+                {{ file.uploadedFileName }},
+              {{ file.fileSizeFormatted }}
+              </p>
+
+              <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+                {{
+                govukButton({
+                  name: "action",
+                  value: "delete-conditions",
+                  text: "Delete file",
+                  classes:
+                    "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter"
+                })
+              }}
+                {{
+                govukFileUpload({
+                  id: "fileDelete",
+                  name: "fileDelete",
+                  classes: "govuk-visually-hidden"
+                })
+              }}
+                {{
+                govukInput({
+                  label: {
+                    text: "",
+                    isPageHeading: false
+                  },
+                  id: "fileName",
+                  name: "fileName",
+                  classes: " govuk-visually-hidden",
+                  value: file.uploadedFileName
+                })
+              }}
+              </form>
+            {% endfor %}
+          {% endif %}
+    </div>
+    {{
+      govukButton({
+        text: "Continue"
+      })
+    }}
+  </div>
+</div>
+
+{% endblock %}
