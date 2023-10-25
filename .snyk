@@ -1,12 +1,13 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.22.1
+version: v1.25.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-JS-HAPISTATEHOOD-2769251:
-    - '@hapi/hapi > @hapi/statehood':
+  SNYK-JS-AXIOS-6032459:
+    - 'notifications-node-client@7.0.3 > axios@1.5.1':
         reason: None given
-        expires: '2022-09-08T11:46:11.839Z'
-      '@hapi/yar > @hapi/statehood':
-        reason: None given
-        expires: '2022-09-14T09:45:19.435Z'
+        expires: '2024-09-08T11:46:11.839Z'
+  SNYK-JS-CRYPTOJS-6028119:
+    - crypto-js@4.2.0:
+        reason: no direct upgrade or patch available
+        expires: '2024-03-21T11:23:27.474Z'
 patch: {}

@@ -13,6 +13,7 @@ const schema = Joi.object({
     otherwise: Joi.required()
   }),
   blobStorageContainerName: Joi.string().required(),
+  claimFormDownloadUrl: Joi.string().required(),
   useBlobStorageConnectionString: Joi.boolean().default(false)
 })
 
@@ -21,7 +22,8 @@ const config = {
   blobStorageConnectionString: process.env.BLOB_STORAGE_CONNECTION_STRING,
   blobStorageAccountName: process.env.BLOB_STORAGE_ACCOUNT_NAME,
   blobStorageContainerName: process.env.BLOB_STORAGE_CONTAINER_NAME,
-  useBlobStorageConnectionString: process.env.USE_BLOB_STORAGE_CONNECTION_STRING
+  useBlobStorageConnectionString: process.env.USE_BLOB_STORAGE_CONNECTION_STRING,
+  claimFormDownloadUrl: process.env.CLAIM_FORM_DOWNLOAD_URL
 }
 console.log(config)
 // Validate config
