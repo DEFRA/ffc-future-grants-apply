@@ -64,6 +64,7 @@ container:
   blobStorageContainerName: not-a-real-container
   blobStorageConnectionString: dummy
   useBlobStorageConnectionString: false
+  claimFormDownloadUrl: dummy
   rpaGetPersonSummaryUrl:
   rpaGetOrganisationPermissionsUrl:
   rpaGetOrganisationUrl:
