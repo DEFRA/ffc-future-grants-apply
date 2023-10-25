@@ -40,6 +40,15 @@
     <p class="govuk-!-font-size-36 govuk-!-margin-bottom-3">
       Claim for a Water Management Grant
     </p>
+    {%if errorSummaryList.length%}
+    {{
+        govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorSummaryList
+        })
+      }}
+    {%endif%}
+    
     <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4">
       Upload claim form and evidence
     </h1>
@@ -138,12 +147,6 @@
       </h3>
       <p class="govuk-body">For example, invoices</p>
       {% if purchasedItemsErrorSummary.items.length %}
-      {{
-          govukErrorSummary({
-          titleText: "There is a problem",
-          errorList: errorSummary.items
-          })
-        }}
       {% endif %}
       <form action="{{ formActionPage }}" method="POST" enctype="multipart/form-data">
         {% set purchasedItemsUploadHtml %}
@@ -315,12 +318,6 @@
       </h3>
       <p class="govuk-body">For example, photos and videos</p>
       {% if inPlaceItemsErrorSummary.items.length %}
-      {{
-        govukErrorSummary({
-          titleText: "There is a problem",
-          errorList: inPlaceItemsrrorSummary.items
-        })
-      }}
       {% endif %}
       <form
         action="{{ formActionPage }}"
@@ -410,14 +407,6 @@
       <p class="govuk-body">
         Only for projects with grant-specefic conditions and outputs
       </p>
-      {% if conditionsErrorSummary.items.length %}
-      {{
-        govukErrorSummary({
-          titleText: "There is a problem",
-          errorList: conditionsErrorSummary.items
-        })
-      }}
-      {% endif %}
       <form
         action="{{ formActionPage }}"
         method="POST"
@@ -449,9 +438,9 @@
         {{
           mojMultiFileUpload({
             uploadedFiles: {
-              heading: { text: "Files addedggg" },
-              items: conditionsUploadedFiles
-            },
+              heading: { text: "Files added" },
+              items: []
+              },
             uploadHtml: conditionsUploadHtml
           })
         }}

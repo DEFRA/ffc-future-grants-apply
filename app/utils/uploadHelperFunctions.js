@@ -15,7 +15,30 @@ function formatFileSize (bytes) {
     return kilobytes.toFixed(2) + ' KB'
   }
 }
+function createErrorsSummaryList (state, errorArray, actionPath) {
+  const createErrorsSummary = {
+    ...state.errorMessage,
+    [actionPath]: errorArray
+  }
 
+  const errorsSummary = Object.values(createErrorsSummary)
+    .flatMap((item) => {
+      if (item && item[0]) {
+        return {
+          text: item[0].html ? item[0].html : item[0].text,
+          href: item[0].href
+        }
+      } else if (item && item.href) {
+        return {
+          text: item.html ? item.html : item.text,
+          href: item.href
+        }
+      }
+      return undefined
+    })
+    .filter((item) => item !== undefined)
+  return errorsSummary
+}
 function fileCheck (uploadedFile, inputName) {
   const acceptableExtensions =
     inputName === 'claim'
@@ -80,4 +103,4 @@ function fileCheck (uploadedFile, inputName) {
   }
   return errorObject
 }
-module.exports = { fileCheck }
+module.exports = { fileCheck, createErrorsSummaryList }

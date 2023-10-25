@@ -3,7 +3,10 @@ const { uploadFile, deleteFile } = require('../services/blob-storage') // Import
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
-const { fileCheck } = require('../utils/uploadHelperFunctions')
+const {
+  fileCheck,
+  createErrorsSummaryList
+} = require('../utils/uploadHelperFunctions')
 function createModel (claimForm, multiForms) {
   return {
     multiForms: { ...multiForms },
@@ -16,7 +19,8 @@ function createModel (claimForm, multiForms) {
       inPlace: null,
       conditions: null
     },
-    backLink
+    backLink,
+    errorSummaryList: []
   }
 }
 module.exports = [
@@ -55,7 +59,8 @@ module.exports = [
               errorMessage: {
                 ...state.errorMessage,
                 [inputName]: {
-                  text: 'The selected file must be smaller than 20MB'
+                  text: 'The selected file must be smaller than 20MB',
+                  href: '#' + inputName
                 }
               }
             }
@@ -83,10 +88,16 @@ module.exports = [
               ...state,
               errorMessage: {
                 ...state.errorMessage,
-                claim: fileCheckDetails
+                claim: { text: fileCheckDetails.text, href: '#claim' }
               },
               claimForm: null
             }
+            const errorsList = createErrorsSummaryList(
+              state,
+              [{ text: fileCheckDetails.text, href: '#claimForm' }],
+              'claim'
+            )
+            state.errorSummaryList = errorsList
             request.yar.set('state', state)
             return h.view(viewTemplate, state).takeover()
           } else {
@@ -106,6 +117,8 @@ module.exports = [
                 claim: null
               }
             }
+            const errorsList = createErrorsSummaryList(state, null, 'claim')
+            state.errorSummaryList = errorsList
             request.yar.set('state', state)
             return h.view(viewTemplate, state)
           }
@@ -175,10 +188,22 @@ module.exports = [
             errorMessage: {
               ...state.errorMessage,
               [actionPath[1]]: {
-                text: 'Uploaded files must be less than 15 files.'
+                text: 'Uploaded files must be less than 15 files.',
+                href: '#' + actionPath[1]
               }
             }
           }
+          const errorsList = createErrorsSummaryList(
+            state,
+            [
+              {
+                href: '#' + actionPath[1],
+                text: 'Uploaded files must be less than 15 files.'
+              }
+            ],
+            actionPath[1]
+          )
+          state.errorSummaryList = errorsList
           request.yar.set('state', state)
           return h.view(viewTemplate, state)
         }
@@ -193,7 +218,10 @@ module.exports = [
             )
             fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
           } else {
-            errorArray.push(fileCheckDetails.text)
+            errorArray.push({
+              text: fileCheckDetails.text,
+              href: '#' + actionPath[1]
+            })
           }
         }
         if (newFilesArray.length) {
@@ -216,14 +244,22 @@ module.exports = [
                 }
               }
         }
-        const allFilesErrors = errorArray.join('<br/>')
+        const allFilesErrors = errorArray
+          .map((item) => item.text)
+          .join('<br/>')
         state = {
           ...state,
           errorMessage: {
             ...state.errorMessage,
-            [actionPath[1]]: allFilesErrors.length ? { html: allFilesErrors } : null
+            [actionPath[1]]: allFilesErrors.length
+              ? { html: allFilesErrors, href: '#' + actionPath[1] }
+              : null
           }
         }
+        const errorsSummary = errorArray.length
+          ? createErrorsSummaryList(state, errorArray, actionPath[1])
+          : createErrorsSummaryList(state, null, actionPath[1])
+        state.errorSummaryList = errorsSummary
         request.yar.set('state', state)
         return h.view(viewTemplate, state)
       }
