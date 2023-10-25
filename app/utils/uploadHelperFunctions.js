@@ -1,5 +1,5 @@
 let errorObject = {
-  text: '',
+  html: '',
   fileName: '',
   inputName: '',
   isCheckPassed: true
@@ -15,7 +15,33 @@ function formatFileSize (bytes) {
     return kilobytes.toFixed(2) + ' KB'
   }
 }
-
+function createErrorsSummaryList (formSubmitted, errorArray, actionPath) {
+  const createErrorsSummary = {
+    ...formSubmitted.errorMessage,
+    [actionPath]: errorArray
+  }
+  const errorsSummary = Object.values(createErrorsSummary)
+    .flatMap((item) => {
+      if (item && item.length) {
+        const filesArray = []
+        for (const file of item) {
+          filesArray.push({
+            html: file.html ? file.html : file.text,
+            href: file.href
+          })
+        }
+        return filesArray.flat(1)
+      } else if (item && item.href) {
+        return {
+          html: item.html ? item.html : item.text,
+          href: item.href
+        }
+      }
+      return undefined
+    })
+    .filter((item) => item !== undefined)
+  return errorsSummary
+}
 function fileCheck (uploadedFile, inputName) {
   const acceptableExtensions =
     inputName === 'claim'
@@ -49,7 +75,7 @@ function fileCheck (uploadedFile, inputName) {
       ...errorObject,
       inputName,
       isCheckPassed: false,
-      text: 'No file selected. Select a file to upload.'
+      html: 'No file selected. Select a file to upload.'
     })
   }
 
@@ -57,7 +83,7 @@ function fileCheck (uploadedFile, inputName) {
     errorObject = {
       ...errorObject,
       isCheckPassed: false,
-      text:
+      html:
         inputName === 'claim'
           ? `${errorObject.fileName} must be a DOC, DOCX, XLS, XLSX`
           : `${errorObject.fileName} must be a DOC, DOCX, XLS, XLSX, PDF, JPG, JPEG, PNG, MPG, MP4, WMV, MOV`
@@ -66,7 +92,7 @@ function fileCheck (uploadedFile, inputName) {
     errorObject = {
       ...errorObject,
       isCheckPassed: false,
-      text: `${errorObject.fileName} must be smaller than 20MB`
+      html: `${errorObject.fileName} must be smaller than 20MB`
     }
   } else {
     const fileSizeFormatted = formatFileSize(fileSizeBytes)
@@ -80,4 +106,4 @@ function fileCheck (uploadedFile, inputName) {
   }
   return errorObject
 }
-module.exports = { fileCheck }
+module.exports = { fileCheck, createErrorsSummaryList }

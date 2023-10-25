@@ -3,7 +3,10 @@ const { uploadFile, deleteFile } = require('../services/blob-storage') // Import
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
-const { fileCheck } = require('../utils/uploadHelperFunctions')
+const {
+  fileCheck,
+  createErrorsSummaryList
+} = require('../utils/uploadHelperFunctions')
 function createModel (claimForm, multiForms) {
   return {
     multiForms: { ...multiForms },
@@ -16,7 +19,8 @@ function createModel (claimForm, multiForms) {
       inPlace: null,
       conditions: null
     },
-    backLink
+    backLink,
+    errorSummaryList: []
   }
 }
 module.exports = [
@@ -27,9 +31,9 @@ module.exports = [
       auth: false
     },
     handler: (request, h) => {
-      const state = createModel(null, null)
-      request.yar.set('state', state)
-      return h.view(viewTemplate, state)
+      const formSubmitted = createModel(null, null)
+      request.yar.set('formSubmitted', formSubmitted)
+      return h.view(viewTemplate, formSubmitted)
     }
   },
   {
@@ -44,70 +48,79 @@ module.exports = [
         maxBytes: 20000000 * 1024,
         failAction: async (request, h, error) => {
           const inputName = request.payload.action.split('-')[1]
-          let state = request.yar.get('state')
+          let formSubmitted = request.yar.get('formSubmitted')
           if (
             error.output.payload.message.includes(
               'Payload content length greater than maximum '
             )
           ) {
-            state = {
-              ...state,
+            formSubmitted = {
+              ...formSubmitted,
               errorMessage: {
-                ...state.errorMessage,
+                ...formSubmitted.errorMessage,
                 [inputName]: {
-                  text: 'The selected file must be smaller than 20MB'
+                  html: 'The selected file must be smaller than 20MB',
+                  href: '#' + inputName
                 }
               }
             }
-            request.yar.set('state', state)
-            return h.view(viewTemplate, state).takeover()
+            request.yar.set('formSubmitted', formSubmitted)
+            return h.view(viewTemplate, formSubmitted).takeover()
           }
-          state = {
-            ...state,
-            errorMessage: { ...state.errorMessage, [inputName]: error }
+          formSubmitted = {
+            ...formSubmitted,
+            errorMessage: { ...formSubmitted.errorMessage, [inputName]: error }
           }
-          return h.view(viewTemplate, state).takeover()
+          return h.view(viewTemplate, formSubmitted).takeover()
         }
       }
     },
     handler: async (request, h) => {
       const { action } = request.payload
       const actionPath = action.split('-')
-      let state = request.yar.get('state')
+      let formSubmitted = request.yar.get('formSubmitted')
       if (actionPath[0] === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
           const fileCheckDetails = fileCheck(claimFormFile, 'claim')
           if (!fileCheckDetails.isCheckPassed) {
-            state = {
-              ...state,
+            formSubmitted = {
+              ...formSubmitted,
               errorMessage: {
-                ...state.errorMessage,
-                claim: fileCheckDetails
+                ...formSubmitted.errorMessage,
+                claim: { html: fileCheckDetails.html, href: '#claim' }
               },
               claimForm: null
             }
-            request.yar.set('state', state)
-            return h.view(viewTemplate, state).takeover()
+            const errorsList = createErrorsSummaryList(
+              formSubmitted,
+              [{ html: fileCheckDetails.html, href: '#claimForm' }],
+              'claim'
+            )
+            formSubmitted.errorSummaryList = errorsList
+            request.yar.set('formSubmitted', formSubmitted)
+            return h.view(viewTemplate, formSubmitted).takeover()
           } else {
             const fileUploaded = await uploadFile(
               fileCheckDetails.fileBuffer,
               fileCheckDetails.uploadedFileName
             )
-            state = {
-              ...state,
+            formSubmitted = {
+              ...formSubmitted,
               claimForm: {
                 originalFileName: fileUploaded.originalFileName,
                 fileSize: fileCheckDetails.fileSizeFormatted,
                 fileName: fileUploaded.fileName
               },
               errorMessage: {
-                ...state.errorMessage,
+                ...formSubmitted.errorMessage,
                 claim: null
               }
             }
-            request.yar.set('state', state)
-            return h.view(viewTemplate, state)
+            const errorsList = createErrorsSummaryList(formSubmitted, null, 'claim')
+            formSubmitted.errorSummaryList = errorsList
+            request.yar.set('formSubmitted', formSubmitted)
+            return h.view(viewTemplate, formSubmitted)
           }
         } catch (error) {
           return h
@@ -124,45 +137,45 @@ module.exports = [
       } else if (actionPath[0] === 'delete') {
         const fileName = request.payload.fileName
         if (!fileName || !fileName.length) {
-          state = {
-            ...state,
+          formSubmitted = {
+            ...formSubmitted,
             errorMessage: {
-              ...state.errorMessage,
+              ...formSubmitted.errorMessage,
               claimFormErrors: 'Invalid file name'
             }
           }
-          request.yar.set('state', state)
-          return h.view(viewTemplate, state).takeover()
+          request.yar.set('formSubmitted', formSubmitted)
+          return h.view(viewTemplate, formSubmitted).takeover()
         }
         const isDeleted = await deleteFile(fileName)
         if (isDeleted && actionPath[1] === 'claim') {
-          state = {
-            ...state,
-            errorMessage: { ...state.errorMessage, claimFormErrors: null },
+          formSubmitted = {
+            ...formSubmitted,
+            errorMessage: { ...formSubmitted.errorMessage, claimFormErrors: null },
             claimForm: null
           }
-          request.yar.set('state', state)
-          return h.view(viewTemplate, state)
+          request.yar.set('formSubmitted', formSubmitted)
+          return h.view(viewTemplate, formSubmitted)
         } else if (isDeleted && actionPath[1] !== 'claim') {
-          const filteredArray = state.multiForms[actionPath[1]].filter(
+          const filteredArray = formSubmitted.multiForms[actionPath[1]].filter(
             (item) => item.uploadedFileName !== fileName
           )
-          state = {
-            ...state,
-            multiForms: { ...state.multiForms, [actionPath[1]]: filteredArray }
+          formSubmitted = {
+            ...formSubmitted,
+            multiForms: { ...formSubmitted.multiForms, [actionPath[1]]: filteredArray }
           }
-          request.yar.set('state', state)
-          return h.view(viewTemplate, state)
+          request.yar.set('formSubmitted', formSubmitted)
+          return h.view(viewTemplate, formSubmitted)
         } else {
-          state = {
-            ...state,
+          formSubmitted = {
+            ...formSubmitted,
             errorMessage: {
-              ...state.errorMessage,
+              ...formSubmitted.errorMessage,
               claimFormErrors: 'Error deleting file'
             }
           }
-          request.yar.set('state', state)
-          return h.view(viewTemplate, state).takeover()
+          request.yar.set('formSubmitted', formSubmitted)
+          return h.view(viewTemplate, formSubmitted).takeover()
         }
       } else if (actionPath[0] === 'multiUpload') {
         let filesArray = request.payload[actionPath[1]]
@@ -170,17 +183,29 @@ module.exports = [
           filesArray = [filesArray]
         }
         if (filesArray.length > 15) {
-          state = {
-            ...state,
+          formSubmitted = {
+            ...formSubmitted,
             errorMessage: {
-              ...state.errorMessage,
+              ...formSubmitted.errorMessage,
               [actionPath[1]]: {
-                text: 'Uploaded files must be less than 15 files.'
+                html: 'Uploaded files must be less than 15 files.',
+                href: '#' + actionPath[1]
               }
             }
           }
-          request.yar.set('state', state)
-          return h.view(viewTemplate, state)
+          const errorsList = createErrorsSummaryList(
+            formSubmitted,
+            [
+              {
+                href: '#' + actionPath[1],
+                html: 'Uploaded files must be less than 15 files.'
+              }
+            ],
+            actionPath[1]
+          )
+          formSubmitted.errorSummaryList = errorsList
+          request.yar.set('formSubmitted', formSubmitted)
+          return h.view(viewTemplate, formSubmitted)
         }
         const newFilesArray = []
         const errorArray = []
@@ -193,39 +218,50 @@ module.exports = [
             )
             fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
           } else {
-            errorArray.push(fileCheckDetails.text)
+            errorArray.push({
+              html: fileCheckDetails.html,
+              href: '#' + actionPath[1]
+            })
           }
         }
         if (newFilesArray.length) {
-          state = state.multiForms[actionPath[1]]
+          formSubmitted = formSubmitted.multiForms[actionPath[1]]
             ? {
-                ...state,
+                ...formSubmitted,
                 multiForms: {
-                  ...state.multiForms,
+                  ...formSubmitted.multiForms,
                   [actionPath[1]]: [
-                    ...state.multiForms[actionPath[1]],
+                    ...formSubmitted.multiForms[actionPath[1]],
                     ...newFilesArray
                   ]
                 }
               }
             : {
-                ...state,
+                ...formSubmitted,
                 multiForms: {
-                  ...state.multiForms,
+                  ...formSubmitted.multiForms,
                   [actionPath[1]]: newFilesArray
                 }
               }
         }
-        const allFilesErrors = errorArray.join('<br/>')
-        state = {
-          ...state,
+        const allFilesErrors = errorArray
+          .map((item) => item.html)
+          .join('<br/>')
+        formSubmitted = {
+          ...formSubmitted,
           errorMessage: {
-            ...state.errorMessage,
-            [actionPath[1]]: allFilesErrors.length ? { html: allFilesErrors } : null
+            ...formSubmitted.errorMessage,
+            [actionPath[1]]: allFilesErrors.length
+              ? { html: allFilesErrors, href: '#' + actionPath[1] }
+              : null
           }
         }
-        request.yar.set('state', state)
-        return h.view(viewTemplate, state)
+        const errorsSummary = errorArray.length
+          ? createErrorsSummaryList(formSubmitted, errorArray, actionPath[1])
+          : createErrorsSummaryList(formSubmitted, null, actionPath[1])
+        formSubmitted.errorSummaryList = errorsSummary
+        request.yar.set('formSubmitted', formSubmitted)
+        return h.view(viewTemplate, formSubmitted)
       }
     }
   }
