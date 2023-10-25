@@ -4,7 +4,6 @@ const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
 const { fileCheck } = require('../utils/uploadHelperFunctions')
-
 function createModel (claimForm, multiForms) {
   return {
     multiForms: { ...multiForms },
@@ -20,7 +19,6 @@ function createModel (claimForm, multiForms) {
     backLink
   }
 }
-
 module.exports = [
   {
     method: 'GET',
@@ -96,7 +94,6 @@ module.exports = [
               fileCheckDetails.fileBuffer,
               fileCheckDetails.uploadedFileName
             )
-
             state = {
               ...state,
               claimForm: {
@@ -138,7 +135,6 @@ module.exports = [
           return h.view(viewTemplate, state).takeover()
         }
         const isDeleted = await deleteFile(fileName)
-
         if (isDeleted && actionPath[1] === 'claim') {
           state = {
             ...state,
@@ -151,7 +147,6 @@ module.exports = [
           const filteredArray = state.multiForms[actionPath[1]].filter(
             (item) => item.uploadedFileName !== fileName
           )
-
           state = {
             ...state,
             multiForms: { ...state.multiForms, [actionPath[1]]: filteredArray }
@@ -179,7 +174,9 @@ module.exports = [
             ...state,
             errorMessage: {
               ...state.errorMessage,
-              [actionPath[1]]: { text: 'Uploaded files must be less than 15 files.' }
+              [actionPath[1]]: {
+                text: 'Uploaded files must be less than 15 files.'
+              }
             }
           }
           request.yar.set('state', state)
@@ -199,40 +196,35 @@ module.exports = [
             errorArray.push(fileCheckDetails.text)
           }
         }
-
         if (newFilesArray.length) {
-          state = {
-            ...state,
-            multiForms: { ...state.multiForms, [actionPath[1]]: newFilesArray }
-          }
-          request.yar.set('state', state)
-        } else {
-          state = {
-            ...state,
-            multiForms: { ...state.multiForms, [actionPath[1]]: null }
-          }
-          request.yar.set('state', state)
+          state = state.multiForms[actionPath[1]]
+            ? {
+                ...state,
+                multiForms: {
+                  ...state.multiForms,
+                  [actionPath[1]]: [
+                    ...state.multiForms[actionPath[1]],
+                    ...newFilesArray
+                  ]
+                }
+              }
+            : {
+                ...state,
+                multiForms: {
+                  ...state.multiForms,
+                  [actionPath[1]]: newFilesArray
+                }
+              }
         }
-
-        if (errorArray.length) {
-          const allFilesErrors = errorArray.join('<br/>')
-          state = {
-            ...state,
-            errorMessage: {
-              ...state.errorMessage,
-              [actionPath[1]]: { html: allFilesErrors }
-            }
+        const allFilesErrors = errorArray.join('<br/>')
+        state = {
+          ...state,
+          errorMessage: {
+            ...state.errorMessage,
+            [actionPath[1]]: allFilesErrors.length ? { html: allFilesErrors } : null
           }
-        } else {
-          state = {
-            ...state,
-            errorMessage: {
-              ...state.errorMessage,
-              [actionPath[1]]: null
-            }
-          }
-          request.yar.set('state', state)
         }
+        request.yar.set('state', state)
         return h.view(viewTemplate, state)
       }
     }
