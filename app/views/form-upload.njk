@@ -70,26 +70,29 @@
     </h2>
     {% if claimForm %}
     <div class="govuk-grid-row">
-      <p class="govuk-grid-column-two-thirds">
+       <p class="govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+        File 1
+      </p>
+      <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
         {{ claimForm.fileName }},
         {{ claimForm.fileSize }}
       </p>
 
-      <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+      <form method="POST" action="{{ formActionPage }}" class="govuk-text-align-right govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0" enctype="multipart/form-data">
         {{
           govukButton({
             name: "action",
             value: "delete-claim",
-            text: "Delete file",
+            text: "Delete",
             classes:
-              "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
+              "govuk-link govuk-link--no-visited-state govuk-!-margin-bottom-0 govuk-!-margin-top-0"
           })
         }}
         {{
           govukFileUpload({
             id: "fileDelete",
             name: "fileDelete",
-            classes: "govuk-visually-hidden"
+            classes: "govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0"
           })
         }}
         {{
@@ -100,7 +103,7 @@
             },
             id: "fileName",
             name: "fileName",
-            classes: " govuk-visually-hidden",
+            classes: " govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0",
             value: claimForm.fileName
           })
         }}
@@ -146,8 +149,7 @@
         Proof items have been purchased
       </h3>
       <p class="govuk-body">For example, invoices</p>
-      {% if purchasedItemsErrorSummary.items.length %}
-      {% endif %}
+      
       <form action="{{ formActionPage }}" method="POST" enctype="multipart/form-data">
         {% set purchasedItemsUploadHtml %}
         {{
@@ -188,26 +190,31 @@
 
       {% if multiForms.purchased %}
       {% for file in multiForms.purchased %}
-      <p class="govuk-grid-column-two-thirds">
+      <hr/>
+      <div class="govuk-grid-row">
+       <p class="govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+        File {{ loop.index }}
+      </p>
+      <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
         {{ file.uploadedFileName }},
         {{ file.fileSizeFormatted }}
       </p>
 
-      <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+      <form method="POST" action="{{ formActionPage }}" class="govuk-text-align-right govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0" enctype="multipart/form-data">
         {{
                 govukButton({
                   name: "action",
                   value: "delete-purchased",
-                  text: "Delete file",
+                  text: "Delete",
                   classes:
-                    "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
+                    "govuk-link govuk-link--no-visited-state govuk-!-margin-bottom-0 govuk-!-margin-top-0"
                 })
               }}
         {{
                 govukFileUpload({
                   id: "fileDelete",
                   name: "fileDelete",
-                  classes: "govuk-visually-hidden"
+                  classes: "govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0"
                 })
               }}
         {{
@@ -223,6 +230,8 @@
                 })
               }}
       </form>
+      </div>
+     
       {% endfor %}
       {% endif %}
     </div>
@@ -273,26 +282,31 @@
       </form>
       {% if multiForms.paid %}
       {% for file in multiForms.paid %}
-      <p class="govuk-grid-column-two-thirds">
+      <hr/>
+      <div class="govuk-grid-row">
+       <p class="govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+        File {{ loop.index }}
+      </p>
+      <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
         {{ file.uploadedFileName }},
         {{ file.fileSizeFormatted }}
       </p>
 
-      <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+       <form method="POST" action="{{ formActionPage }}" class="govuk-text-align-right govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0" enctype="multipart/form-data">
         {{
                 govukButton({
                   name: "action",
                   value: "delete-paid",
-                  text: "Delete file",
+                  text: "Delete",
                   classes:
-                    "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
+                    "govuk-link govuk-link--no-visited-state govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-!-width-one-quarter "
                 })
               }}
         {{
                 govukFileUpload({
                   id: "fileDelete",
                   name: "fileDelete",
-                  classes: "govuk-visually-hidden"
+                  classes: "govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0"
                 })
               }}
         {{
@@ -303,7 +317,7 @@
                   },
                   id: "fileName",
                   name: "fileName",
-                  classes: " govuk-visually-hidden",
+                  classes: " govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0",
                   value: file.uploadedFileName
                 })
               }}
@@ -317,8 +331,6 @@
         Proof items are in place
       </h3>
       <p class="govuk-body">For example, photos and videos</p>
-      {% if inPlaceItemsErrorSummary.items.length %}
-      {% endif %}
       <form
         action="{{ formActionPage }}"
         method="POST"
@@ -361,26 +373,30 @@
       </form>
        {% if multiForms.inPlace %}
             {% for file in multiForms.inPlace %}
-              <p class="govuk-grid-column-two-thirds">
-                {{ file.uploadedFileName }},
-              {{ file.fileSizeFormatted }}
-              </p>
-
-              <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+             <hr/>
+      <div class="govuk-grid-row">
+       <p class="govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+        File {{ loop.index }}
+      </p>
+      <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+        {{ file.uploadedFileName }},
+        {{ file.fileSizeFormatted }}
+      </p>
+               <form method="POST" action="{{ formActionPage }}" class="govuk-text-align-right govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0" enctype="multipart/form-data">
                 {{
                 govukButton({
                   name: "action",
                   value: "delete-inPlace",
-                  text: "Delete file",
+                  text: "Delete",
                   classes:
-                    "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter "
+                    "govuk-link govuk-link--no-visited-state govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-!-width-one-quarter "
                 })
               }}
                 {{
                 govukFileUpload({
                   id: "fileDelete",
                   name: "fileDelete",
-                  classes: "govuk-visually-hidden"
+                  classes: "govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0"
                 })
               }}
                 {{
@@ -391,7 +407,7 @@
                   },
                   id: "fileName",
                   name: "fileName",
-                  classes: " govuk-visually-hidden",
+                  classes: " govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0",
                   value: file.uploadedFileName
                 })
               }}
@@ -447,26 +463,30 @@
       </form>
       {% if multiForms.conditions %}
             {% for file in multiForms.conditions %}
-              <p class="govuk-grid-column-two-thirds">
-                {{ file.uploadedFileName }},
-              {{ file.fileSizeFormatted }}
-              </p>
-
-              <form method="POST" action="{{ formActionPage }}" class="govuk-!-text-align-right" enctype="multipart/form-data">
+             <hr/>
+      <div class="govuk-grid-row">
+       <p class="govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+        File {{ loop.index }}
+      </p>
+      <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+        {{ file.uploadedFileName }},
+        {{ file.fileSizeFormatted }}
+      </p>
+               <form method="POST" action="{{ formActionPage }}" class="govuk-text-align-right govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0" enctype="multipart/form-data">
                 {{
                 govukButton({
                   name: "action",
                   value: "delete-conditions",
-                  text: "Delete file",
+                  text: "Delete",
                   classes:
-                    "govuk-link govuk-link--no-visited-state govuk-!-width-one-quarter"
+                    "govuk-link govuk-link--no-visited-state govuk-!-margin-bottom-0 govuk-!-margin-top-0 govuk-!-width-one-quarter"
                 })
               }}
                 {{
                 govukFileUpload({
                   id: "fileDelete",
                   name: "fileDelete",
-                  classes: "govuk-visually-hidden"
+                  classes: "govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0"
                 })
               }}
                 {{
@@ -477,7 +497,7 @@
                   },
                   id: "fileName",
                   name: "fileName",
-                  classes: " govuk-visually-hidden",
+                  classes: " govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0",
                   value: file.uploadedFileName
                 })
               }}
