@@ -112,6 +112,9 @@
         govukFileUpload({
           id: "claimForm",
           name: "claimForm",
+           attributes:{
+            accept:".doc, .docx, .xls, .xlsx"
+            },
           errorMessage: errorMessage.claim
         })
       }}
@@ -159,7 +162,8 @@
               text: "Upload files",
               classes: "govuk-label--m"
             },
-            attributes: { multiple: "" },
+            attributes: { multiple: "", accept:".doc,.docx,.xls,.xlsx,.pdf,.jpg,.jpeg,.png,.mpg,.mp4,.wmv,.mov"
+             },
             errorMessage:errorMessage.purchased
           })
         }}
@@ -181,7 +185,10 @@
               heading: { text: "Files added" },
               items: []
             },
-            uploadHtml: purchasedItemsUploadHtml
+            uploadHtml: purchasedItemsUploadHtml,
+            attributes:{
+              accept:".doc,.docx,.xls,.xlsx,.pdf,.jpg,.jpeg,.png,.mpg,.mp4,.wmv,.mov"
+            }
           })
         }}
       </form>
@@ -246,7 +253,7 @@
               text: "Upload files",
               classes: "govuk-label--m"
             },
-            attributes: { multiple: "" },
+            attributes: { multiple: "", accept:".doc,.docx,.xls,.xlsx,.pdf,.jpg,.jpeg,.png,.mpg,.mp4,.wmv,.mov" },
             errorMessage:errorMessage.paid
           })
         }}
@@ -334,7 +341,7 @@
               text: "Upload files",
               classes: "govuk-label--m"
             },
-            attributes: { multiple: "" },
+            attributes: { multiple: "",accept:".doc,.docx,.xls,.xlsx,.pdf,.jpg,.jpeg,.png,.mpg,.mp4,.wmv,.mov" },
             errorMessage:errorMessage.inPlace
           })
         }}
@@ -422,7 +429,7 @@
               text: "Upload files",
               classes: "govuk-label--m"
             },
-            attributes: { multiple: "" },
+            attributes: { multiple: "",accept:".doc,.docx,.xls,.xlsx,.pdf,.jpg,.jpeg,.png,.mpg,.mp4,.wmv,.mov" },
             errorMessage:errorMessage.conditions
           })
         }}
