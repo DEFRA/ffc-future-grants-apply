@@ -147,7 +147,7 @@ module.exports = [
           request.yar.set('formSubmitted', formSubmitted)
           return h.view(viewTemplate, formSubmitted).takeover()
         }
-        const isDeleted = await deleteFile(fileName,actionPath[1])
+        const isDeleted = await deleteFile(fileName, actionPath[1])
         if (isDeleted && actionPath[1] === 'claim') {
           formSubmitted = {
             ...formSubmitted,
@@ -210,7 +210,7 @@ module.exports = [
         const newFilesArray = []
         const errorArray = []
         for (const file of filesArray) {
-          const fileCheckDetails = fileCheck(file)
+          const fileCheckDetails = fileCheck(file, actionPath[1], formSubmitted)
           if (fileCheckDetails.isCheckPassed) {
             const fileUploaded = await uploadFile(
               fileCheckDetails.fileBuffer,
@@ -261,7 +261,6 @@ module.exports = [
           ? createErrorsSummaryList(formSubmitted, errorArray, actionPath[1])
           : createErrorsSummaryList(formSubmitted, null, actionPath[1])
         formSubmitted.errorSummaryList = errorsSummary
-        console.log(formSubmitted)
         request.yar.set('formSubmitted', formSubmitted)
         return h.view(viewTemplate, formSubmitted)
       }

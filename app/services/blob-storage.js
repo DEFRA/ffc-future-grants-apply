@@ -20,7 +20,7 @@ const blobContainerClient = blobServiceClient.getContainerClient(
   config.blobStorageContainerName
 )
 
-async function uploadFile (buffer, filename,prefix) {
+async function uploadFile (buffer, filename, prefix) {
   const fileNameWithPrefix = `${prefix}-${filename}`
   try {
     const blockBlobClient = blobContainerClient.getBlockBlobClient(fileNameWithPrefix)
@@ -44,8 +44,8 @@ async function checkFileExists (fileName) {
     throw error
   }
 }
-async function deleteFile (fileName,prefix) {
-  const newFileName=`${prefix}-${fileName}`
+async function deleteFile (fileName, prefix) {
+  const newFileName = `${prefix}-${fileName}`
   try {
     await blobContainerClient.getBlobClient(newFileName).delete()
     console.log(`Blob '${fileName}' was deleted successfully.`)
