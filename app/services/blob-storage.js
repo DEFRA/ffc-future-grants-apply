@@ -20,17 +20,16 @@ const blobContainerClient = blobServiceClient.getContainerClient(
   config.blobStorageContainerName
 )
 
-async function uploadFile (buffer, filename) {
-  const filenameWithUuid = filename
+async function uploadFile (buffer, filename, prefix) {
+  const fileNameWithPrefix = `${prefix}-${filename}`
   try {
-    // const uuid = uuidv4()
-    const blockBlobClient = blobContainerClient.getBlockBlobClient(filenameWithUuid)
+    const blockBlobClient = blobContainerClient.getBlockBlobClient(fileNameWithPrefix)
     await blockBlobClient.upload(buffer, buffer.byteLength)
     console.log('Blob was uploaded successfully')
-    return { fileName: filenameWithUuid, originalFileName: filename, isUploaded: true }
+    return { fileName: fileNameWithPrefix, originalFileName: filename, isUploaded: true }
   } catch (error) {
     console.log(error)
-    return { fileName: filenameWithUuid, originalFileName: filename, isUploaded: false }
+    return { fileName: fileNameWithPrefix, originalFileName: filename, isUploaded: false }
   }
 }
 async function checkFileExists (fileName) {
@@ -45,10 +44,10 @@ async function checkFileExists (fileName) {
     throw error
   }
 }
-async function deleteFile (fileName) {
-  console.log(fileName)
+async function deleteFile (fileName, prefix) {
+  const newFileName = `${prefix}-${fileName}`
   try {
-    await blobContainerClient.getBlobClient(fileName).delete()
+    await blobContainerClient.getBlobClient(newFileName).delete()
     console.log(`Blob '${fileName}' was deleted successfully.`)
     return true
   } catch (error) {

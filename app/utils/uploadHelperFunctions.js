@@ -42,7 +42,9 @@ function createErrorsSummaryList (formSubmitted, errorArray, actionPath) {
     .filter((item) => item !== undefined)
   return errorsSummary
 }
-function fileCheck (uploadedFile, inputName) {
+function fileCheck (uploadedFile, inputName, state) {
+  const fileNames = state.multiForms[`${inputName}`] && state.multiForms[`${inputName}`].map(item => item.fileName)
+
   const acceptableExtensions =
     inputName === 'claim'
       ? ['doc', 'docx', 'xls', 'xlsx']
@@ -62,6 +64,7 @@ function fileCheck (uploadedFile, inputName) {
         ]
 
   const uploadedFileName = uploadedFile.hapi.filename
+  const isFileExist = fileNames ? fileNames.includes(uploadedFileName) : false
   errorObject.fileName = uploadedFileName
   const fileExtension = uploadedFileName.split('.').pop()
   const isExtensionAllowed = acceptableExtensions.includes(fileExtension)
@@ -69,7 +72,6 @@ function fileCheck (uploadedFile, inputName) {
   const claimFormBuffer = uploadedFile._data
   const fileSizeBytes = claimFormBuffer.byteLength
   const isAllowedSize = allowedFileSize >= Number(fileSizeBytes)
-
   if (!uploadedFileName || !uploadedFileName.length) {
     return (errorObject = {
       ...errorObject,
@@ -78,8 +80,13 @@ function fileCheck (uploadedFile, inputName) {
       html: 'No file selected. Select a file to upload.'
     })
   }
-
-  if (!isExtensionAllowed) {
+  if (isFileExist) {
+    errorObject = {
+      ...errorObject,
+      isCheckPassed: false,
+      html: `${errorObject.fileName} is already uploaded`
+    }
+  } else if (!isExtensionAllowed) {
     errorObject = {
       ...errorObject,
       isCheckPassed: false,
