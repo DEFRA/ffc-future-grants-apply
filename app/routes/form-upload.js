@@ -1,5 +1,5 @@
 const { urlPrefix } = require('../config/index')
-const { uploadFile, deleteFile } = require('../services/blob-storage') // Import your uploadFile function
+const { uploadFile, deleteFile } = require('../services/blob-storage')
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
