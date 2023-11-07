@@ -16,8 +16,8 @@ if (config.useBlobStorageConnectionString) {
 const blobContainerClient = blobServiceClient.getContainerClient(
   config.blobStorageContainerName
 )
-async function uploadFile (buffer, filename) {
-  const filenameWithUuid = filename
+async function uploadFile (buffer, filename, prefix) {
+  const fileNameWithPrefix = `${prefix}-${filename}`
   const chunkSize = 0.25 * 1024 * 1024
   const totalBytes = buffer.byteLength
   let uploadedBytes = 0
@@ -27,7 +27,7 @@ async function uploadFile (buffer, filename) {
     return Number(progress.toFixed(2).split('.')[0])
   }
   try {
-    const blockBlobClient = blobContainerClient.getBlockBlobClient(filenameWithUuid)
+    const blockBlobClient = blobContainerClient.getBlockBlobClient(fileNameWithPrefix)
     for (let offset = 0; offset < buffer.byteLength; offset += chunkSize) {
       const chunk = buffer.slice(offset, offset + chunkSize)
       const readableStream = new stream.Readable({
@@ -48,10 +48,10 @@ async function uploadFile (buffer, filename) {
       )
     }
     console.log('Blob was uploaded successfully')
-    return { fileName: filenameWithUuid, originalFileName: filename, isUploaded: true }
+    return { fileName: fileNameWithPrefix, originalFileName: filename, isUploaded: true }
   } catch (error) {
     console.log(error)
-    return { fileName: filenameWithUuid, originalFileName: filename, isUploaded: false }
+    return { fileName: fileNameWithPrefix, originalFileName: filename, isUploaded: false }
   }
 }
 async function checkFileExists (fileName) {
@@ -66,9 +66,10 @@ async function checkFileExists (fileName) {
     throw error
   }
 }
-async function deleteFile (fileName) {
+async function deleteFile (fileName, prefix) {
+  const newFileName = `${prefix}-${fileName}`
   try {
-    await blobContainerClient.getBlobClient(fileName).delete()
+    await blobContainerClient.getBlobClient(newFileName).delete()
     console.log(`Blob '${fileName}' was deleted successfully.`)
     return true
   } catch (error) {
