@@ -82,7 +82,8 @@ module.exports = [
       if (actionPath[0] === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
-          const fileCheckDetails = fileCheck(claimFormFile, 'claim')
+          console.log(claimFormFile)
+          const fileCheckDetails = fileCheck(claimFormFile, 'claim', formSubmitted)
           if (!fileCheckDetails.isCheckPassed) {
             formSubmitted = {
               ...formSubmitted,
@@ -103,14 +104,15 @@ module.exports = [
           } else {
             const fileUploaded = await uploadFile(
               fileCheckDetails.fileBuffer,
-              fileCheckDetails.uploadedFileName
+              fileCheckDetails.uploadedFileName,
+              'claim'
             )
+            console.log(fileUploaded)
             formSubmitted = {
               ...formSubmitted,
               claimForm: {
-                originalFileName: fileUploaded.originalFileName,
                 fileSize: fileCheckDetails.fileSizeFormatted,
-                fileName: fileUploaded.fileName
+                fileName: fileUploaded.originalFileName
               },
               errorMessage: {
                 ...formSubmitted.errorMessage,
@@ -147,7 +149,7 @@ module.exports = [
           request.yar.set('formSubmitted', formSubmitted)
           return h.view(viewTemplate, formSubmitted).takeover()
         }
-        const isDeleted = await deleteFile(fileName)
+        const isDeleted = await deleteFile(fileName, actionPath[1])
         if (isDeleted && actionPath[1] === 'claim') {
           formSubmitted = {
             ...formSubmitted,
@@ -210,11 +212,12 @@ module.exports = [
         const newFilesArray = []
         const errorArray = []
         for (const file of filesArray) {
-          const fileCheckDetails = fileCheck(file)
+          const fileCheckDetails = fileCheck(file, actionPath[1], formSubmitted)
           if (fileCheckDetails.isCheckPassed) {
             const fileUploaded = await uploadFile(
               fileCheckDetails.fileBuffer,
-              fileCheckDetails.uploadedFileName
+              fileCheckDetails.uploadedFileName,
+              actionPath[1]
             )
             fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
           } else {
