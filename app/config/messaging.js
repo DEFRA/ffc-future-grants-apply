@@ -14,6 +14,10 @@ const mqSchema = Joi.object({
     address: process.env.APPLICATIONREQUEST_QUEUE_ADDRESS,
     type: 'queue'
   },
+  fileStoreQueue: {
+    address: process.env.FILE_STORE_QUEUE_ADDRESS,
+    type: 'queue'
+  },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
   applicationResponseQueue: {
     address: process.env.APPLICATIONRESPONSE_QUEUE_ADDRESS,
@@ -41,6 +45,10 @@ const mqConfig = {
   },
   applicationRequestQueue: {
     address: process.env.APPLICATIONREQUEST_QUEUE_ADDRESS,
+    type: 'queue'
+  },
+  fileStoreQueue: {
+    address: process.env.FILE_STORE_QUEUE_ADDRESS,
     type: 'queue'
   },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
