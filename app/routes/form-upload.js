@@ -1,5 +1,5 @@
 const { urlPrefix } = require('../config/index')
-const { uploadFile, deleteFile } = require('../services/blob-storage') // Import your uploadFile function
+const { uploadFile, deleteFile } = require('../services/blob-storage')
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
@@ -82,7 +82,8 @@ module.exports = [
       if (actionPath[0] === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
-          const fileCheckDetails = fileCheck(claimFormFile, 'claim')
+          console.log(claimFormFile)
+          const fileCheckDetails = fileCheck(claimFormFile, 'claim', formSubmitted)
           if (!fileCheckDetails.isCheckPassed) {
             formSubmitted = {
               ...formSubmitted,
@@ -106,6 +107,7 @@ module.exports = [
               fileCheckDetails.uploadedFileName,
               'claim'
             )
+            console.log(fileUploaded)
             formSubmitted = {
               ...formSubmitted,
               claimForm: {

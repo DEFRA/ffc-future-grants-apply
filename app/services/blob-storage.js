@@ -1,10 +1,8 @@
 const { DefaultAzureCredential } = require('@azure/identity')
 const { BlobServiceClient } = require('@azure/storage-blob')
-// const { v4: uuidv4 } = require('uuid')
-
+const stream = require('stream')
 const config = require('../config/blob-storage')
 let blobServiceClient
-
 if (config.useBlobStorageConnectionString) {
   console.log('Using connection string for BlobServiceClient', config.blobStorageConnectionString)
   blobServiceClient = BlobServiceClient.fromConnectionString(
@@ -15,16 +13,40 @@ if (config.useBlobStorageConnectionString) {
   const uri = `https://${config.blobStorageAccountName}.blob.core.windows.net`
   blobServiceClient = new BlobServiceClient(uri, new DefaultAzureCredential())
 }
-
 const blobContainerClient = blobServiceClient.getContainerClient(
   config.blobStorageContainerName
 )
-
 async function uploadFile (buffer, filename, prefix) {
   const fileNameWithPrefix = `${prefix}-${filename}`
+  const chunkSize = 0.25 * 1024 * 1024
+  const totalBytes = buffer.byteLength
+  let uploadedBytes = 0
+  const onChunkProgress = (chunkSize) => {
+    uploadedBytes += chunkSize
+    const progress = (uploadedBytes / totalBytes) * 100
+    return Number(progress.toFixed(2).split('.')[0])
+  }
   try {
     const blockBlobClient = blobContainerClient.getBlockBlobClient(fileNameWithPrefix)
-    await blockBlobClient.upload(buffer, buffer.byteLength)
+    for (let offset = 0; offset < buffer.byteLength; offset += chunkSize) {
+      const chunk = buffer.slice(offset, offset + chunkSize)
+      const readableStream = new stream.Readable({
+        read () {
+          this.push(chunk)
+          this.push(null)
+        }
+      })
+      await blockBlobClient.uploadStream(
+        readableStream,
+        chunk.byteLength,
+        undefined,
+        {
+          onProgress: (ev) => {
+            onChunkProgress(ev.loadedBytes)
+          }
+        }
+      )
+    }
     console.log('Blob was uploaded successfully')
     return { fileName: fileNameWithPrefix, originalFileName: filename, isUploaded: true }
   } catch (error) {
