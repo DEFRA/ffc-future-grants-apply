@@ -1,4 +1,5 @@
 const { urlPrefix } = require('../config/index')
+const { sendMessage } = require('../messaging')
 const { uploadFile, deleteFile } = require('../services/blob-storage')
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
@@ -82,7 +83,6 @@ module.exports = [
       if (actionPath[0] === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
-          console.log(claimFormFile)
           const fileCheckDetails = fileCheck(claimFormFile, 'claim', formSubmitted)
           if (!fileCheckDetails.isCheckPassed) {
             formSubmitted = {
@@ -107,7 +107,9 @@ module.exports = [
               fileCheckDetails.uploadedFileName,
               'claim'
             )
-            console.log(fileUploaded)
+            if(fileUploaded.isUploaded){
+              sendMessage({name:fileUploaded.fileName},'claim','config options...',{adress:'asd'})
+            }
             formSubmitted = {
               ...formSubmitted,
               claimForm: {
