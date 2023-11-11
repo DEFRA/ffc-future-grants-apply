@@ -41,7 +41,7 @@ const mqConfig = {
     username: process.env.MESSAGE_QUEUE_USER,
     password: process.env.MESSAGE_QUEUE_PASSWORD,
     useCredentialChain: process.env.NODE_ENV === 'production',
-    appInsights: process.env.NODE_ENV === 'production' ? require('applicationinsights') : undefined
+    appInsights: process.env.NODE_ENV === 'production' ? require('applicationinsights') : undefined,
   },
   applicationRequestQueue: {
     address: process.env.APPLICATIONREQUEST_QUEUE_ADDRESS,
@@ -67,11 +67,9 @@ const mqConfig = {
     messageType: `${msgTypePrefix}.register.your.interest.request`
   }
 }
-
 const mqResult = mqSchema.validate(mqConfig, {
   abortEarly: false
 })
-
 if (mqResult.error) {
   throw new Error(`The message queue config is invalid. ${mqResult.error.message}`)
 }
@@ -82,6 +80,16 @@ const eventQueue = { ...mqResult.value.messageQueue, ...mqResult.value.eventQueu
 const fetchApplicationRequestQueue = { ...mqResult.value.messageQueue, ...mqResult.value.fetchApplicationRequestQueue }
 const applicationRequestMsgType = mqResult.value.applicationRequestMsgType
 const registerYourInterestRequestQueue = { ...mqResult.value.messageQueue, ...mqResult.value.registerYourInterestRequestQueue }
+
+console.log(
+  'applicationRequestQueue, applicationResponseQueue, fetchApplicationRequestQueue, applicationRequestMsgType, registerYourInterestRequestQueue'
+,
+  applicationRequestQueue,
+applicationResponseQueue,
+fetchApplicationRequestQueue,
+applicationRequestMsgType,
+registerYourInterestRequestQueue
+)
 
 module.exports = {
   applicationRequestQueue,

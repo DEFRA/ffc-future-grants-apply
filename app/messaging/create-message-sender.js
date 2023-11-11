@@ -6,8 +6,9 @@ const createMessageSender = (config) => {
   if (cachedSenders[config.address]) {
     return cachedSenders[config.address]
   }
-
   const sender = new MessageSender(config)
+  console.log('createMessage Sender====>\n',sender);
+
   cachedSenders[config.address] = sender
 
   return sender
