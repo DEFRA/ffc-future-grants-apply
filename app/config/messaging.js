@@ -81,16 +81,6 @@ const fetchApplicationRequestQueue = { ...mqResult.value.messageQueue, ...mqResu
 const applicationRequestMsgType = mqResult.value.applicationRequestMsgType
 const registerYourInterestRequestQueue = { ...mqResult.value.messageQueue, ...mqResult.value.registerYourInterestRequestQueue }
 
-console.log(
-  'applicationRequestQueue, applicationResponseQueue, fetchApplicationRequestQueue, applicationRequestMsgType, registerYourInterestRequestQueue'
-,
-  applicationRequestQueue,
-applicationResponseQueue,
-fetchApplicationRequestQueue,
-applicationRequestMsgType,
-registerYourInterestRequestQueue
-)
-
 module.exports = {
   applicationRequestQueue,
   applicationResponseQueue,
