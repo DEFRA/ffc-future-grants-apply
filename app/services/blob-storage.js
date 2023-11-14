@@ -2,6 +2,8 @@ const { DefaultAzureCredential } = require('@azure/identity')
 const { BlobServiceClient } = require('@azure/storage-blob')
 const stream = require('stream')
 const config = require('../config/blob-storage')
+const { sendMessage } = require('../messaging')
+const { applicationRequestMsgType, applicationRequestQueue } = require('../config/messaging')
 let blobServiceClient
 if (config.useBlobStorageConnectionString) {
   console.log('Using connection string for BlobServiceClient', config.blobStorageConnectionString)
@@ -48,6 +50,7 @@ async function uploadFile (buffer, filename, prefix) {
       )
     }
     console.log('Blob was uploaded successfully')
+    await sendMessage({ name: fileNameWithPrefix }, applicationRequestMsgType, applicationRequestQueue)
     return { fileName: fileNameWithPrefix, originalFileName: filename, isUploaded: true }
   } catch (error) {
     console.log(error)
@@ -71,6 +74,7 @@ async function deleteFile (fileName, prefix) {
   try {
     await blobContainerClient.getBlobClient(newFileName).delete()
     console.log(`Blob '${fileName}' was deleted successfully.`)
+    await sendMessage({ name: newFileName }, applicationRequestMsgType, applicationRequestQueue)
     return true
   } catch (error) {
     console.error(`Error deleting blob '${fileName}':`, error)

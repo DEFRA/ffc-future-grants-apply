@@ -108,9 +108,6 @@ module.exports = [
               fileCheckDetails.uploadedFileName,
               'claim'
             )
-            if (fileUploaded.isUploaded) {
-              await sendMessage({ name: 'test' }, applicationRequestMsgType, applicationRequestQueue, { test: 'test' })
-            }
             formSubmitted = {
               ...formSubmitted,
               claimForm: {
