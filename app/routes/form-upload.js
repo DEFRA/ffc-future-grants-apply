@@ -1,5 +1,5 @@
 const { urlPrefix } = require('../config/index')
-const { applicationRequestMsgType,applicationRequestQueue } = require('../config/messaging')
+const { applicationRequestMsgType, applicationRequestQueue } = require('../config/messaging')
 const { sendMessage } = require('../messaging')
 const { uploadFile, deleteFile } = require('../services/blob-storage')
 const viewTemplate = 'form-upload'
@@ -108,9 +108,8 @@ module.exports = [
               fileCheckDetails.uploadedFileName,
               'claim'
             )
-            if(fileUploaded.isUploaded){
-             await sendMessage({ name:"test" }, applicationRequestMsgType, applicationRequestQueue, { test:'test' })
-            
+            if (fileUploaded.isUploaded) {
+              await sendMessage({ name: 'test' }, applicationRequestMsgType, applicationRequestQueue, { test: 'test' })
             }
             formSubmitted = {
               ...formSubmitted,

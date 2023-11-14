@@ -6,11 +6,10 @@ const sendMessage = async (body, type, config, options) => {
   const sender = createMessageSender(config)
   try {
     await sender.sendMessage(message)
-   console.log('successfully sent');
+    console.log('successfully sent')
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
- 
 }
 
 module.exports = sendMessage
