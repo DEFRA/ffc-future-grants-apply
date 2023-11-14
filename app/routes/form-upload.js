@@ -1,6 +1,4 @@
 const { urlPrefix } = require('../config/index')
-const { applicationRequestMsgType, applicationRequestQueue } = require('../config/messaging')
-const { sendMessage } = require('../messaging')
 const { uploadFile, deleteFile } = require('../services/blob-storage')
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
