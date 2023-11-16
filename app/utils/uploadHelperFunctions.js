@@ -107,6 +107,7 @@ function fileCheck (uploadedFile, inputName, state) {
       ...errorObject,
       isCheckPassed: true,
       fileBuffer: claimFormBuffer,
+      fileExtension,
       fileSizeFormatted,
       uploadedFileName
     }

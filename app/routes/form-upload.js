@@ -1,5 +1,7 @@
 const { urlPrefix } = require('../config/index')
 const { uploadFile, deleteFile } = require('../services/blob-storage')
+const { getToken, sendToAvScan} = require('../utils/AvHelperFunctions');
+const { v4: uuidv4 } = require('uuid')
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
@@ -101,6 +103,21 @@ module.exports = [
             request.yar.set('formSubmitted', formSubmitted)
             return h.view(viewTemplate, formSubmitted).takeover()
           } else {
+            const {token} = await getToken()
+            const key = uuidv4()
+            if (token) {
+              const fileBlob = new Blob([claimFormFile._data], {
+                type: claimFormFile.hapi.headers['content-type']
+              });
+              const result = await sendToAvScan(token, 'claim', fileBlob, {
+                key,
+                collection: 'claim',
+                service: 'fgp',
+                extension: fileCheckDetails.fileExtension,
+                fileName: fileCheckDetails.uploadedFileName
+              }, key)
+              console.log(result);
+            }
             const fileUploaded = await uploadFile(
               fileCheckDetails.fileBuffer,
               fileCheckDetails.uploadedFileName,
