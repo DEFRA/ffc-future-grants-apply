@@ -14,6 +14,10 @@ const mqSchema = Joi.object({
     address: process.env.APPLICATIONREQUEST_QUEUE_ADDRESS,
     type: 'queue'
   },
+  fileStoreQueue: {
+    address: process.env.FILE_STORE_QUEUE_ADDRESS,
+    type: 'queue'
+  },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
   applicationResponseQueue: {
     address: process.env.APPLICATIONRESPONSE_QUEUE_ADDRESS,
@@ -43,6 +47,10 @@ const mqConfig = {
     address: process.env.APPLICATIONREQUEST_QUEUE_ADDRESS,
     type: 'queue'
   },
+  fileStoreQueue: {
+    address: process.env.FILE_STORE_QUEUE_ADDRESS,
+    type: 'queue'
+  },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
   applicationResponseQueue: {
     address: process.env.APPLICATIONRESPONSE_QUEUE_ADDRESS,
@@ -59,11 +67,9 @@ const mqConfig = {
     messageType: `${msgTypePrefix}.register.your.interest.request`
   }
 }
-
 const mqResult = mqSchema.validate(mqConfig, {
   abortEarly: false
 })
-
 if (mqResult.error) {
   throw new Error(`The message queue config is invalid. ${mqResult.error.message}`)
 }

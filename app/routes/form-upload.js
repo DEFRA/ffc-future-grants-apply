@@ -82,7 +82,6 @@ module.exports = [
       if (actionPath[0] === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
-          console.log(claimFormFile)
           const fileCheckDetails = fileCheck(claimFormFile, 'claim', formSubmitted)
           if (!fileCheckDetails.isCheckPassed) {
             formSubmitted = {
@@ -107,7 +106,6 @@ module.exports = [
               fileCheckDetails.uploadedFileName,
               'claim'
             )
-            console.log(fileUploaded)
             formSubmitted = {
               ...formSubmitted,
               claimForm: {
