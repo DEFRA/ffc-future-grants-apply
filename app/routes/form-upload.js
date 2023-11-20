@@ -1,6 +1,6 @@
 const { urlPrefix } = require('../config/index')
 const { uploadFile, deleteFile } = require('../services/blob-storage')
-const { getToken, sendToAvScan} = require('../utils/AvHelperFunctions');
+const { getToken, sendToAvScan, getScanResult } = require('../utils/AvHelperFunctions')
 const { v4: uuidv4 } = require('uuid')
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
@@ -103,41 +103,109 @@ module.exports = [
             request.yar.set('formSubmitted', formSubmitted)
             return h.view(viewTemplate, formSubmitted).takeover()
           } else {
-            const {token} = await getToken()
+            const { token } = await getToken()
+            const accessToken = `${token.token_type} ${token.access_token}`
+
             const key = uuidv4()
             if (token) {
               const fileBlob = new Blob([claimFormFile._data], {
                 type: claimFormFile.hapi.headers['content-type']
-              });
-              const result = await sendToAvScan(token, 'claim', fileBlob, {
-                key,
-                collection: 'claim',
-                service: 'fgp',
-                extension: fileCheckDetails.fileExtension,
-                fileName: fileCheckDetails.uploadedFileName
-              }, key)
-              console.log(result);
-            }
-            const fileUploaded = await uploadFile(
-              fileCheckDetails.fileBuffer,
-              fileCheckDetails.uploadedFileName,
-              'claim'
-            )
-            formSubmitted = {
-              ...formSubmitted,
-              claimForm: {
-                fileSize: fileCheckDetails.fileSizeFormatted,
-                fileName: fileUploaded.originalFileName
-              },
-              errorMessage: {
-                ...formSubmitted.errorMessage,
-                claim: null
+              })
+              const result = await sendToAvScan(
+                accessToken,
+                'claim',
+                fileBlob,
+                {
+                  key,
+                  collection: 'claim',
+                  service: 'fgp',
+                  extension: fileCheckDetails.fileExtension,
+                  fileName: fileCheckDetails.uploadedFileName
+                },
+                key
+              )
+
+              if (result === 204) {
+                console.log('File successfully sent!')
+                let counter = -1
+
+                const checkingResponse = async () => {
+                  counter += 1
+                  console.log('counter===> ', counter)
+                  try {
+                    const scannedResult = await getScanResult(
+                      accessToken,
+                      'claim',
+                      key
+                    )
+                    console.log('SCANNED RESULT=======>\n', scannedResult)
+
+                    if (counter > 6) {
+                      console.log('time out')
+                      counter = -1
+                      const errorsList = createErrorsSummaryList(
+                        formSubmitted,
+                        [
+                          {
+                            html: 'Request timeout! File cannot be uploaded due to a server error',
+                            href: '#claimForm'
+                          }
+                        ],
+                        'claim'
+                      )
+                      formSubmitted.errorSummaryList = errorsList
+                      request.yar.set('formSubmitted', formSubmitted)
+                      return scannedResult
+                    }
+
+                    if (scannedResult.isScanned && scannedResult.isSafe) {
+                      console.log('scanned successfully!!!!!!')
+                      counter = -1
+                      const fileUploaded = await uploadFile(
+                        fileCheckDetails.fileBuffer,
+                        fileCheckDetails.uploadedFileName,
+                        'claim'
+                      )
+
+                      formSubmitted = {
+                        ...formSubmitted,
+                        claimForm: {
+                          fileSize: fileCheckDetails.fileSizeFormatted,
+                          fileName: fileUploaded.originalFileName
+                        },
+                        errorMessage: {
+                          ...formSubmitted.errorMessage,
+                          claim: null
+                        }
+                      }
+
+                      const errorsList = createErrorsSummaryList(
+                        formSubmitted,
+                        null,
+                        'claim'
+                      )
+                      formSubmitted.errorSummaryList = errorsList
+                      request.yar.set('formSubmitted', formSubmitted)
+                      return scannedResult
+                    } else {
+                      return scannedResult
+                    }
+                  } catch (error) {
+                    console.error('An error occurred:', error)
+                    counter = -1
+                  }
+                }
+                return new Promise((resolve) => {
+                  const intervalResult = setInterval(async () => {
+                    const check = await checkingResponse()
+                    if (check.isSafe && check.isScanned) {
+                      clearInterval(intervalResult)
+                      resolve(h.view(viewTemplate, formSubmitted))
+                    }
+                  }, 5000)
+                })
               }
             }
-            const errorsList = createErrorsSummaryList(formSubmitted, null, 'claim')
-            formSubmitted.errorSummaryList = errorsList
-            request.yar.set('formSubmitted', formSubmitted)
-            return h.view(viewTemplate, formSubmitted)
           }
         } catch (error) {
           return h
