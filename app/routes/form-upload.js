@@ -129,7 +129,7 @@ module.exports = [
                 console.log('File successfully sent!')
                 let counter = -1
 
-                const checkingResponse = async () => {
+                const checkingAvGetResponse = async () => {
                   counter += 1
                   console.log('counter===> ', counter)
                   try {
@@ -195,9 +195,10 @@ module.exports = [
                     counter = -1
                   }
                 }
+                
                 return new Promise((resolve) => {
                   const intervalResult = setInterval(async () => {
-                    const check = await checkingResponse()
+                    const check = await checkingAvGetResponse()
                     if (check.isSafe && check.isScanned) {
                       clearInterval(intervalResult)
                       resolve(h.view(viewTemplate, formSubmitted))
@@ -294,16 +295,24 @@ module.exports = [
         }
         const newFilesArray = []
         const errorArray = []
+
+
         for (const file of filesArray) {
           const fileCheckDetails = fileCheck(file, actionPath[1], formSubmitted)
           if (fileCheckDetails.isCheckPassed) {
+
             const fileUploaded = await uploadFile(
               fileCheckDetails.fileBuffer,
               fileCheckDetails.uploadedFileName,
               actionPath[1]
             )
             fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
-          } else {
+          }
+          
+          
+          
+          
+          else {
             errorArray.push({
               html: fileCheckDetails.html,
               href: '#' + actionPath[1]
