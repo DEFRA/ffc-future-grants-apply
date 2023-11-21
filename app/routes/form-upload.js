@@ -1,6 +1,6 @@
 const { urlPrefix } = require('../config/index')
 const { uploadFile, deleteFile } = require('../services/blob-storage')
-const { getToken, sendToAvScan, getScanResult } = require('../utils/AvHelperFunctions')
+const { getToken, sendToAvScan, getScanResult, checkingSingleAvGetResponse } = require('../utils/AvHelperFunctions')
 const { v4: uuidv4 } = require('uuid')
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
@@ -104,7 +104,6 @@ module.exports = [
             return h.view(viewTemplate, formSubmitted).takeover()
           } else {
             const { token } = await getToken()
-            const accessToken = `${token.token_type} ${token.access_token}`
 
             const key = uuidv4()
             if (token) {
@@ -112,7 +111,7 @@ module.exports = [
                 type: claimFormFile.hapi.headers['content-type']
               })
               const result = await sendToAvScan(
-                accessToken,
+                token,
                 'claim',
                 fileBlob,
                 {
@@ -127,84 +126,9 @@ module.exports = [
 
               if (result === 204) {
                 console.log('File successfully sent!')
-                let counter = -1
-
-                const checkingAvGetResponse = async () => {
-                  counter += 1
-                  console.log('counter===> ', counter)
-                  try {
-                    const scannedResult = await getScanResult(
-                      accessToken,
-                      'claim',
-                      key
-                    )
-                    console.log('SCANNED RESULT=======>\n', scannedResult)
-
-                    if (counter > 6) {
-                      console.log('time out')
-                      counter = -1
-                      const errorsList = createErrorsSummaryList(
-                        formSubmitted,
-                        [
-                          {
-                            html: 'Request timeout! File cannot be uploaded due to a server error',
-                            href: '#claimForm'
-                          }
-                        ],
-                        'claim'
-                      )
-                      formSubmitted.errorSummaryList = errorsList
-                      request.yar.set('formSubmitted', formSubmitted)
-                      return scannedResult
-                    }
-
-                    if (scannedResult.isScanned && scannedResult.isSafe) {
-                      console.log('scanned successfully!!!!!!')
-                      counter = -1
-                      const fileUploaded = await uploadFile(
-                        fileCheckDetails.fileBuffer,
-                        fileCheckDetails.uploadedFileName,
-                        'claim'
-                      )
-
-                      formSubmitted = {
-                        ...formSubmitted,
-                        claimForm: {
-                          fileSize: fileCheckDetails.fileSizeFormatted,
-                          fileName: fileUploaded.originalFileName
-                        },
-                        errorMessage: {
-                          ...formSubmitted.errorMessage,
-                          claim: null
-                        }
-                      }
-
-                      const errorsList = createErrorsSummaryList(
-                        formSubmitted,
-                        null,
-                        'claim'
-                      )
-                      formSubmitted.errorSummaryList = errorsList
-                      request.yar.set('formSubmitted', formSubmitted)
-                      return scannedResult
-                    } else {
-                      return scannedResult
-                    }
-                  } catch (error) {
-                    console.error('An error occurred:', error)
-                    counter = -1
-                  }
-                }
                 
-                return new Promise((resolve) => {
-                  const intervalResult = setInterval(async () => {
-                    const check = await checkingAvGetResponse()
-                    if (check.isSafe && check.isScanned) {
-                      clearInterval(intervalResult)
-                      resolve(h.view(viewTemplate, formSubmitted))
-                    }
-                  }, 5000)
-                })
+                return await checkingSingleAvGetResponse(token, 'claim', key, request, h, formSubmitted, fileCheckDetails)
+                
               }
             }
           }
@@ -295,68 +219,99 @@ module.exports = [
         }
         const newFilesArray = []
         const errorArray = []
-
-
-        for (const file of filesArray) {
-          const fileCheckDetails = fileCheck(file, actionPath[1], formSubmitted)
-          if (fileCheckDetails.isCheckPassed) {
-
-            const fileUploaded = await uploadFile(
-              fileCheckDetails.fileBuffer,
-              fileCheckDetails.uploadedFileName,
-              actionPath[1]
-            )
-            fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
+        const { token } = await getToken()
+    
+        if (token) {
+          const filesToScan = []
+          for (const file of filesArray) {
+            const fileCheckDetails = fileCheck(file, actionPath[1], formSubmitted)
+            if (fileCheckDetails.isCheckPassed) {
+              const key = uuidv4()
+              const fileBlob = new Blob([file._data], {
+                type: file.hapi.headers['content-type']
+              })
+              const result = await sendToAvScan(
+                token,
+                actionPath[1],
+                fileBlob,
+                {
+                  key,
+                  collection: actionPath[1],
+                  service: 'fgp',
+                  extension: fileCheckDetails.fileExtension,
+                  fileName: fileCheckDetails.uploadedFileName
+                },
+                key
+              )
+              console.log("send file status code====> ", result)
+              const fileUploaded = await uploadFile(
+                fileCheckDetails.fileBuffer,
+                fileCheckDetails.uploadedFileName,
+                actionPath[1]
+              )
+              fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
+            }
+            
+            
+            
+       
+            else {
+              errorArray.push({
+                html: fileCheckDetails.html,
+                href: '#' + actionPath[1]
+              })
+            }
           }
-          
-          
-          
-          
-          else {
-            errorArray.push({
-              html: fileCheckDetails.html,
-              href: '#' + actionPath[1]
-            })
-          }
-        }
-        if (newFilesArray.length) {
-          formSubmitted = formSubmitted.multiForms[actionPath[1]]
-            ? {
-                ...formSubmitted,
-                multiForms: {
-                  ...formSubmitted.multiForms,
-                  [actionPath[1]]: [
-                    ...formSubmitted.multiForms[actionPath[1]],
-                    ...newFilesArray
-                  ]
+          if (newFilesArray.length) {
+            formSubmitted = formSubmitted.multiForms[actionPath[1]]
+              ? {
+                  ...formSubmitted,
+                  multiForms: {
+                    ...formSubmitted.multiForms,
+                    [actionPath[1]]: [
+                      ...formSubmitted.multiForms[actionPath[1]],
+                      ...newFilesArray
+                    ]
+                  }
                 }
-              }
-            : {
-                ...formSubmitted,
-                multiForms: {
-                  ...formSubmitted.multiForms,
-                  [actionPath[1]]: newFilesArray
+              : {
+                  ...formSubmitted,
+                  multiForms: {
+                    ...formSubmitted.multiForms,
+                    [actionPath[1]]: newFilesArray
+                  }
                 }
-              }
-        }
-        const allFilesErrors = errorArray
-          .map((item) => item.html)
-          .join('<br/>')
-        formSubmitted = {
-          ...formSubmitted,
-          errorMessage: {
-            ...formSubmitted.errorMessage,
-            [actionPath[1]]: allFilesErrors.length
-              ? { html: allFilesErrors, href: '#' + actionPath[1] }
-              : null
           }
+  
+  
+  
+  
+  
+          const allFilesErrors = errorArray
+            .map((item) => item.html)
+            .join('<br/>')
+          formSubmitted = {
+            ...formSubmitted,
+            errorMessage: {
+              ...formSubmitted.errorMessage,
+              [actionPath[1]]: allFilesErrors.length
+                ? { html: allFilesErrors, href: '#' + actionPath[1] }
+                : null
+            }
+          }
+          const errorsSummary = errorArray.length
+            ? createErrorsSummaryList(formSubmitted, errorArray, actionPath[1])
+            : createErrorsSummaryList(formSubmitted, null, actionPath[1])
+          formSubmitted.errorSummaryList = errorsSummary
+          request.yar.set('formSubmitted', formSubmitted)
+  
+  
+  
+  
+  
+          return h.view(viewTemplate, formSubmitted)
         }
-        const errorsSummary = errorArray.length
-          ? createErrorsSummaryList(formSubmitted, errorArray, actionPath[1])
-          : createErrorsSummaryList(formSubmitted, null, actionPath[1])
-        formSubmitted.errorSummaryList = errorsSummary
-        request.yar.set('formSubmitted', formSubmitted)
-        return h.view(viewTemplate, formSubmitted)
+       
       }
     }
   }
