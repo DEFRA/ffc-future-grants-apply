@@ -47,7 +47,7 @@ function fileCheck (uploadedFile, inputName, state) {
 
   const acceptableExtensions =
     inputName === 'claim'
-      ? ['doc', 'docx', 'xls', 'xlsx']
+      ? ['doc', 'docx', 'xls', 'xlsx', 'txt']
       : [
           'doc',
           'docx',
@@ -67,6 +67,7 @@ function fileCheck (uploadedFile, inputName, state) {
   const isFileExist = fileNames ? fileNames.includes(uploadedFileName) : false
   errorObject.fileName = uploadedFileName
   const fileExtension = uploadedFileName.split('.').pop()
+  console.log('fileExtension=======>', fileExtension)
   const isExtensionAllowed = acceptableExtensions.includes(fileExtension)
   const allowedFileSize = 20000 * 1024
   const claimFormBuffer = uploadedFile._data

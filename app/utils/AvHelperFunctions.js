@@ -43,19 +43,31 @@ async function sendToAvScan (token, collection, file, fileDetails, key) {
   formData.append('fileDetails', JSON.stringify(fileDetails))
   formData.append('file', file)
   const fetchUrl = `${avBaseUrl}files/stream/${collection}/${key}`
+  console.log(fetchUrl)
   const headers = {
     Authorization: token
   }
   try {
     console.log('Sending the file for scanning...')
     const response = await axios.put(fetchUrl, formData, { headers })
-    return response.status
+   
+      return response.status
+  
   } catch (error) {
     console.log('Error in sending file to scan: \n', error)
   }
 }
+
+
+
+
+
+
+
+
 async function getScanResult (token, collection, key) {
   const fetchUrl = `${avBaseUrl}files/${collection}/${key}`
+  console.log(fetchUrl)
   const getResultFetchOptions = {
     method: 'GET',
     headers: {
@@ -64,9 +76,12 @@ async function getScanResult (token, collection, key) {
   }
   try {
     const response = await axios.get(fetchUrl, getResultFetchOptions)
+   
     if (response && response.status === 200) {
       const { data } = response
+      console.log('data', data);
       const { status, createdOn, modifiedOn, key, collection, fileName } = data
+console.log('status=====>\n', status)
       if (status === 'Success') {
         return {
           status,
@@ -86,6 +101,16 @@ async function getScanResult (token, collection, key) {
           fileName,
           isSafe: false,
           isScanned: false
+        }
+      }else if(status === 'Quarantined'){
+        return {
+          status,
+          key,
+          collection,
+          fileName,
+          isSafe: false,
+          isScanned: true,
+          errorMessage: 'viiiiiiiiiiiiiiiiiiiiirus'
         }
       } else {
         return {
@@ -172,6 +197,28 @@ async function checkingSingleAvGetResponse (token, collection, key, request, h, 
           request.yar.set('formSubmitted', formSubmitted);
           resolve(h.view('form-upload', formSubmitted));
         }
+        if(scannedResult.isScanned && !scannedResult.isSafe) {
+
+          clearInterval(intervalResult);
+          console.log('scanned but has virus!!!!!!');
+          counter = -1;
+
+          formSubmitted = {
+            ...formSubmitted,
+            errorMessage: {
+              ...formSubmitted.errorMessage,
+              claim: { html: `${file.uploadedFileName} can't be uploaded as it's not a safe file`, href: '#claim' }
+            },
+            claimForm: null
+          }
+          const errorsList = createErrorsSummaryList(
+            formSubmitted,
+            [{ html: `${file.uploadedFileName} can't be uploaded as it's not a safe file`, href: '#claim' }],
+            'claim'
+          )
+          formSubmitted.errorSummaryList = errorsList
+          request.yar.set('formSubmitted', formSubmitted)
+        }
       } catch (error) {
         console.error('An error occurred:', error);
         counter = -1;
@@ -179,5 +226,6 @@ async function checkingSingleAvGetResponse (token, collection, key, request, h, 
     }, 5000);
   });
 };
+
 
 module.exports = { getToken, sendToAvScan, getScanResult, checkingSingleAvGetResponse }
