@@ -266,40 +266,37 @@ module.exports = [
           request.yar.set("formSubmitted", formSubmitted);
           return h.view(viewTemplate, formSubmitted);
         }
-
-        const newFilesArray = [];
-        const errorArray = [];
-        const { token } = await getToken();
-        
+        const newFilesArray = []
+        const errorArray = []
+        const { token } = await getToken()
         if (token) {
-          const filesToScan = [];
           for (const file of filesArray) {
             const fileCheckDetails = fileCheck(file, actionPath[1], formSubmitted);
-        
             if (fileCheckDetails.isCheckPassed) {
-              const avFileBlob = new Blob([file._data], {
-                type: file.hapi.headers["content-type"]
-              });
               const key = uuidv4();
+              const content = Buffer.from(file._data).toString('base64');
               const result = await sendToAvScan(
                 token,
-                actionPath[1],
-                avFileBlob,
                 {
                   key,
                   collection: actionPath[1],
+                  content,
                   service: "fgp",
                   extension: fileCheckDetails.fileExtension,
                   fileName: fileCheckDetails.uploadedFileName
-                },
-                key
-              );
-        
-              if (result === 204) {
-                filesToScan.push({ ...fileCheckDetails, key });
-              } else {
+                }
+              )
+              if (result.isScanned && result.isSafe) {
+                const fileUploaded = await uploadFile(
+                  fileCheckDetails.fileBuffer,
+                  fileCheckDetails.uploadedFileName,
+                  actionPath[1]
+                )
+                fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
+
+              } else if(result.isScanned && !result.isSafe) { 
                 errorArray.push({
-                  html: `${fileCheckDetails.uploadedFileName}, can't be uploaded due to server error`,
+                  html: `${fileCheckDetails.uploadedFileName}, can't be uploaded as it's not safe and might have virus`,
                   href: "#" + actionPath[1]
                 });
               }
@@ -309,75 +306,9 @@ module.exports = [
                 href: "#" + actionPath[1]
               });
             }
-          }        
-          for (const awaitingFile of filesToScan) {
-            try {
-              await new Promise(async (resolve, reject) => {
-                let counter = 0;
-                const intervalId = setInterval(async () => {
-                  console.log("counter===> ", counter);
-          
-                  try {
-                    const scannedResult = await getScanResult(
-                      token,
-                      actionPath[1],
-                      awaitingFile.key
-                    );          
-                    if (scannedResult.isScanned && scannedResult.isSafe) {
-                      console.log("scanned and no virus!!!!!!\n", "Scan result===>\n", scannedResult);
-                      newFilesArray.push(awaitingFile);
-          
-                      clearInterval(intervalId);
-                      resolve();
-                    } else if (scannedResult.isScanned && !scannedResult.isSafe) {
-                      console.log("scanned and had virus!!!!!!");
-                      errorArray.push({
-                        html: `${awaitingFile.uploadedFileName}, can't be uploaded due to having a virus`,
-                        href: "#" + actionPath[1]
-                      });
-          
-                      clearInterval(intervalId);
-                      resolve();
-                    } else if (counter >= 6) {
-                      console.log("time out");
-                      errorArray.push({
-                        html: `${awaitingFile.uploadedFileName}, can't be uploaded due to Request time out`,
-                        href: "#" + actionPath[1]
-                      });
-          
-                      clearInterval(intervalId);
-                      resolve();
-                    }
-          
-                    counter += 1;
-                  } catch (error) {
-                    console.error("An error occurred:", error);
-                    clearInterval(intervalId);
-                    reject(error);
-                  }
-                }, 5000);
-              });
-            } catch (error) {
-              console.error("An error occurred:", error);
-            }
-          }          
-          const scannedFiles = [];
-          for (const fileToUpload of newFilesArray) {
-            try {
-              const fileUploaded = await uploadFile(
-                fileToUpload.fileBuffer,
-                fileToUpload.uploadedFileName,
-                actionPath[1]
-              );
-        
-              if (fileUploaded.isUploaded) {
-                scannedFiles.push(fileToUpload);
-              }
-            } catch (error) {
-              console.error("An error occurred during upload:", error);
-            }
-          }
-          if (scannedFiles.length) {
+          }      
+        }          
+          if (newFilesArray.length) {
             formSubmitted = formSubmitted.multiForms[actionPath[1]]
               ? {
                   ...formSubmitted,
@@ -385,7 +316,7 @@ module.exports = [
                     ...formSubmitted.multiForms,
                     [actionPath[1]]: [
                       ...formSubmitted.multiForms[actionPath[1]],
-                      ...scannedFiles
+                      ...newFilesArray
                     ]
                   }
                 }
@@ -393,7 +324,7 @@ module.exports = [
                   ...formSubmitted,
                   multiForms: {
                     ...formSubmitted.multiForms,
-                    [actionPath[1]]: scannedFiles
+                    [actionPath[1]]: newFilesArray
                   }
                 };
           }
@@ -420,12 +351,6 @@ module.exports = [
         
           return h.view(viewTemplate, formSubmitted);
         }
-        
-
-        
-        
-
-      }
     }
   }
 ];

@@ -60,7 +60,8 @@ function fileCheck (uploadedFile, inputName, state) {
           'mpg',
           'mp4',
           'wmv',
-          'mov'
+          'mov',
+          'txt'
         ]
 
   const uploadedFileName = uploadedFile.hapi.filename
