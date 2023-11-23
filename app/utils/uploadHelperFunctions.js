@@ -47,7 +47,7 @@ function fileCheck (uploadedFile, inputName, state) {
 
   const acceptableExtensions =
     inputName === 'claim'
-      ? ['doc', 'docx', 'xls', 'xlsx', 'txt']
+      ? ['doc', 'docx', 'xls', 'xlsx', 'txt', 'png', 'jpg', 'jpeg']
       : [
           'doc',
           'docx',

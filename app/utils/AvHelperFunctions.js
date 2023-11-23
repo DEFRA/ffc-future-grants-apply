@@ -38,33 +38,48 @@ async function getToken () {
     throw error
   }
 }
-async function sendToAvScan (token, collection, file, fileDetails, key) {
-  const formData = new FormData()
-  formData.append('fileDetails', JSON.stringify(fileDetails))
-  formData.append('file', file)
-  const fetchUrl = `${avBaseUrl}files/stream/${collection}/${key}`
-  console.log(fetchUrl)
+async function sendToAvScan (token, fileDetails) {
+  const fetchUrl = `${avBaseUrl}syncAv/${fileDetails.collection}/${fileDetails.key}?persistFile=false`
   const headers = {
     Authorization: token
   }
   try {
     console.log('Sending the file for scanning...')
-    const response = await axios.put(fetchUrl, formData, { headers })
-   
-      return response.status
-  
+    const response = await axios.put(fetchUrl, fileDetails, { headers })
+    if (response && response.status === 200) {
+      const { data } = response
+      const status = data.split(' ')[1]
+      console.log('Scan Result===>', status);
+      if (status === 'Clean') {
+        return {
+          status,
+          key: fileDetails.key,
+          collection: fileDetails.collection,
+          fileName: fileDetails.fileName,
+          isSafe: true,
+          isScanned: true
+        }
+      }
+      if (status === 'Malicious') {
+        return {
+          status,
+          key: fileDetails.key,
+          collection: fileDetails.collection,
+          fileName: fileDetails.fileName,
+          isSafe: false,
+          isScanned: true
+        }
+      }else{
+        throw new Error('Different status message!')
+      }
+    }
+    else{
+      throw new Error('Could not get a successful response from the server')
+    }
   } catch (error) {
     console.log('Error in sending file to scan: \n', error)
   }
 }
-
-
-
-
-
-
-
-
 async function getScanResult (token, collection, key) {
   const fetchUrl = `${avBaseUrl}files/${collection}/${key}`
   console.log(fetchUrl)
@@ -102,15 +117,15 @@ console.log('status=====>\n', status)
           isSafe: false,
           isScanned: false
         }
-      }else if(status === 'Quarantined'){
+      }else if(status === 'FailedToVirusScan'){
         return {
           status,
           key,
           collection,
           fileName,
           isSafe: false,
-          isScanned: true,
-          errorMessage: 'viiiiiiiiiiiiiiiiiiiiirus'
+          isScanned: false,
+          errorMessage: 'Faild to scan'
         }
       } else {
         return {
@@ -144,7 +159,7 @@ async function checkingSingleAvGetResponse (token, collection, key, request, h, 
         );
         console.log('SCANNED RESULT=======>\n', scannedResult);
 
-        if (counter > 6) {
+        if (counter > 12) {
           console.log('time out');
           counter = -1;
 
@@ -217,8 +232,10 @@ async function checkingSingleAvGetResponse (token, collection, key, request, h, 
             'claim'
           )
           formSubmitted.errorSummaryList = errorsList
-          request.yar.set('formSubmitted', formSubmitted)
+          request.yar.set('formSubmitted', formSubmitted);
+          resolve(h.view('form-upload', formSubmitted));
         }
+        
       } catch (error) {
         console.error('An error occurred:', error);
         counter = -1;

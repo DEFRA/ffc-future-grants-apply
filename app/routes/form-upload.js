@@ -1,5 +1,6 @@
 const { urlPrefix } = require("../config/index");
 const { uploadFile, deleteFile } = require("../services/blob-storage");
+const { TextEncoder } = require('util');
 const {
   getToken,
   sendToAvScan,
@@ -113,38 +114,64 @@ module.exports = [
             return h.view(viewTemplate, formSubmitted).takeover();
           } else {
             const { token } = await getToken();
-
             const key = uuidv4();
             if (token) {
-              const avFileBlob = new Blob([claimFormFile._data], {
-                type: claimFormFile.hapi.headers["content-type"]
-              });
+              const content = Buffer.from(claimFormFile._data).toString('base64');
               const result = await sendToAvScan(
                 token,
-                "claim",
-                avFileBlob,
                 {
                   key,
                   collection: "claim",
                   service: "fgp",
                   extension: fileCheckDetails.fileExtension,
+                  content,
                   fileName: fileCheckDetails.uploadedFileName
-                },
-                key
-              );
-
-              if (result === 204) {
-                console.log("File successfully sent!");
-
-                return await checkingSingleAvGetResponse(
-                  token,
-                  "claim",
-                  key,
-                  request,
-                  h,
+                }
+              )
+              console.log(result)
+              if (result.isScanned && result.isSafe) {
+                const fileUploaded = await uploadFile(
+                  fileCheckDetails.fileBuffer,
+                  fileCheckDetails.uploadedFileName,
+                  'claim'
+                )
+                formSubmitted = {
+                  ...formSubmitted,
+                  claimForm: {
+                    fileSize: fileCheckDetails.fileSizeFormatted,
+                    fileName: fileUploaded.originalFileName,
+                  },
+                  errorMessage: {
+                    ...formSubmitted.errorMessage,
+                    claim: null,
+                  },
+                }
+                const errorsList = createErrorsSummaryList(
                   formSubmitted,
-                  fileCheckDetails
-                );
+                  null,
+                  'claim'
+                )
+                formSubmitted.errorSummaryList = errorsList;
+                request.yar.set('formSubmitted', formSubmitted);
+              return h.view('form-upload', formSubmitted)
+              }
+              if(result.isScanned && !result.isSafe) {
+                formSubmitted = {
+                  ...formSubmitted,
+                  errorMessage: {
+                    ...formSubmitted.errorMessage,
+                    claim: { html: `${fileCheckDetails.uploadedFileName} can't be uploaded as it's not a safe file`, href: '#claim' }
+                  },
+                  claimForm: null
+                }
+                const errorsList = createErrorsSummaryList(
+                  formSubmitted,
+                  [{ html: `${fileCheckDetails.uploadedFileName} can't be uploaded as it's not a safe file`, href: '#claim' }],
+                  'claim'
+                )
+                formSubmitted.errorSummaryList = errorsList
+                request.yar.set('formSubmitted', formSubmitted);
+               return h.view('form-upload', formSubmitted)
               }
             }
           }
@@ -246,7 +273,6 @@ module.exports = [
         
         if (token) {
           const filesToScan = [];
-        
           for (const file of filesArray) {
             const fileCheckDetails = fileCheck(file, actionPath[1], formSubmitted);
         
