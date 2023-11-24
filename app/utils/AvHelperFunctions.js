@@ -39,8 +39,6 @@ async function sendToAvScan (token, fileDetails) {
   try {
     console.log('Sending the file for scanning...')
     const response = await axios.put(fetchUrl, fileDetails, { headers })
-    console.log(fileDetails)
-    console.log('response======>\n \n', response.status);
     if (response && response.status === 200) {
       const { data } = response
       const status = data.split(' ')[1]
