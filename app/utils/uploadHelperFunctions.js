@@ -68,7 +68,7 @@ function fileCheck (uploadedFile, inputName, state) {
   errorObject.fileName = uploadedFileName
   const fileExtension = uploadedFileName.split('.').pop()
   const isExtensionAllowed = acceptableExtensions.includes(fileExtension)
-  const allowedFileSize = 20000 * 1024
+  const allowedFileSize = 17000 * 1024
   const claimFormBuffer = uploadedFile._data
   const fileSizeBytes = claimFormBuffer.byteLength
   const isAllowedSize = allowedFileSize >= Number(fileSizeBytes)
