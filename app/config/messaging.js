@@ -11,7 +11,7 @@ const mqSchema = Joi.object({
     appInsights: Joi.object()
   },
   applicationRequestQueue: {
-    address: process.env.APPLICATIONREQUEST_QUEUE_ADDRESS,
+    address: process.env.APPLICATION_REQUEST_QUEUE_ADDRESS,
     type: 'queue'
   },
   fileStoreQueue: {
@@ -20,7 +20,7 @@ const mqSchema = Joi.object({
   },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
   applicationResponseQueue: {
-    address: process.env.APPLICATIONRESPONSE_QUEUE_ADDRESS,
+    address: process.env.APPLICATION_RESPONSE_QUEUE_ADDRESS,
     type: 'queue'
   },
   eventQueue: {
@@ -44,7 +44,7 @@ const mqConfig = {
     appInsights: process.env.NODE_ENV === 'production' ? require('applicationinsights') : undefined
   },
   applicationRequestQueue: {
-    address: process.env.APPLICATIONREQUEST_QUEUE_ADDRESS,
+    address: process.env.APPLICATION_REQUEST_QUEUE_ADDRESS,
     type: 'queue'
   },
   fileStoreQueue: {
@@ -53,7 +53,7 @@ const mqConfig = {
   },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
   applicationResponseQueue: {
-    address: process.env.APPLICATIONRESPONSE_QUEUE_ADDRESS,
+    address: process.env.APPLICATION_RESPONSE_QUEUE_ADDRESS,
     type: 'queue'
   },
   eventQueue: {

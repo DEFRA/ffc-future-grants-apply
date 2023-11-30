@@ -50,7 +50,7 @@ async function uploadFile (buffer, filename, prefix) {
       )
     }
     console.log('Blob was uploaded successfully')
-    await sendMessage({ name: fileNameWithPrefix }, applicationRequestMsgType, applicationRequestQueue)
+    await sendMessage({ sessionId: filename }, applicationRequestMsgType, applicationRequestQueue)
     return { fileName: fileNameWithPrefix, originalFileName: filename, isUploaded: true }
   } catch (error) {
     console.log(error)
