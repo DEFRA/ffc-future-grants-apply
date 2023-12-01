@@ -1,6 +1,6 @@
 const Joi = require('joi')
 
-const msgTypePrefix = 'uk.gov.ffc.ahwr'
+const msgTypePrefix = 'uk.gov.ffc.grants'
 
 const mqSchema = Joi.object({
   messageQueue: {
@@ -52,6 +52,7 @@ const mqConfig = {
     type: 'queue'
   },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
+
   applicationResponseQueue: {
     address: process.env.APPLICATION_RESPONSE_QUEUE_ADDRESS,
     type: 'queue'
@@ -75,6 +76,7 @@ if (mqResult.error) {
 }
 
 const applicationRequestQueue = { ...mqResult.value.messageQueue, ...mqResult.value.applicationRequestQueue }
+const fileStoreQueue = { ...mqResult.value.messageQueue, ...mqResult.value.fileStoreQueue }
 const applicationResponseQueue = { ...mqResult.value.messageQueue, ...mqResult.value.applicationResponseQueue }
 const eventQueue = { ...mqResult.value.messageQueue, ...mqResult.value.eventQueue }
 const fetchApplicationRequestQueue = { ...mqResult.value.messageQueue, ...mqResult.value.fetchApplicationRequestQueue }
@@ -87,5 +89,6 @@ module.exports = {
   eventQueue,
   fetchApplicationRequestQueue,
   applicationRequestMsgType,
-  registerYourInterestRequestQueue
+  registerYourInterestRequestQueue,
+  fileStoreQueue
 }
