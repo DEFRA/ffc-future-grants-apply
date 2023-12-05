@@ -136,19 +136,23 @@ module.exports = [
                 if (fileUploaded.isUploaded) {
                   await sendMessage(
                     {
-                      id: key,
-                      fileName: fileCheckDetails.uploadedFileName,
-                      fileSize: fileCheckDetails.fileSizeFormatted,
-                      fileType: fileCheckDetails.fileExtension,
-                      category: 'category test',
-                      userId: 'test user ID',
-                      bussinessId: 'Business ID test',
-                      caseId: 'case ID test',
-                      grantScheme: 'Grant Scheme test',
-                      grantSubScheme: 'Gran sub scheme test',
-                      grantTheme: 'Grant theme test',
-                      dateAndTime: new Date(),
-                      storageUrl: 'Storage URL test'
+                      data: [
+                        {
+                          id: key,
+                          fileName: fileCheckDetails.uploadedFileName,
+                          fileSize: fileCheckDetails.fileSizeFormatted,
+                          fileType: fileCheckDetails.fileExtension,
+                          category: 'category test',
+                          userId: 8749,
+                          bussinessId: 97058,
+                          caseId: 65378,
+                          grantScheme: 'Grant Scheme test',
+                          grantSubScheme: 'Gran sub scheme test',
+                          grantTheme: 'Grant theme test',
+                          dateAndTime: new Date(),
+                          storageUrl: 'Storage URL test'
+                        }
+                      ]
                     },
                     applicationRequestMsgType,
                     fileStoreQueue
@@ -256,6 +260,7 @@ module.exports = [
           return h.view(viewTemplate, formSubmitted).takeover()
         }
       } else if (actionPath[0] === 'multiUpload') {
+        const queueArray = []
         let filesArray = request.payload[actionPath[1]]
         if (!filesArray.length) {
           filesArray = [filesArray]
@@ -314,25 +319,22 @@ module.exports = [
                 )
                 if (fileUploaded.isUploaded) {
                   newFilesArray.push(fileCheckDetails)
-                  await sendMessage(
-                    {
-                      id: key,
-                      fileName: fileCheckDetails.uploadedFileName,
-                      fileSize: fileCheckDetails.fileSizeFormatted,
-                      fileType: fileCheckDetails.fileExtension,
-                      category: 'category test',
-                      userId: 'test user ID',
-                      bussinessId: 'Business ID test',
-                      caseId: 'case ID test',
-                      grantScheme: 'Grant Scheme test',
-                      grantSubScheme: 'Gran sub scheme test',
-                      grantTheme: 'Grant theme test',
-                      dateAndTime: new Date(),
-                      storageUrl: 'Storage URL test'
-                    },
-                    applicationRequestMsgType,
-                    fileStoreQueue
-                  )
+
+                  queueArray.push({
+                    id: key,
+                    fileName: fileCheckDetails.uploadedFileName,
+                    fileSize: fileCheckDetails.fileSizeFormatted,
+                    fileType: fileCheckDetails.fileExtension,
+                    category: 'category test',
+                    userId: 8749,
+                    bussinessId: 97058,
+                    caseId: 65378,
+                    grantScheme: 'Grant Scheme test',
+                    grantSubScheme: 'Gran sub scheme test',
+                    grantTheme: 'Grant theme test',
+                    dateAndTime: new Date(),
+                    storageUrl: 'Storage URL test'
+                  })
                 }
               } else if (result.isScanned && !result.isSafe) {
                 errorArray.push({
@@ -347,6 +349,13 @@ module.exports = [
               })
             }
           }
+          queueArray.length && await sendMessage(
+            {
+              data: queueArray
+            },
+            applicationRequestMsgType,
+            fileStoreQueue
+          )
         }
         if (newFilesArray.length) {
           formSubmitted = formSubmitted.multiForms[actionPath[1]]
