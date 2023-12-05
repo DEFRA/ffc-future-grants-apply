@@ -6,7 +6,7 @@ const sendMessage = async (body, type, config, options) => {
   const sender = createMessageSender(config)
   try {
     await sender.sendMessage(message)
-    console.log('Queue message successfully sent!')
+    console.log('Queue message successfully sent as below!==>\n', body)
   } catch (error) {
     console.log(error)
   }

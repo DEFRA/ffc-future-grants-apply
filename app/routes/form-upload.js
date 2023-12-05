@@ -12,6 +12,8 @@ const {
   fileCheck,
   createErrorsSummaryList
 } = require('../utils/uploadHelperFunctions')
+const { sendMessage } = require('../messaging')
+const { applicationRequestMsgType, fileStoreQueue } = require('../config/messaging')
 function createModel (claimForm, multiForms) {
   return {
     multiForms: { ...multiForms },
@@ -131,24 +133,45 @@ module.exports = [
                   fileCheckDetails.uploadedFileName,
                   'claim'
                 )
-                formSubmitted = {
-                  ...formSubmitted,
-                  claimForm: {
-                    fileSize: fileCheckDetails.fileSizeFormatted,
-                    fileName: fileUploaded.originalFileName
-                  },
-                  errorMessage: {
-                    ...formSubmitted.errorMessage,
-                    claim: null
+                if (fileUploaded.isUploaded) {
+                  await sendMessage(
+                    {
+                      id: key,
+                      fileName: fileCheckDetails.uploadedFileName,
+                      fileSize: fileCheckDetails.fileSizeFormatted,
+                      fileType: fileCheckDetails.fileExtension,
+                      category: 'category test',
+                      userId: 'test user ID',
+                      bussinessId: 'Business ID test',
+                      caseId: 'case ID test',
+                      grantScheme: 'Grant Scheme test',
+                      grantSubScheme: 'Gran sub scheme test',
+                      grantTheme: 'Grant theme test',
+                      dateAndTime: new Date(),
+                      storageUrl: 'Storage URL test'
+                    },
+                    applicationRequestMsgType,
+                    fileStoreQueue
+                  )
+                  formSubmitted = {
+                    ...formSubmitted,
+                    claimForm: {
+                      fileSize: fileCheckDetails.fileSizeFormatted,
+                      fileName: fileUploaded.originalFileName
+                    },
+                    errorMessage: {
+                      ...formSubmitted.errorMessage,
+                      claim: null
+                    }
                   }
+                  const errorsList = createErrorsSummaryList(
+                    formSubmitted,
+                    null,
+                    'claim'
+                  )
+                  formSubmitted.errorSummaryList = errorsList
+                  request.yar.set('formSubmitted', formSubmitted)
                 }
-                const errorsList = createErrorsSummaryList(
-                  formSubmitted,
-                  null,
-                  'claim'
-                )
-                formSubmitted.errorSummaryList = errorsList
-                request.yar.set('formSubmitted', formSubmitted)
                 return h.view('form-upload', formSubmitted)
               }
               if (result.isScanned && !result.isSafe) {
@@ -289,7 +312,28 @@ module.exports = [
                   fileCheckDetails.uploadedFileName,
                   actionPath[1]
                 )
-                fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
+                if (fileUploaded.isUploaded) {
+                  newFilesArray.push(fileCheckDetails)
+                  await sendMessage(
+                    {
+                      id: key,
+                      fileName: fileCheckDetails.uploadedFileName,
+                      fileSize: fileCheckDetails.fileSizeFormatted,
+                      fileType: fileCheckDetails.fileExtension,
+                      category: 'category test',
+                      userId: 'test user ID',
+                      bussinessId: 'Business ID test',
+                      caseId: 'case ID test',
+                      grantScheme: 'Grant Scheme test',
+                      grantSubScheme: 'Gran sub scheme test',
+                      grantTheme: 'Grant theme test',
+                      dateAndTime: new Date(),
+                      storageUrl: 'Storage URL test'
+                    },
+                    applicationRequestMsgType,
+                    fileStoreQueue
+                  )
+                }
               } else if (result.isScanned && !result.isSafe) {
                 errorArray.push({
                   html: `${fileCheckDetails.uploadedFileName}, can't be uploaded as it's not safe and might have virus`,
