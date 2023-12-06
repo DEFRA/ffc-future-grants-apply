@@ -14,10 +14,10 @@ const {
 } = require('../utils/uploadHelperFunctions')
 const { sendMessage } = require('../messaging')
 const { applicationRequestMsgType, fileStoreQueue } = require('../config/messaging')
-function createModel (claimForm, multiForms) {
+function createModel (claim, multiForms) {
   return {
     multiForms: { ...multiForms },
-    claimForm: claimForm,
+    claim: claim,
     formActionPage: currentPath,
     errorMessage: {
       claim: null,
@@ -88,9 +88,9 @@ module.exports = [
       let formSubmitted = request.yar.get('formSubmitted')
       if (actionPath[0] === 'singleUpload') {
         try {
-          const claimFormFile = request.payload.claimForm
+          const claimFile = request.payload.claim
           const fileCheckDetails = fileCheck(
-            claimFormFile,
+            claimFile,
             'claim',
             formSubmitted
           )
@@ -101,11 +101,11 @@ module.exports = [
                 ...formSubmitted.errorMessage,
                 claim: { html: fileCheckDetails.html, href: '#claim' }
               },
-              claimForm: null
+              claim: null
             }
             const errorsList = createErrorsSummaryList(
               formSubmitted,
-              [{ html: fileCheckDetails.html, href: '#claimForm' }],
+              [{ html: fileCheckDetails.html, href: '#claim' }],
               'claim'
             )
             formSubmitted.errorSummaryList = errorsList
@@ -115,7 +115,7 @@ module.exports = [
             const { token } = await getToken()
             const key = uuidv4()
             if (token) {
-              const content = Buffer.from(claimFormFile._data).toString('base64')
+              const content = Buffer.from(claimFile._data).toString('base64')
               const result = await sendToAvScan(
                 token,
                 {
@@ -136,9 +136,10 @@ module.exports = [
                 if (fileUploaded.isUploaded) {
                   await sendMessage(
                     {
+                      method: 'add',
                       data: [
                         {
-                          id: key,
+                          fileId: key,
                           fileName: fileCheckDetails.uploadedFileName,
                           fileSize: fileCheckDetails.fileSizeFormatted,
                           fileType: fileCheckDetails.fileExtension,
@@ -159,7 +160,8 @@ module.exports = [
                   )
                   formSubmitted = {
                     ...formSubmitted,
-                    claimForm: {
+                    claim: {
+                      fileId: key,
                       fileSize: fileCheckDetails.fileSizeFormatted,
                       fileName: fileUploaded.originalFileName
                     },
@@ -185,7 +187,7 @@ module.exports = [
                     ...formSubmitted.errorMessage,
                     claim: { html: `${fileCheckDetails.uploadedFileName} can't be uploaded as it's not a safe file`, href: '#claim' }
                   },
-                  claimForm: null
+                  claim: null
                 }
                 const errorsList = createErrorsSummaryList(
                   formSubmitted,
@@ -223,7 +225,17 @@ module.exports = [
           request.yar.set('formSubmitted', formSubmitted)
           return h.view(viewTemplate, formSubmitted).takeover()
         }
-        const isDeleted = await deleteFile(fileName, actionPath[1])
+        let fileId
+        if (actionPath[1] === 'claim') {
+          fileId = formSubmitted[actionPath[1]].fileId
+        } else {
+          const targetFile = formSubmitted.multiForms[actionPath[1]].find(
+            (item) => item.fileName === fileName
+          )
+          fileId = targetFile.fileId
+        }
+        console.info('FILE ID===>  ', fileId)
+        const isDeleted = await deleteFile(fileName, actionPath[1], fileId)
         if (isDeleted && actionPath[1] === 'claim') {
           formSubmitted = {
             ...formSubmitted,
@@ -231,7 +243,7 @@ module.exports = [
               ...formSubmitted.errorMessage,
               claimFormErrors: null
             },
-            claimForm: null
+            claim: null
           }
           request.yar.set('formSubmitted', formSubmitted)
           return h.view(viewTemplate, formSubmitted)
@@ -318,10 +330,10 @@ module.exports = [
                   actionPath[1]
                 )
                 if (fileUploaded.isUploaded) {
-                  newFilesArray.push(fileCheckDetails)
+                  newFilesArray.push({ ...fileCheckDetails, fileId: key })
 
                   queueArray.push({
-                    id: key,
+                    fileId: key,
                     fileName: fileCheckDetails.uploadedFileName,
                     fileSize: fileCheckDetails.fileSizeFormatted,
                     fileType: fileCheckDetails.fileExtension,
@@ -351,6 +363,7 @@ module.exports = [
           }
           queueArray.length && await sendMessage(
             {
+              method: 'add',
               data: queueArray
             },
             applicationRequestMsgType,

@@ -68,16 +68,17 @@ async function checkFileExists (fileName) {
     throw error
   }
 }
-async function deleteFile (fileName, prefix) {
+async function deleteFile (fileName, prefix, fileId) {
   const newFileName = `${prefix}-${fileName}`
+  console.log(fileName)
   try {
     await blobContainerClient.getBlobClient(newFileName).delete()
     console.log(`Blob '${fileName}' was deleted successfully.`)
 
-    await sendMessage({ fileName }, applicationRequestMsgType, fileStoreQueue)
+    await sendMessage({ method: 'delete', fileId }, applicationRequestMsgType, fileStoreQueue)
     return true
   } catch (error) {
-    console.error(`Error deleting blob '${fileName}':`, error)
+    console.error(`Error in deleting or sending message queue '${fileName}':`, error)
     return false
   }
 }
