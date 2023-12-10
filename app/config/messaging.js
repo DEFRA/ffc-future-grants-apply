@@ -1,6 +1,6 @@
 const Joi = require('joi')
 
-const msgTypePrefix = 'uk.gov.ffc.ahwr'
+const msgTypePrefix = 'uk.gov.ffc.grants'
 
 const mqSchema = Joi.object({
   messageQueue: {
@@ -11,12 +11,16 @@ const mqSchema = Joi.object({
     appInsights: Joi.object()
   },
   applicationRequestQueue: {
-    address: process.env.APPLICATIONREQUEST_QUEUE_ADDRESS,
+    address: process.env.APPLICATION_REQUEST_QUEUE_ADDRESS,
+    type: 'queue'
+  },
+  fileStoreQueue: {
+    address: process.env.FILE_STORE_QUEUE_ADDRESS,
     type: 'queue'
   },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
   applicationResponseQueue: {
-    address: process.env.APPLICATIONRESPONSE_QUEUE_ADDRESS,
+    address: process.env.APPLICATION_RESPONSE_QUEUE_ADDRESS,
     type: 'queue'
   },
   eventQueue: {
@@ -40,12 +44,17 @@ const mqConfig = {
     appInsights: process.env.NODE_ENV === 'production' ? require('applicationinsights') : undefined
   },
   applicationRequestQueue: {
-    address: process.env.APPLICATIONREQUEST_QUEUE_ADDRESS,
+    address: process.env.APPLICATION_REQUEST_QUEUE_ADDRESS,
+    type: 'queue'
+  },
+  fileStoreQueue: {
+    address: process.env.FILE_STORE_QUEUE_ADDRESS,
     type: 'queue'
   },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
+
   applicationResponseQueue: {
-    address: process.env.APPLICATIONRESPONSE_QUEUE_ADDRESS,
+    address: process.env.APPLICATION_RESPONSE_QUEUE_ADDRESS,
     type: 'queue'
   },
   eventQueue: {
@@ -59,16 +68,15 @@ const mqConfig = {
     messageType: `${msgTypePrefix}.register.your.interest.request`
   }
 }
-
 const mqResult = mqSchema.validate(mqConfig, {
   abortEarly: false
 })
-
 if (mqResult.error) {
   throw new Error(`The message queue config is invalid. ${mqResult.error.message}`)
 }
 
 const applicationRequestQueue = { ...mqResult.value.messageQueue, ...mqResult.value.applicationRequestQueue }
+const fileStoreQueue = { ...mqResult.value.messageQueue, ...mqResult.value.fileStoreQueue }
 const applicationResponseQueue = { ...mqResult.value.messageQueue, ...mqResult.value.applicationResponseQueue }
 const eventQueue = { ...mqResult.value.messageQueue, ...mqResult.value.eventQueue }
 const fetchApplicationRequestQueue = { ...mqResult.value.messageQueue, ...mqResult.value.fetchApplicationRequestQueue }
@@ -81,5 +89,6 @@ module.exports = {
   eventQueue,
   fetchApplicationRequestQueue,
   applicationRequestMsgType,
-  registerYourInterestRequestQueue
+  registerYourInterestRequestQueue,
+  fileStoreQueue
 }

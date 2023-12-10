@@ -1,5 +1,10 @@
 const { urlPrefix } = require('../config/index')
 const { uploadFile, deleteFile } = require('../services/blob-storage')
+const {
+  getToken,
+  sendToAvScan
+} = require('../utils/AvHelperFunctions')
+const { v4: uuidv4 } = require('uuid')
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
@@ -7,6 +12,8 @@ const {
   fileCheck,
   createErrorsSummaryList
 } = require('../utils/uploadHelperFunctions')
+const { sendMessage } = require('../messaging')
+const { applicationRequestMsgType, fileStoreQueue } = require('../config/messaging')
 function createModel (claimForm, multiForms) {
   return {
     multiForms: { ...multiForms },
@@ -82,8 +89,11 @@ module.exports = [
       if (actionPath[0] === 'singleUpload') {
         try {
           const claimFormFile = request.payload.claimForm
-          console.log(claimFormFile)
-          const fileCheckDetails = fileCheck(claimFormFile, 'claim', formSubmitted)
+          const fileCheckDetails = fileCheck(
+            claimFormFile,
+            'claim',
+            formSubmitted
+          )
           if (!fileCheckDetails.isCheckPassed) {
             formSubmitted = {
               ...formSubmitted,
@@ -102,27 +112,91 @@ module.exports = [
             request.yar.set('formSubmitted', formSubmitted)
             return h.view(viewTemplate, formSubmitted).takeover()
           } else {
-            const fileUploaded = await uploadFile(
-              fileCheckDetails.fileBuffer,
-              fileCheckDetails.uploadedFileName,
-              'claim'
-            )
-            console.log(fileUploaded)
-            formSubmitted = {
-              ...formSubmitted,
-              claimForm: {
-                fileSize: fileCheckDetails.fileSizeFormatted,
-                fileName: fileUploaded.originalFileName
-              },
-              errorMessage: {
-                ...formSubmitted.errorMessage,
-                claim: null
+            const { token } = await getToken()
+            const key = uuidv4()
+            if (token) {
+              const content = Buffer.from(claimFormFile._data).toString('base64')
+              const result = await sendToAvScan(
+                token,
+                {
+                  key,
+                  collection: 'claim',
+                  service: 'fgp',
+                  extension: fileCheckDetails.fileExtension,
+                  content,
+                  fileName: fileCheckDetails.uploadedFileName
+                }
+              )
+              if (result.isScanned && result.isSafe) {
+                const fileUploaded = await uploadFile(
+                  fileCheckDetails.fileBuffer,
+                  fileCheckDetails.uploadedFileName,
+                  'claim'
+                )
+                if (fileUploaded.isUploaded) {
+                  await sendMessage(
+                    {
+                      data: [
+                        {
+                          id: key,
+                          fileName: fileCheckDetails.uploadedFileName,
+                          fileSize: fileCheckDetails.fileSizeFormatted,
+                          fileType: fileCheckDetails.fileExtension,
+                          category: 'category test',
+                          userId: 8749,
+                          bussinessId: 97058,
+                          caseId: 65378,
+                          grantScheme: 'Grant Scheme test',
+                          grantSubScheme: 'Gran sub scheme test',
+                          grantTheme: 'Grant theme test',
+                          dateAndTime: new Date(),
+                          storageUrl: 'Storage URL test'
+                        }
+                      ]
+                    },
+                    applicationRequestMsgType,
+                    fileStoreQueue
+                  )
+                  formSubmitted = {
+                    ...formSubmitted,
+                    claimForm: {
+                      fileSize: fileCheckDetails.fileSizeFormatted,
+                      fileName: fileUploaded.originalFileName
+                    },
+                    errorMessage: {
+                      ...formSubmitted.errorMessage,
+                      claim: null
+                    }
+                  }
+                  const errorsList = createErrorsSummaryList(
+                    formSubmitted,
+                    null,
+                    'claim'
+                  )
+                  formSubmitted.errorSummaryList = errorsList
+                  request.yar.set('formSubmitted', formSubmitted)
+                }
+                return h.view('form-upload', formSubmitted)
+              }
+              if (result.isScanned && !result.isSafe) {
+                formSubmitted = {
+                  ...formSubmitted,
+                  errorMessage: {
+                    ...formSubmitted.errorMessage,
+                    claim: { html: `${fileCheckDetails.uploadedFileName} can't be uploaded as it's not a safe file`, href: '#claim' }
+                  },
+                  claimForm: null
+                }
+                const errorsList = createErrorsSummaryList(
+                  formSubmitted,
+                  [{ html: `${fileCheckDetails.uploadedFileName} can't be uploaded as it's not a safe file`, href: '#claim' }],
+                  'claim'
+                )
+                formSubmitted.errorSummaryList = errorsList
+                request.yar.set('formSubmitted', formSubmitted)
+                return h.view('form-upload', formSubmitted)
               }
             }
-            const errorsList = createErrorsSummaryList(formSubmitted, null, 'claim')
-            formSubmitted.errorSummaryList = errorsList
-            request.yar.set('formSubmitted', formSubmitted)
-            return h.view(viewTemplate, formSubmitted)
           }
         } catch (error) {
           return h
@@ -153,7 +227,10 @@ module.exports = [
         if (isDeleted && actionPath[1] === 'claim') {
           formSubmitted = {
             ...formSubmitted,
-            errorMessage: { ...formSubmitted.errorMessage, claimFormErrors: null },
+            errorMessage: {
+              ...formSubmitted.errorMessage,
+              claimFormErrors: null
+            },
             claimForm: null
           }
           request.yar.set('formSubmitted', formSubmitted)
@@ -164,7 +241,10 @@ module.exports = [
           )
           formSubmitted = {
             ...formSubmitted,
-            multiForms: { ...formSubmitted.multiForms, [actionPath[1]]: filteredArray }
+            multiForms: {
+              ...formSubmitted.multiForms,
+              [actionPath[1]]: filteredArray
+            }
           }
           request.yar.set('formSubmitted', formSubmitted)
           return h.view(viewTemplate, formSubmitted)
@@ -180,6 +260,7 @@ module.exports = [
           return h.view(viewTemplate, formSubmitted).takeover()
         }
       } else if (actionPath[0] === 'multiUpload') {
+        const queueArray = []
         let filesArray = request.payload[actionPath[1]]
         if (!filesArray.length) {
           filesArray = [filesArray]
@@ -211,21 +292,70 @@ module.exports = [
         }
         const newFilesArray = []
         const errorArray = []
-        for (const file of filesArray) {
-          const fileCheckDetails = fileCheck(file, actionPath[1], formSubmitted)
-          if (fileCheckDetails.isCheckPassed) {
-            const fileUploaded = await uploadFile(
-              fileCheckDetails.fileBuffer,
-              fileCheckDetails.uploadedFileName,
-              actionPath[1]
+        const { token } = await getToken()
+        if (token) {
+          for (const file of filesArray) {
+            const fileCheckDetails = fileCheck(
+              file,
+              actionPath[1],
+              formSubmitted
             )
-            fileUploaded.isUploaded && newFilesArray.push(fileCheckDetails)
-          } else {
-            errorArray.push({
-              html: fileCheckDetails.html,
-              href: '#' + actionPath[1]
-            })
+            if (fileCheckDetails.isCheckPassed) {
+              const key = uuidv4()
+              const content = Buffer.from(file._data).toString('base64')
+              const result = await sendToAvScan(token, {
+                key,
+                collection: actionPath[1],
+                content,
+                service: 'fgp',
+                extension: fileCheckDetails.fileExtension,
+                fileName: fileCheckDetails.uploadedFileName
+              })
+              if (result.isScanned && result.isSafe) {
+                const fileUploaded = await uploadFile(
+                  fileCheckDetails.fileBuffer,
+                  fileCheckDetails.uploadedFileName,
+                  actionPath[1]
+                )
+                if (fileUploaded.isUploaded) {
+                  newFilesArray.push(fileCheckDetails)
+
+                  queueArray.push({
+                    id: key,
+                    fileName: fileCheckDetails.uploadedFileName,
+                    fileSize: fileCheckDetails.fileSizeFormatted,
+                    fileType: fileCheckDetails.fileExtension,
+                    category: 'category test',
+                    userId: 8749,
+                    bussinessId: 97058,
+                    caseId: 65378,
+                    grantScheme: 'Grant Scheme test',
+                    grantSubScheme: 'Gran sub scheme test',
+                    grantTheme: 'Grant theme test',
+                    dateAndTime: new Date(),
+                    storageUrl: 'Storage URL test'
+                  })
+                }
+              } else if (result.isScanned && !result.isSafe) {
+                errorArray.push({
+                  html: `${fileCheckDetails.uploadedFileName}, can't be uploaded as it's not safe and might have virus`,
+                  href: '#' + actionPath[1]
+                })
+              }
+            } else {
+              errorArray.push({
+                html: fileCheckDetails.html,
+                href: '#' + actionPath[1]
+              })
+            }
           }
+          queueArray.length && await sendMessage(
+            {
+              data: queueArray
+            },
+            applicationRequestMsgType,
+            fileStoreQueue
+          )
         }
         if (newFilesArray.length) {
           formSubmitted = formSubmitted.multiForms[actionPath[1]]
