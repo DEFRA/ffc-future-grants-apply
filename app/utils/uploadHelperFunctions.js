@@ -1,6 +1,6 @@
 let errorObject = {
   html: '',
-  fileName: '',
+  file_name: '',
   inputName: '',
   isCheckPassed: true
 }
@@ -43,7 +43,10 @@ function createErrorsSummaryList (formSubmitted, errorArray, actionPath) {
   return errorsSummary
 }
 function fileCheck (uploadedFile, inputName, state) {
-  const fileNames = state.multiForms[`${inputName}`] && state.multiForms[`${inputName}`].map(item => item.fileName)
+  console.log(uploadedFile, inputName, state)
+  const fileNames =
+    state.multiForms[`${inputName}`] &&
+    state.multiForms[`${inputName}`].map((item) => item.file_name)
 
   const acceptableExtensions =
     inputName === 'claim'
@@ -63,16 +66,16 @@ function fileCheck (uploadedFile, inputName, state) {
           'mov'
         ]
 
-  const uploadedFileName = uploadedFile.hapi.filename
-  const isFileExist = fileNames ? fileNames.includes(uploadedFileName) : false
-  errorObject.fileName = uploadedFileName
-  const fileExtension = uploadedFileName.split('.').pop()
+  const fileName = uploadedFile.hapi.filename
+  const isFileExist = fileNames ? fileNames.includes(fileName) : false
+  errorObject.file_name = fileName
+  const fileExtension = fileName.split('.').pop()
   const isExtensionAllowed = acceptableExtensions.includes(fileExtension)
   const allowedFileSize = 17000 * 1024
   const claimFormBuffer = uploadedFile._data
   const fileSizeBytes = claimFormBuffer.byteLength
   const isAllowedSize = allowedFileSize >= Number(fileSizeBytes)
-  if (!uploadedFileName || !uploadedFileName.length) {
+  if (!fileName || !fileName.length) {
     return (errorObject = {
       ...errorObject,
       inputName,
@@ -84,7 +87,7 @@ function fileCheck (uploadedFile, inputName, state) {
     errorObject = {
       ...errorObject,
       isCheckPassed: false,
-      html: `${errorObject.fileName} is already uploaded`
+      html: `${errorObject.file_name} is already uploaded`
     }
   } else if (!isExtensionAllowed) {
     errorObject = {
@@ -92,14 +95,14 @@ function fileCheck (uploadedFile, inputName, state) {
       isCheckPassed: false,
       html:
         inputName === 'claim'
-          ? `${errorObject.fileName} must be a DOC, DOCX, XLS, XLSX`
-          : `${errorObject.fileName} must be a DOC, DOCX, XLS, XLSX, PDF, JPG, JPEG, PNG, MPG, MP4, WMV, MOV`
+          ? `${errorObject.file_name} must be a DOC, DOCX, XLS, XLSX`
+          : `${errorObject.file_name} must be a DOC, DOCX, XLS, XLSX, PDF, JPG, JPEG, PNG, MPG, MP4, WMV, MOV`
     }
   } else if (!isAllowedSize) {
     errorObject = {
       ...errorObject,
       isCheckPassed: false,
-      html: `${errorObject.fileName} must be smaller than 20MB`
+      html: `${errorObject.file_name} must be smaller than 20MB`
     }
   } else {
     const fileSizeFormatted = formatFileSize(fileSizeBytes)
@@ -107,9 +110,9 @@ function fileCheck (uploadedFile, inputName, state) {
       ...errorObject,
       isCheckPassed: true,
       fileBuffer: claimFormBuffer,
-      fileExtension,
+      file_extension: fileExtension,
       fileSizeFormatted,
-      uploadedFileName
+      file_name: fileName
     }
   }
   return errorObject
