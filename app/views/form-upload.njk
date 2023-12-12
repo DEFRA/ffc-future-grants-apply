@@ -113,8 +113,8 @@
         File 1
       </p>
       <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
-        {{ claim.fileName }},
-        {{ claim.fileSize }}
+        {{ claim.file_name }},
+        {{ claim.file_size }}
       </p>
 
       <form method="POST" action="{{ formActionPage }}#claim"
@@ -147,7 +147,7 @@
             name: "fileName",
             classes:
               " govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0",
-            value: claim.fileName
+            value: claim.file_name
           })
         }}
       </form>
@@ -231,8 +231,8 @@
           File {{ loop.index }}
         </p>
         <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
-          {{ file.uploadedFileName }},
-          {{ file.fileSizeFormatted }}
+          {{ file.file_name }},
+          {{ file.file_size }}
         </p>
 
         <form method="POST" action="{{ formActionPage }}#purchased"
@@ -264,7 +264,7 @@
               id: "fileName",
               name: "fileName",
               classes: " govuk-visually-hidden",
-              value:file.uploadedFileName
+              value:file.file_name
             })
           }}
         </form>
@@ -332,8 +332,8 @@
           File {{ loop.index }}
         </p>
         <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
-          {{ file.uploadedFileName }},
-          {{ file.fileSizeFormatted }}
+          {{ file.file_name }},
+          {{ file.file_size }}
         </p>
 
         <form method="POST" action="{{ formActionPage }}#paid"
@@ -366,7 +366,7 @@
               name: "fileName",
               classes:
                 " govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0",
-              value: file.uploadedFileName
+              value: file.file_name
             })
           }}
         </form>
@@ -432,8 +432,8 @@
           File {{ loop.index }}
         </p>
         <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
-          {{ file.uploadedFileName }},
-          {{ file.fileSizeFormatted }}
+          {{ file.file_name }},
+          {{ file.file_size }}
         </p>
         <form method="POST" action="{{ formActionPage }}#inPlace"
           class="govuk-!-text-align-right govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0"
@@ -465,7 +465,7 @@
                 name: "fileName",
                 classes:
                   " govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0",
-                value: file.uploadedFileName
+                value: file.file_name
               })
             }}
         </form>
@@ -531,8 +531,8 @@
           File {{ loop.index }}
         </p>
         <p class="govuk-grid-column-one-half govuk-!-margin-bottom-0 govuk-!-margin-top-0">
-          {{ file.uploadedFileName }},
-          {{ file.fileSizeFormatted }}
+          {{ file.file_name }},
+          {{ file.file_size }}
         </p>
         <form method="POST" action="{{ formActionPage }}#conditions"
           class="govuk-!-text-align-right govuk-grid-column-one-quarter govuk-!-margin-bottom-0 govuk-!-margin-top-0"
@@ -564,7 +564,7 @@
                   name: "fileName",
                   classes:
                     " govuk-visually-hidden govuk-!-margin-bottom-0 govuk-!-margin-top-0",
-                  value: file.uploadedFileName
+                  value: file.file_name
                 })
               }}
         </form>
