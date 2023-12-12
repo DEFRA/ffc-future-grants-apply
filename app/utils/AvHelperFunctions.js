@@ -17,7 +17,9 @@ const getTokenHeaders = {
 }
 async function getToken () {
   try {
-    const response = await axios.post(tokenUrl, getTokenRequestBody, { getTokenHeaders })
+    const response = await axios.post(tokenUrl, getTokenRequestBody, {
+      getTokenHeaders
+    })
     if (!response && !response.status === 200) {
       throw new Error(
         `Token Request Failed: ${response.status} ${response.statusText}`
@@ -61,12 +63,20 @@ async function sendToAvScan (token, fileDetails) {
           isSafe: false,
           isScanned: true
         }
-      } else {
-        throw new Error('Different status message!')
+      }
+    } else if (response && response.status === 504) {
+      return {
+        status: 'un-readable',
+        key: fileDetails.key,
+        collection: fileDetails.collection,
+        fileName: fileDetails.fileName,
+        isSafe: false,
+        isScanned: true
       }
     } else {
       throw new Error('Could not get a successful response from the server')
     }
+    console.log('<<<Scanned Finished!>>>')
   } catch (error) {
     console.log('Error in sending file to scan: \n', error)
   }
