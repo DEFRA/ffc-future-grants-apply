@@ -1,9 +1,6 @@
 const { urlPrefix } = require('../config/index')
 const { uploadFile, deleteFile } = require('../services/blob-storage')
-const {
-  getToken,
-  sendToAvScan
-} = require('../utils/AvHelperFunctions')
+const { getToken, sendToAvScan } = require('../utils/AvHelperFunctions')
 const { v4: uuidv4 } = require('uuid')
 const viewTemplate = 'form-upload'
 const currentPath = `${urlPrefix}/${viewTemplate}`
@@ -12,8 +9,13 @@ const {
   fileCheck,
   createErrorsSummaryList
 } = require('../utils/uploadHelperFunctions')
-const { sendMessage } = require('../messaging')
-const { applicationRequestMsgType, fileStoreQueue } = require('../config/messaging')
+const { sendMessage, receiveMessage } = require('../messaging')
+const {
+  applicationRequestMsgType,
+  fileStoreQueue,
+  userDataRequestQueueAddress,
+  userDataResponseQueueAddress
+} = require('../config/messaging')
 function createModel (claim, multiForms) {
   return {
     multiForms: { ...multiForms },
@@ -37,9 +39,22 @@ module.exports = [
     options: {
       auth: false
     },
-    handler: (request, h) => {
+    handler: async (request, h) => {
       const formSubmitted = createModel(null, null)
+      const sessionId = uuidv4()
+      await sendMessage(
+        { sessionId, userId: 8749 },
+        applicationRequestMsgType,
+        userDataRequestQueueAddress
+      )
+      const { data } = await receiveMessage(
+        sessionId,
+        userDataResponseQueueAddress
+      )
+      formSubmitted.claim = data.claim
+      formSubmitted.multiForms = data.multiForms
       request.yar.set('formSubmitted', formSubmitted)
+      console.log('form Submitted=====>\n', formSubmitted)
       return h.view(viewTemplate, formSubmitted)
     }
   },
@@ -89,11 +104,7 @@ module.exports = [
       if (actionPath[0] === 'singleUpload') {
         try {
           const claimFile = request.payload.claim
-          const fileCheckDetails = fileCheck(
-            claimFile,
-            'claim',
-            formSubmitted
-          )
+          const fileCheckDetails = fileCheck(claimFile, 'claim', formSubmitted)
           if (!fileCheckDetails.isCheckPassed) {
             formSubmitted = {
               ...formSubmitted,
@@ -116,21 +127,18 @@ module.exports = [
             const key = uuidv4()
             if (token) {
               const content = Buffer.from(claimFile._data).toString('base64')
-              const result = await sendToAvScan(
-                token,
-                {
-                  key,
-                  collection: 'claim',
-                  service: 'fgp',
-                  extension: fileCheckDetails.fileExtension,
-                  content,
-                  fileName: fileCheckDetails.uploadedFileName
-                }
-              )
+              const result = await sendToAvScan(token, {
+                key,
+                collection: 'claim',
+                service: 'fgp',
+                extension: fileCheckDetails.file_extension,
+                content,
+                fileName: fileCheckDetails.file_name
+              })
               if (result.isScanned && result.isSafe) {
                 const fileUploaded = await uploadFile(
                   fileCheckDetails.fileBuffer,
-                  fileCheckDetails.uploadedFileName,
+                  fileCheckDetails.file_name,
                   'claim'
                 )
                 if (fileUploaded.isUploaded) {
@@ -140,9 +148,10 @@ module.exports = [
                       data: [
                         {
                           fileId: key,
-                          fileName: fileCheckDetails.uploadedFileName,
+                          fileName: fileCheckDetails.file_name,
                           fileSize: fileCheckDetails.fileSizeFormatted,
-                          fileType: fileCheckDetails.fileExtension,
+                          fileType: 'claim',
+                          file_extension: fileCheckDetails.file_extension,
                           category: 'category test',
                           userId: 8749,
                           bussinessId: 97058,
@@ -162,8 +171,8 @@ module.exports = [
                     ...formSubmitted,
                     claim: {
                       fileId: key,
-                      fileSize: fileCheckDetails.fileSizeFormatted,
-                      fileName: fileUploaded.originalFileName
+                      file_size: fileCheckDetails.fileSizeFormatted,
+                      file_name: fileUploaded.originalFileName
                     },
                     errorMessage: {
                       ...formSubmitted.errorMessage,
@@ -185,13 +194,21 @@ module.exports = [
                   ...formSubmitted,
                   errorMessage: {
                     ...formSubmitted.errorMessage,
-                    claim: { html: `${fileCheckDetails.uploadedFileName} can't be uploaded as it's not a safe file`, href: '#claim' }
+                    claim: {
+                      html: `${fileCheckDetails.file_name} can't be uploaded as it's an un-readable file or not a safe file`,
+                      href: '#claim'
+                    }
                   },
                   claim: null
                 }
                 const errorsList = createErrorsSummaryList(
                   formSubmitted,
-                  [{ html: `${fileCheckDetails.uploadedFileName} can't be uploaded as it's not a safe file`, href: '#claim' }],
+                  [
+                    {
+                      html: `${fileCheckDetails.file_name} can't be uploaded as it's not a safe file`,
+                      href: '#claim'
+                    }
+                  ],
                   'claim'
                 )
                 formSubmitted.errorSummaryList = errorsList
@@ -227,14 +244,13 @@ module.exports = [
         }
         let fileId
         if (actionPath[1] === 'claim') {
-          fileId = formSubmitted[actionPath[1]].fileId
+          fileId = formSubmitted[actionPath[1]].file_id
         } else {
           const targetFile = formSubmitted.multiForms[actionPath[1]].find(
-            (item) => item.fileName === fileName
+            (item) => item.file_name === fileName
           )
-          fileId = targetFile.fileId
+          fileId = targetFile.file_id
         }
-        console.info('FILE ID===>  ', fileId)
         const isDeleted = await deleteFile(fileName, actionPath[1], fileId)
         if (isDeleted && actionPath[1] === 'claim') {
           formSubmitted = {
@@ -249,7 +265,7 @@ module.exports = [
           return h.view(viewTemplate, formSubmitted)
         } else if (isDeleted && actionPath[1] !== 'claim') {
           const filteredArray = formSubmitted.multiForms[actionPath[1]].filter(
-            (item) => item.uploadedFileName !== fileName
+            (item) => item.file_name !== fileName
           )
           formSubmitted = {
             ...formSubmitted,
@@ -320,23 +336,28 @@ module.exports = [
                 collection: actionPath[1],
                 content,
                 service: 'fgp',
-                extension: fileCheckDetails.fileExtension,
-                fileName: fileCheckDetails.uploadedFileName
+                extension: fileCheckDetails.file_extension,
+                fileName: fileCheckDetails.file_name
               })
               if (result.isScanned && result.isSafe) {
                 const fileUploaded = await uploadFile(
                   fileCheckDetails.fileBuffer,
-                  fileCheckDetails.uploadedFileName,
+                  fileCheckDetails.file_name,
                   actionPath[1]
                 )
                 if (fileUploaded.isUploaded) {
-                  newFilesArray.push({ ...fileCheckDetails, fileId: key })
+                  newFilesArray.push({
+                    ...fileCheckDetails,
+                    file_id: key,
+                    fie_size: fileCheckDetails.fileSizeFormatted
+                  })
 
                   queueArray.push({
                     fileId: key,
-                    fileName: fileCheckDetails.uploadedFileName,
+                    fileName: fileCheckDetails.file_name,
                     fileSize: fileCheckDetails.fileSizeFormatted,
-                    fileType: fileCheckDetails.fileExtension,
+                    fileType: actionPath[1],
+                    file_extension: fileCheckDetails.file_extension,
                     category: 'category test',
                     userId: 8749,
                     bussinessId: 97058,
@@ -350,7 +371,7 @@ module.exports = [
                 }
               } else if (result.isScanned && !result.isSafe) {
                 errorArray.push({
-                  html: `${fileCheckDetails.uploadedFileName}, can't be uploaded as it's not safe and might have virus`,
+                  html: `${fileCheckDetails.file_name}, can't be uploaded as it's not safe and might have virus`,
                   href: '#' + actionPath[1]
                 })
               }
@@ -361,14 +382,15 @@ module.exports = [
               })
             }
           }
-          queueArray.length && await sendMessage(
-            {
-              method: 'add',
-              data: queueArray
-            },
-            applicationRequestMsgType,
-            fileStoreQueue
-          )
+          queueArray.length &&
+            (await sendMessage(
+              {
+                method: 'add',
+                data: queueArray
+              },
+              applicationRequestMsgType,
+              fileStoreQueue
+            ))
         }
         if (newFilesArray.length) {
           formSubmitted = formSubmitted.multiForms[actionPath[1]]
