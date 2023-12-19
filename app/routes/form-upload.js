@@ -170,7 +170,7 @@ module.exports = [
                   formSubmitted = {
                     ...formSubmitted,
                     claim: {
-                      fileId: key,
+                      file_id: key,
                       file_size: fileCheckDetails.fileSizeFormatted,
                       file_name: fileUploaded.originalFileName
                     },
@@ -251,6 +251,7 @@ module.exports = [
           )
           fileId = targetFile.file_id
         }
+        console.log(fileId)
         const isDeleted = await deleteFile(fileName, actionPath[1], fileId)
         if (isDeleted && actionPath[1] === 'claim') {
           formSubmitted = {
