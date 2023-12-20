@@ -1,3 +1,5 @@
+const ExcelJS = require('exceljs');
+
 let errorObject = {
   html: '',
   file_name: '',
@@ -117,4 +119,22 @@ function fileCheck (uploadedFile, inputName, state) {
   }
   return errorObject
 }
-module.exports = { fileCheck, createErrorsSummaryList }
+
+async function extractDataToJson (fileBuffer) {
+  const workBook = new ExcelJS.Workbook()
+  await workBook.xlsx.load(fileBuffer)
+  const data = []
+  workBook.eachSheet(sheet => {
+    const sheetData = []
+    sheet.eachRow(row => {
+      sheetData.push(row.values)
+    })
+    data.push({
+      sheetName: sheet.name,
+      data: sheetData
+    })
+  })
+    return data
+
+}
+module.exports = { fileCheck, createErrorsSummaryList, extractDataToJson }

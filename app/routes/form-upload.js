@@ -7,7 +7,8 @@ const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
 const {
   fileCheck,
-  createErrorsSummaryList
+  createErrorsSummaryList,
+  extractDataToJson
 } = require('../utils/uploadHelperFunctions')
 const { sendMessage, receiveMessage } = require('../messaging')
 const {
@@ -127,6 +128,11 @@ module.exports = [
             const key = uuidv4()
             if (token) {
               const content = Buffer.from(claimFile._data).toString('base64')
+              
+              // We can uncomment this line and move it. 1st line below, send the file buffer to a function and it returns extracted data from xls file and the 2nd line logs the data in a table.
+
+              // const excelFile = await extractDataToJson(claimFile._data)
+              // console.table(excelFile[0].data)
               const result = await sendToAvScan(token, {
                 key,
                 collection: 'claim',
