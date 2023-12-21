@@ -1,4 +1,4 @@
-const ExcelJS = require('exceljs');
+const ExcelJS = require('exceljs')
 
 let errorObject = {
   html: '',
@@ -134,7 +134,6 @@ async function extractDataToJson (fileBuffer) {
       data: sheetData
     })
   })
-    return data
-
+  return data
 }
 module.exports = { fileCheck, createErrorsSummaryList, extractDataToJson }
