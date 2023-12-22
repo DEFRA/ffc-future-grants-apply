@@ -11,7 +11,13 @@ ignore:
         reason: no direct upgrade or patch available
         expires: '2024-03-21T11:23:27.474Z'
   SNYK-JS-INFLIGHT-6095116:
-    - 'inflight@1.0.6 > exceljs@4.4.0':
-        reason: None given
-        expires: '2024-09-08T11:46:11.839Z'
+    - '*':
+        reason: None Given
+        expires: 2024-01-04T10:57:50.229Z
+        created: 2023-12-05T10:57:50.234Z
+  SNYK-JS-AXIOS-6124857:
+    - '*':
+        reason: None Given
+        expires: 2024-01-13T11:21:41.617Z
+        created: 2023-12-14T11:21:41.621Z
 patch: {}
