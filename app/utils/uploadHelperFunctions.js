@@ -45,7 +45,6 @@ function createErrorsSummaryList (formSubmitted, errorArray, actionPath) {
   return errorsSummary
 }
 function fileCheck (uploadedFile, inputName, state) {
-  console.log(uploadedFile, inputName, state)
   const fileNames =
     state.multiForms[`${inputName}`] &&
     state.multiForms[`${inputName}`].map((item) => item.file_name)

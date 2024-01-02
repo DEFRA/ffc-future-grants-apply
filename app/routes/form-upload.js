@@ -7,13 +7,13 @@ const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
 const {
   fileCheck,
-  createErrorsSummaryList
-  // extractDataToJson
+  createErrorsSummaryList,
+  extractDataToJson
 } = require('../utils/uploadHelperFunctions')
 const { sendMessage, receiveMessage } = require('../messaging')
 const {
   applicationRequestMsgType,
-  fileStoreQueue,
+  fileStoreQueueAddress,
   userDataRequestQueueAddress,
   userDataResponseQueueAddress
 } = require('../config/messaging')
@@ -54,8 +54,6 @@ module.exports = [
       )
       formSubmitted.claim = data.claim
       formSubmitted.multiForms = data.multiForms
-      request.yar.set('formSubmitted', formSubmitted)
-      console.log('form Submitted=====>\n', formSubmitted)
       return h.view(viewTemplate, formSubmitted)
     }
   },
@@ -169,7 +167,7 @@ module.exports = [
                       ]
                     },
                     applicationRequestMsgType,
-                    fileStoreQueue
+                    fileStoreQueueAddress
                   )
                   formSubmitted = {
                     ...formSubmitted,
@@ -394,7 +392,7 @@ module.exports = [
                 data: queueArray
               },
               applicationRequestMsgType,
-              fileStoreQueue
+              fileStoreQueueAddress
             ))
         }
         if (newFilesArray.length) {
