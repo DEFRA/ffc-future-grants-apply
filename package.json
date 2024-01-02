@@ -48,19 +48,20 @@
     "jquery": "^3.7.1",
     "jsonwebtoken": "^9.0.0",
     "jwk-to-pem": "^2.0.5",
-    "notifications-node-client": "^7.0.3",
+    "notifications-node-client": "^7.0.6",
     "nunjucks": "^3.2.3",
     "uuid": "^8.3.2"
   },
   "overrides": {
     "notifications-node-client": {
       "jsonwebtoken": "9.0.0",
-      "axios": "1.6.2"
+      "axios": "1.6.3"
     },
     "@azure/identity": {
       "jsonwebtoken": "9.0.0"
     },
-    "semver": "7.5.2"
+    "semver": "7.5.2",
+    "follow-redirects": "1.15.4"
   },
   "devDependencies": {
     "@hapi/catbox-memory": "^5.0.1",
