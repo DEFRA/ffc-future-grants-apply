@@ -7,8 +7,8 @@ const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
 const {
   fileCheck,
-  createErrorsSummaryList,
-  extractDataToJson
+  createErrorsSummaryList
+  // ,extractDataToJson
 } = require('../utils/uploadHelperFunctions')
 const { sendMessage, receiveMessage } = require('../messaging')
 const {
