@@ -20,11 +20,11 @@ const mqSchema = Joi.object({
     type: 'queue'
   },
   userDataRequestQueueAddress: {
-    address: process.env.USER_DATA_REQUEST_QUEUE_ADDRESS,
+    address: process.env.USER_DATA_REQ_QUEUE_ADDRESS,
     type: 'queue'
   },
   userDataResponseQueueAddress: {
-    address: process.env.USER_DATA_RESPONSE_QUEUE_ADDRESS,
+    address: process.env.USER_DATA_RES_QUEUE_ADDRESS,
     type: 'sessionQueue'
   },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
@@ -61,11 +61,11 @@ const mqConfig = {
     type: 'queue'
   },
   userDataRequestQueueAddress: {
-    address: process.env.USER_DATA_REQUEST_QUEUE_ADDRESS,
+    address: process.env.USER_DATA_REQ_QUEUE_ADDRESS,
     type: 'queue'
   },
   userDataResponseQueueAddress: {
-    address: process.env.USER_DATA_RESPONSE_QUEUE_ADDRESS,
+    address: process.env.USER_DATA_RES_QUEUE_ADDRESS,
     type: 'sessionQueue'
   },
   fileStoreQueueAddress: {

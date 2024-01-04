@@ -54,6 +54,7 @@ module.exports = [
       )
       formSubmitted.claim = data.claim
       formSubmitted.multiForms = data.multiForms
+      request.yar.set('formSubmitted', formSubmitted)
       return h.view(viewTemplate, formSubmitted)
     }
   },
@@ -253,7 +254,6 @@ module.exports = [
           )
           fileId = targetFile.file_id
         }
-        console.log(fileId)
         const isDeleted = await deleteFile(fileName, actionPath[1], fileId)
         if (isDeleted && actionPath[1] === 'claim') {
           formSubmitted = {

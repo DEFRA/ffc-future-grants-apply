@@ -1,4 +1,4 @@
-const axios = require('axios')
+const Wreck = require('@hapi/wreck')
 const tokenUrl = process.env.AV_ACCESS_TOKEN_URL
 const clientId = process.env.AV_CLIENT_ID
 const clientSecret = process.env.AV_CLIENT_SECRET
@@ -17,15 +17,16 @@ const getTokenHeaders = {
 }
 async function getToken () {
   try {
-    const response = await axios.post(tokenUrl, getTokenRequestBody, {
-      getTokenHeaders
+    const { res, payload } = await Wreck.post(tokenUrl, {
+      payload: getTokenRequestBody.toString(),
+      headers: getTokenHeaders
     })
-    if (!response && !response.status === 200) {
+    if (res.statusCode !== 200) {
       throw new Error(
-        `Token Request Failed: ${response.status} ${response.statusText}`
+        `Token Request Failed: ${res.statusCode} ${res.statusMessage}`
       )
     }
-    const token = response.data
+    const token = JSON.parse(payload.toString('utf8'))
     const accessToken = `${token.token_type} ${token.access_token}`
     return { token: accessToken, isTokenExist: true }
   } catch (error) {
@@ -40,9 +41,13 @@ async function sendToAvScan (token, fileDetails) {
   }
   try {
     console.log('Sending the file for scanning...')
-    const response = await axios.put(fetchUrl, fileDetails, { headers })
-    if (response && response.status === 200) {
-      const { data } = response
+    const { payload, res } = await Wreck.put(fetchUrl, {
+      payload: fileDetails,
+      headers,
+      json: true
+    })
+    if (res.statusCode === 200) {
+      const data = payload.toString('utf8')
       const status = data.split(' ')[1]
       if (status === 'Clean') {
         return {
@@ -64,7 +69,7 @@ async function sendToAvScan (token, fileDetails) {
           isScanned: true
         }
       }
-    } else if (response && response.status === 504) {
+    } else if (res.statusCode === 504) {
       return {
         status: 'un-readable',
         key: fileDetails.key,
