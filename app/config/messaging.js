@@ -139,5 +139,6 @@ module.exports = {
   registerYourInterestRequestQueue,
   fileStoreQueueAddress,
   userDataRequestQueueAddress,
-  userDataResponseQueueAddress, mqConfig
+  userDataResponseQueueAddress,
+  mqConfig
 }

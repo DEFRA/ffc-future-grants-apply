@@ -1,5 +1,5 @@
 const Joi = require('joi')
-const {mqConfig} = require('./messaging')
+const { mqConfig } = require('./messaging')
 const authConfig = require('./auth')
 const urlPrefix = '/apply'
 const schema = Joi.object({
