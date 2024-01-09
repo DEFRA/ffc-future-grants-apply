@@ -1,8 +1,7 @@
 const Joi = require('joi')
-const mqConfig = require('./messaging')
+const { mqConfig } = require('./messaging')
 const authConfig = require('./auth')
 const urlPrefix = '/apply'
-
 const schema = Joi.object({
   appInsights: Joi.object(),
   namespace: Joi.string().optional(),
@@ -16,6 +15,7 @@ const schema = Joi.object({
       tls: Joi.object()
     }
   },
+
   cookie: {
     cookieNameCookiePolicy: Joi.string().default('ffc_ahwr_cookie_policy'),
     cookieNameAuth: Joi.string().default('ffc_ahwr_auth'),
@@ -120,5 +120,4 @@ if (result.error) {
 const value = result.value
 value.mqConfig = mqConfig
 value.authConfig = authConfig
-
 module.exports = value
