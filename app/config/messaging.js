@@ -43,7 +43,6 @@ const mqSchema = Joi.object({
     messageType: `${msgTypePrefix}.register.your.interest.request`
   }
 })
-
 const mqConfig = {
   messageQueue: {
     host: process.env.MESSAGE_QUEUE_HOST,
@@ -140,5 +139,5 @@ module.exports = {
   registerYourInterestRequestQueue,
   fileStoreQueueAddress,
   userDataRequestQueueAddress,
-  userDataResponseQueueAddress
+  userDataResponseQueueAddress, mqConfig
 }

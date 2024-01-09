@@ -1,6 +1,5 @@
 const { sendMessage, receiveMessage } = require('../')
-const { applicationRequestQueue, applicationRequestMsgType, fetchApplicationRequestMsgType, applicationResponseQueue } = require('../../config').mqConfig
-
+const { applicationRequestQueue, applicationRequestMsgType, fetchApplicationRequestMsgType, applicationResponseQueue } = require('../../config/index').mqConfig
 async function getApplication (applicationReference, sessionId) {
   await sendMessage({ applicationReference }, fetchApplicationRequestMsgType, applicationRequestQueue, { sessionId })
   return receiveMessage(sessionId, applicationResponseQueue)
@@ -8,7 +7,6 @@ async function getApplication (applicationReference, sessionId) {
 
 async function sendApplication (application, sessionId) {
   console.log(`Sending application ${JSON.stringify(application)} to queue ${applicationRequestQueue.address} with sessionID ${sessionId}.`)
-
   await sendMessage(
     application,
     applicationRequestMsgType,
@@ -19,7 +17,6 @@ async function sendApplication (application, sessionId) {
     sessionId,
     applicationResponseQueue
   )
-
   console.log(`Received response ${JSON.stringify(response)} from queue ${applicationResponseQueue.address} for sessionID ${sessionId}.`)
   return response?.applicationReference
 }
