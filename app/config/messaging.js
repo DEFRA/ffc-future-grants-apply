@@ -1,47 +1,46 @@
 const Joi = require('joi')
-
 const msgTypePrefix = 'uk.gov.ffc.grants'
 
 const mqSchema = Joi.object({
-  messageQueue: {
+  messageQueue: Joi.object({
     host: Joi.string().required(),
     username: Joi.string(),
     password: Joi.string(),
     useCredentialChain: Joi.bool().default(false),
     appInsights: Joi.object(),
     retries: Joi.number()
-  },
-  applicationRequestQueue: {
-    address: process.env.APPLICATION_REQUEST_QUEUE_ADDRESS,
-    type: 'queue'
-  },
-  fileStoreQueueAddress: {
-    address: process.env.FILE_STORE_QUEUE_ADDRESS,
-    type: 'queue'
-  },
-  userDataRequestQueueAddress: {
-    address: process.env.USER_DATA_REQ_QUEUE_ADDRESS,
-    type: 'queue'
-  },
-  userDataResponseQueueAddress: {
-    address: process.env.USER_DATA_RES_QUEUE_ADDRESS,
-    type: 'sessionQueue'
-  },
-  applicationRequestMsgType: `${msgTypePrefix}.app.request`,
-  applicationResponseQueue: {
-    address: process.env.APPLICATION_RESPONSE_QUEUE_ADDRESS,
-    type: 'queue'
-  },
-  eventQueue: {
-    address: process.env.EVENT_QUEUE_ADDRESS,
-    type: 'queue'
-  },
-  fetchApplicationRequestMsgType: `${msgTypePrefix}.fetch.app.request`,
-  registerYourInterestRequestQueue: {
-    address: process.env.REGISTER_YOUR_INTEREST_REQUEST_QUEUE_ADDRESS,
-    type: 'queue',
-    messageType: `${msgTypePrefix}.register.your.interest.request`
-  }
+  }),
+  applicationRequestQueueAddress: Joi.object({
+    address: Joi.string().required(),
+    type: Joi.string().required().valid('queue')
+  }),
+  fileStoreQueueAddress: Joi.object({
+    address: Joi.string().required(),
+    type: Joi.string().required().valid('queue')
+  }),
+  userDataRequestQueueAddress: Joi.object({
+    address: Joi.string().required(),
+    type: Joi.string().required().valid('queue')
+  }),
+  userDataResponseQueueAddress: Joi.object({
+    address: Joi.string().required(),
+    type: Joi.string().required().valid('sessionQueue')
+  }),
+  applicationRequestMsgType: Joi.string().required(),
+  applicationResponseQueue: Joi.object({
+    address: Joi.string().required(),
+    type: Joi.string().required().valid('queue')
+  }),
+  eventQueue: Joi.object({
+    address: Joi.string().required(),
+    type: Joi.string().required().valid('queue')
+  }),
+  fetchApplicationRequestMsgType: Joi.string().required(),
+  registerYourInterestRequestQueue: Joi.object({
+    address: Joi.string().required(),
+    type: Joi.string().required().valid('queue'),
+    messageType: Joi.string().required()
+  })
 })
 const mqConfig = {
   messageQueue: {
@@ -55,7 +54,7 @@ const mqConfig = {
         : undefined,
     retries: 5
   },
-  applicationRequestQueue: {
+  applicationRequestQueueAddress: {
     address: process.env.APPLICATION_REQUEST_QUEUE_ADDRESS,
     type: 'queue'
   },
@@ -73,7 +72,7 @@ const mqConfig = {
   },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
 
-  applicationResponseQueue: {
+  applicationResponseQueueAddress: {
     address: process.env.APPLICATION_RESPONSE_QUEUE_ADDRESS,
     type: 'queue'
   },
@@ -91,23 +90,23 @@ const mqConfig = {
 const mqResult = mqSchema.validate(mqConfig, {
   abortEarly: false
 })
+console.log('\n \n \n ', mqResult, '\n')
 if (mqResult.error) {
   throw new Error(
     `The message queue config is invalid. ${mqResult.error.message}`
   )
 }
-
-const applicationRequestQueue = {
+const applicationRequestQueueAddress = {
   ...mqResult.value.messageQueue,
-  ...mqResult.value.applicationRequestQueue
+  ...mqResult.value.applicationRequestQueueAddress
 }
 const fileStoreQueueAddress = {
   ...mqResult.value.messageQueue,
   ...mqResult.value.fileStoreQueueAddress
 }
-const applicationResponseQueue = {
+const applicationResponseQueueAddress = {
   ...mqResult.value.messageQueue,
-  ...mqResult.value.applicationResponseQueue
+  ...mqResult.value.applicationResponseQueueAddress
 }
 const eventQueue = {
   ...mqResult.value.messageQueue,
@@ -131,8 +130,8 @@ const userDataResponseQueueAddress = {
   ...mqResult.value.userDataResponseQueueAddress
 }
 module.exports = {
-  applicationRequestQueue,
-  applicationResponseQueue,
+  applicationRequestQueueAddress,
+  applicationResponseQueueAddress,
   eventQueue,
   fetchApplicationRequestQueue,
   applicationRequestMsgType,

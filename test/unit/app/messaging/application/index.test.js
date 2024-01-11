@@ -1,5 +1,5 @@
 const { getApplication } = require('../../../../../app/messaging/application')
-const { applicationRequestQueue, applicationResponseQueue, fetchApplicationRequestMsgType } = require('../../../../../app/config').mqConfig
+const { applicationRequestQueueAddress, applicationResponseQueueAddress, fetchApplicationRequestMsgType } = require('../../../../../app/config').mqConfig
 
 jest.mock('../../../../../app/messaging')
 const { receiveMessage, sendMessage } = require('../../../../../app/messaging')
@@ -20,8 +20,8 @@ describe('application messaging tests', () => {
 
     expect(message).toEqual(receiveMessageRes)
     expect(receiveMessage).toHaveBeenCalledTimes(1)
-    expect(receiveMessage).toHaveBeenCalledWith(sessionId, applicationResponseQueue)
+    expect(receiveMessage).toHaveBeenCalledWith(sessionId, applicationResponseQueueAddress)
     expect(sendMessage).toHaveBeenCalledTimes(1)
-    expect(sendMessage).toHaveBeenCalledWith({ applicationReference: reference }, fetchApplicationRequestMsgType, applicationRequestQueue, { sessionId })
+    expect(sendMessage).toHaveBeenCalledWith({ applicationReference: reference }, fetchApplicationRequestMsgType, applicationRequestQueueAddress, { sessionId })
   })
 })
