@@ -27,7 +27,7 @@ const mqSchema = Joi.object({
     type: Joi.string().required().valid('sessionQueue')
   }),
   applicationRequestMsgType: Joi.string().required(),
-  applicationResponseQueue: Joi.object({
+  applicationResponseQueueAddress: Joi.object({
     address: Joi.string().required(),
     type: Joi.string().required().valid('queue')
   }),
