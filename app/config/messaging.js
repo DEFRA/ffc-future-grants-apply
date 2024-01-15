@@ -1,84 +1,96 @@
 const Joi = require('joi')
 const msgTypePrefix = 'uk.gov.ffc.grants'
 
+const sharedConfigSchema = {
+  host: Joi.string().default('localhost'),
+  username: Joi.string(),
+  password: Joi.string(),
+  appInsights: Joi.object(),
+  useCredentialChain: Joi.bool().default(false),
+  retries: 5
+}
+const sharedConfig = {
+  host: process.env.MESSAGE_QUEUE_HOST,
+  username: process.env.MESSAGE_QUEUE_USER,
+  password: process.env.MESSAGE_QUEUE_PASSWORD,
+  appInsights:
+    process.env.NODE_ENV === 'production'
+      ? require('applicationinsights')
+      : undefined,
+  useCredentialChain: process.env.NODE_ENV === 'production',
+  retries: 5
+}
 const mqSchema = Joi.object({
-  messageQueue: Joi.object({
-    host: Joi.string().required(),
-    username: Joi.string(),
-    password: Joi.string(),
-    useCredentialChain: Joi.bool().default(false),
-    appInsights: Joi.object(),
-    retries: Joi.number()
-  }),
-  applicationRequestQueueAddress: Joi.object({
-    address: Joi.string().required(),
-    type: Joi.string().required().valid('queue')
-  }),
-  fileStoreQueueAddress: Joi.object({
-    address: Joi.string().required(),
-    type: Joi.string().required().valid('queue')
-  }),
-  userDataRequestQueueAddress: Joi.object({
-    address: Joi.string().required(),
-    type: Joi.string().required().valid('queue')
-  }),
-  userDataResponseQueueAddress: Joi.object({
-    address: Joi.string().required(),
-    type: Joi.string().required().valid('sessionQueue')
-  }),
-  applicationRequestMsgType: Joi.string().required(),
-  applicationResponseQueueAddress: Joi.object({
-    address: Joi.string().required(),
-    type: Joi.string().required().valid('queue')
-  }),
-  eventQueue: Joi.object({
-    address: Joi.string().required(),
-    type: Joi.string().required().valid('queue')
-  }),
-  fetchApplicationRequestMsgType: Joi.string().required(),
-  registerYourInterestRequestQueue: Joi.object({
-    address: Joi.string().required(),
-    type: Joi.string().required().valid('queue'),
-    messageType: Joi.string().required()
-  })
+  applicationRequestQueueAddress: {
+    address: Joi.string(),
+    type: Joi.string(),
+    ...sharedConfigSchema
+  },
+  fileStoreQueueAddress: {
+    address: Joi.string(),
+    type: Joi.string(),
+    ...sharedConfigSchema
+  },
+  userDataRequestQueueAddress: {
+    address: Joi.string(),
+    type: Joi.string(),
+    ...sharedConfigSchema
+  },
+  userDataResponseQueueAddress: {
+    address: Joi.string(),
+    type: Joi.string(),
+    ...sharedConfigSchema
+  },
+  applicationRequestMsgType: Joi.string(),
+  applicationResponseQueueAddress: {
+    address: Joi.string(),
+    type: Joi.string(),
+    ...sharedConfigSchema
+  },
+  eventQueue: {
+    address: Joi.string(),
+    type: Joi.string(),
+    ...sharedConfigSchema
+  },
+  fetchApplicationRequestMsgType: Joi.string(),
+  registerYourInterestRequestQueue: {
+    address: Joi.string(),
+    type: Joi.string(),
+    messageType: Joi.string()
+  }
 })
 const mqConfig = {
-  messageQueue: {
-    host: process.env.MESSAGE_QUEUE_HOST,
-    username: process.env.MESSAGE_QUEUE_USER,
-    password: process.env.MESSAGE_QUEUE_PASSWORD,
-    useCredentialChain: process.env.NODE_ENV === 'production',
-    appInsights:
-      process.env.NODE_ENV === 'production'
-        ? require('applicationinsights')
-        : undefined,
-    retries: 5
-  },
   applicationRequestQueueAddress: {
     address: process.env.APPLICATION_REQUEST_QUEUE_ADDRESS,
-    type: 'queue'
+    type: 'queue',
+    ...sharedConfig
   },
   userDataRequestQueueAddress: {
     address: process.env.USER_DATA_REQ_QUEUE_ADDRESS,
-    type: 'queue'
+    type: 'queue',
+    ...sharedConfig
   },
   userDataResponseQueueAddress: {
     address: process.env.USER_DATA_RES_QUEUE_ADDRESS,
-    type: 'sessionQueue'
+    type: 'sessionQueue',
+    ...sharedConfig
   },
   fileStoreQueueAddress: {
     address: process.env.FILE_STORE_QUEUE_ADDRESS,
-    type: 'queue'
+    type: 'queue',
+    ...sharedConfig
   },
   applicationRequestMsgType: `${msgTypePrefix}.app.request`,
 
   applicationResponseQueueAddress: {
     address: process.env.APPLICATION_RESPONSE_QUEUE_ADDRESS,
-    type: 'queue'
+    type: 'queue',
+    ...sharedConfig
   },
   eventQueue: {
     address: process.env.EVENT_QUEUE_ADDRESS,
-    type: 'queue'
+    type: 'queue',
+    ...sharedConfig
   },
   fetchApplicationRequestMsgType: `${msgTypePrefix}.fetch.app.request`,
   registerYourInterestRequestQueue: {
@@ -87,48 +99,26 @@ const mqConfig = {
     messageType: `${msgTypePrefix}.register.your.interest.request`
   }
 }
-const mqResult = mqSchema.validate(mqConfig, {
+const {value, error} = mqSchema.validate(mqConfig, {
   abortEarly: false
 })
-console.log('\n \n \n ', mqResult, '\n')
-if (mqResult.error) {
+console.log('\n \n \n ', value, '\n')
+if (error) {
   throw new Error(
-    `The message queue config is invalid. ${mqResult.error.message}`
+    `The message queue config is invalid. ${error.message}`
   )
 }
-const applicationRequestQueueAddress = {
-  ...mqResult.value.messageQueue,
-  ...mqResult.value.applicationRequestQueueAddress
-}
-const fileStoreQueueAddress = {
-  ...mqResult.value.messageQueue,
-  ...mqResult.value.fileStoreQueueAddress
-}
-const applicationResponseQueueAddress = {
-  ...mqResult.value.messageQueue,
-  ...mqResult.value.applicationResponseQueueAddress
-}
-const eventQueue = {
-  ...mqResult.value.messageQueue,
-  ...mqResult.value.eventQueue
-}
-const fetchApplicationRequestQueue = {
-  ...mqResult.value.messageQueue,
-  ...mqResult.value.fetchApplicationRequestQueue
-}
-const applicationRequestMsgType = mqResult.value.applicationRequestMsgType
-const registerYourInterestRequestQueue = {
-  ...mqResult.value.messageQueue,
-  ...mqResult.value.registerYourInterestRequestQueue
-}
-const userDataRequestQueueAddress = {
-  ...mqResult.value.messageQueue,
-  ...mqResult.value.userDataRequestQueueAddress
-}
-const userDataResponseQueueAddress = {
-  ...mqResult.value.messageQueue,
-  ...mqResult.value.userDataResponseQueueAddress
-}
+const {
+  applicationRequestQueueAddress,
+  applicationResponseQueueAddress,
+  eventQueue,
+  fetchApplicationRequestQueue,
+  applicationRequestMsgType,
+  registerYourInterestRequestQueue,
+  fileStoreQueueAddress,
+  userDataRequestQueueAddress,
+  userDataResponseQueueAddress
+} = value
 module.exports = {
   applicationRequestQueueAddress,
   applicationResponseQueueAddress,
