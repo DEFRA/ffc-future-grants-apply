@@ -7,6 +7,8 @@ data:
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
   APPLICATION_REQUEST_QUEUE_ADDRESS: {{ quote .Values.container.applicationRequestQueueAddress }}
   FILE_STORE_QUEUE_ADDRESS: {{ quote .Values.container.fileStoreQueueAddress }}
+  USER_DATA_REQ_QUEUE_ADDRESS: {{ quote .Values.container.userDataRequestQueueAddress }}
+  USER_DATA_RES_QUEUE_ADDRESS: {{ quote .Values.container.userDataResponseQueueAddress }}
 
   APPLICATION_RESPONSE_QUEUE_ADDRESS: {{ quote .Values.container.applicationResponseQueueAddress }}
   EVENT_QUEUE_ADDRESS: {{ .Values.container.eventQueueAddress }}
