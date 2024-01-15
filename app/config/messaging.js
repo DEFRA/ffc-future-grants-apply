@@ -99,7 +99,7 @@ const mqConfig = {
     messageType: `${msgTypePrefix}.register.your.interest.request`
   }
 }
-const {value, error} = mqSchema.validate(mqConfig, {
+const { value, error } = mqSchema.validate(mqConfig, {
   abortEarly: false
 })
 console.log('\n \n \n ', value, '\n')
