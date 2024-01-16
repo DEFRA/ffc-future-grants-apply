@@ -1,26 +1,23 @@
 const { sendMessage, receiveMessage } = require('../')
-const { applicationRequestQueue, applicationRequestMsgType, fetchApplicationRequestMsgType, applicationResponseQueue } = require('../../config').mqConfig
-
+const { applicationRequestQueueAddress, applicationRequestMsgType, fetchApplicationRequestMsgType, applicationResponseQueueAddress } = require('../../config/index').mqConfig
 async function getApplication (applicationReference, sessionId) {
-  await sendMessage({ applicationReference }, fetchApplicationRequestMsgType, applicationRequestQueue, { sessionId })
-  return receiveMessage(sessionId, applicationResponseQueue)
+  await sendMessage({ applicationReference }, fetchApplicationRequestMsgType, applicationRequestQueueAddress, { sessionId })
+  return receiveMessage(sessionId, applicationResponseQueueAddress)
 }
 
 async function sendApplication (application, sessionId) {
-  console.log(`Sending application ${JSON.stringify(application)} to queue ${applicationRequestQueue.address} with sessionID ${sessionId}.`)
-
+  console.log(`Sending application ${JSON.stringify(application)} to queue ${applicationRequestQueueAddress.address} with sessionID ${sessionId}.`)
   await sendMessage(
     application,
     applicationRequestMsgType,
-    applicationRequestQueue,
+    applicationRequestQueueAddress,
     { sessionId }
   )
   const response = await receiveMessage(
     sessionId,
-    applicationResponseQueue
+    applicationResponseQueueAddress
   )
-
-  console.log(`Received response ${JSON.stringify(response)} from queue ${applicationResponseQueue.address} for sessionID ${sessionId}.`)
+  console.log(`Received response ${JSON.stringify(response)} from queue ${applicationResponseQueueAddress.address} for sessionID ${sessionId}.`)
   return response?.applicationReference
 }
 

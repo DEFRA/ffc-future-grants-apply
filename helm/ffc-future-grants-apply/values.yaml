@@ -40,6 +40,9 @@ container:
   limitMemory: 400Mi
   limitCpu: 400m
   applicationRequestQueueAddress: ffc-future-grants-application-request
+  fileStoreQueueAddress: ffc-future-grants-file-data
+  userDataRequestQueueAddress:
+  userDataResponseQueueAddress:
   applicationResponseQueueAddress: ffc-future-grants-application-response
   cookiePassword: who-likes-cookies-i-like-cookies-everybody-likes-cookies
   eventQueueAddress: ffc-ahwr-event

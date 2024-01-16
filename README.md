@@ -30,8 +30,8 @@ Please ask a developer for an example `.env` file that you can include in the ro
 
 | Name                                        | Description                                                                                      |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| APPLICATIONREQUEST_QUEUE_ADDRESS            | Name of message queue used to send application requests                                          |
-| APPLICATIONRESPONSE_QUEUE_ADDRESS           | Name of session enabled message queue used to receive application responses                      |
+| APPLICATION_REQUEST_QUEUE_ADDRESS            | Name of message queue used to send application requests                                          |
+| APPLICATION_RESPONSE_QUEUE_ADDRESS           | Name of session enabled message queue used to receive application responses                      |
 | MESSAGE_QUEUE_HOST                          | Azure Service Bus hostname, e.g. `myservicebus.servicebus.windows.net`                           |
 | MESSAGE_QUEUE_PASSWORD                      | Azure Service Bus SAS policy key                                                                 |
 | MESSAGE_QUEUE_SUFFIX                        | Developer initials                                                                               |
