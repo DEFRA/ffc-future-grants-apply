@@ -5,8 +5,12 @@ data:
   PORT: {{ quote .Values.container.port }}
   NAMESPACE: {{ quote .Values.namespace }}
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
-  APPLICATIONREQUEST_QUEUE_ADDRESS: {{ quote .Values.container.applicationRequestQueueAddress }}
-  APPLICATIONRESPONSE_QUEUE_ADDRESS: {{ quote .Values.container.applicationResponseQueueAddress }}
+  APPLICATION_REQUEST_QUEUE_ADDRESS: {{ quote .Values.container.applicationRequestQueueAddress }}
+  FILE_STORE_QUEUE_ADDRESS: {{ quote .Values.container.fileStoreQueueAddress }}
+  USER_DATA_REQ_QUEUE_ADDRESS: {{ quote .Values.container.userDataRequestQueueAddress }}
+  USER_DATA_RES_QUEUE_ADDRESS: {{ quote .Values.container.userDataResponseQueueAddress }}
+  APPLICATION_RESPONSE_QUEUE_ADDRESS: {{ quote .Values.container.applicationResponseQueueAddress }}
+  COOKIE_PASSWORD: {{quote .Values.container.cookiePassword}}
   EVENT_QUEUE_ADDRESS: {{ .Values.container.eventQueueAddress }}
   MESSAGE_QUEUE_HOST: {{ quote .Values.container.messageQueueHost }}
   {{- if .Values.container.redisHostname }}
