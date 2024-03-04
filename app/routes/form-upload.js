@@ -55,6 +55,7 @@ module.exports = [
       formSubmitted.claim = data.claim
       formSubmitted.multiForms = data.multiForms
       request.yar.set('formSubmitted', formSubmitted)
+      console.log(formSubmitted)
       return h.view(viewTemplate, formSubmitted)
     }
   },
