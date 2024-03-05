@@ -8,7 +8,9 @@ $moj-assets-path: "~@ministryofjustice/frontend/moj/assets/";
 .nojs-hidden {
   display: none;
 }
-
+html {
+  scroll-behavior: smooth;
+}
 .js-enabled .nojs-hidden {
   display: block;
 }
