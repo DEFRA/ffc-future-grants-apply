@@ -80,6 +80,8 @@
       {% if claim %} Files added {% else %} Upload a file {% endif %}
     </h2>
      <form method="POST" action="{{ formActionPage }}#claim" enctype="multipart/form-data">
+      
+      {% if not claim.file_name%}
       {{
         govukFileUpload({
           id: "claim",
@@ -102,6 +104,8 @@
           }
         })
       }}
+      {% endif%}
+      
       <div class="progress-container progress-container-claim hidden">
       <progress id="progressbar-claim" max="100" value="0"></progress>
       <span id="progressbar-text-claim">0%</span>

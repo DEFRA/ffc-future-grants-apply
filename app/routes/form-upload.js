@@ -352,15 +352,14 @@ module.exports = [
                   newFilesArray.push({
                     ...fileCheckDetails,
                     file_id: key,
-                    fie_size: fileCheckDetails.fileSizeFormatted
+                    file_size: fileCheckDetails.fileSizeFormatted
                   })
-
                   queueArray.push({
                     fileId: key,
                     fileName: fileCheckDetails.file_name,
                     fileSize: fileCheckDetails.fileSizeFormatted,
                     fileType: actionPath[1],
-                    file_extension: fileCheckDetails.file_extension,
+                    fileExtension: fileCheckDetails.file_extension,
                     category: 'category test',
                     userId: 8749,
                     bussinessId: 97058,
@@ -406,7 +405,6 @@ module.exports = [
               }
           }
         } else {
-          console.log('formSubmitted  ====> \n', formSubmitted)
           formSubmitted = formSubmitted.multiForms[actionPath[1]]
             ? {
                 ...formSubmitted,
