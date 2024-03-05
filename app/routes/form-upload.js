@@ -55,7 +55,6 @@ module.exports = [
       formSubmitted.claim = data.claim
       formSubmitted.multiForms = data.multiForms
       request.yar.set('formSubmitted', formSubmitted)
-      console.log(formSubmitted)
       return h.view(viewTemplate, formSubmitted)
     }
   },
@@ -397,6 +396,17 @@ module.exports = [
             ))
         }
         if (newFilesArray.length) {
+          if(actionPath[1] === 'claim') {
+            formSubmitted = {
+              ...formSubmitted,
+              claim: newFilesArray[0],
+              errorMessage: {
+                ...formSubmitted.errorMessage,
+                claim: null
+              }
+          }
+        } else {
+          console.log('formSubmitted  ====> \n', formSubmitted)
           formSubmitted = formSubmitted.multiForms[actionPath[1]]
             ? {
                 ...formSubmitted,
@@ -415,6 +425,8 @@ module.exports = [
                   [actionPath[1]]: newFilesArray
                 }
               }
+        }
+         
         }
         const allFilesErrors = errorArray
           .map((item) => item.html)
