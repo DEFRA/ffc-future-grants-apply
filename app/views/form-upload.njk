@@ -60,7 +60,7 @@
         }}
     {%endif%}
 
-    <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4">
+    <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4" id="claim">
       Upload claim form and evidence
     </h1>
     <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-8">
@@ -84,7 +84,6 @@
       {% if not claim.file_name%}
       {{
         govukFileUpload({
-          id: "claim",
           name: "claim",
           attributes:{
             accept:".doc, .docx, .xls, .xlsx"
@@ -176,7 +175,7 @@
     }}
     <hr />
     <div>
-      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3" id="purchased">
         Proof items have been purchased
       </h3>
       <p class="govuk-body">For example, invoices</p>
@@ -184,7 +183,6 @@
         {% set purchasedItemsUploadHtml %}
         {{
           govukFileUpload({
-            id: "purchased",
             name: "purchased",
             classes: "moj-multi-file-upload__input",
             label: {
@@ -278,7 +276,7 @@
     </div>
     <hr />
     <div>
-      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3" id="paid">
         Proof items have been paid for
       </h3>
       <p class="govuk-body">
@@ -289,7 +287,6 @@
         {% set paidItemsUploadHtml %}
         {{
           govukFileUpload({
-            id: "paid",
             name: "paid",
             classes: "moj-multi-file-upload__input",
             label: {
@@ -381,7 +378,7 @@
     </div>
     <hr />
     <div>
-      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3" id="inPlace">
         Proof items are in place
       </h3>
       <p class="govuk-body">For example, photos and videos</p>
@@ -389,7 +386,6 @@
         {% set inPlaceItemsUploadHtml %}
         {{
             govukFileUpload({
-              id: "inPlace",
               name: "inPlace",
               classes: "moj-multi-file-upload__input",
               label: {
@@ -483,14 +479,13 @@
       <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
         Proof conditions and outputs have been met
       </h3>
-      <p class="govuk-body">
+      <p class="govuk-body" id="conditions">
         Only for projects with grant-specefic conditions and outputs
       </p>
       <form action="{{ formActionPage }}#conditions" method="POST" enctype="multipart/form-data">
         {% set conditionsUploadHtml %}
         {{
               govukFileUpload({
-                id: "conditions",
                 name: "conditions",
                 classes: "moj-multi-file-upload__input",
                 label: {
@@ -503,6 +498,7 @@
             }}
         {{
               govukButton({
+                id: "conditionsItemsButton",
                 name: "action",
                 value: "upload-conditions",
                 text: "Upload file",
@@ -608,7 +604,8 @@
         },300)
         return
 }
-document.getElementById("claimItemsButton").addEventListener("click", () => {
+document.addEventListener("load", function() {
+  document.getElementById("claimItemsButton").addEventListener("click", () => {
         uploadProgress("progressbar-claim", "progressbar-text-claim", "claim-files", "progress-container-claim");
       });
  document.getElementById("purchasedItemsButton").addEventListener("click", () => {
@@ -623,6 +620,6 @@ document.getElementById("claimItemsButton").addEventListener("click", () => {
   document.getElementById("conditionsItemsButton").addEventListener("click", () => {
         uploadProgress("progressbar-conditions", "progress-text-conditions", "conditions-files", "progress-container-conditions");
       });
-
+})
  </script>
 {% endblock %}
