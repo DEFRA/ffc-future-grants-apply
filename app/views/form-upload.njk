@@ -604,22 +604,22 @@
         },300)
         return
 }
-document.addEventListener("load", function() {
-  document.getElementById("claimItemsButton").addEventListener("click", () => {
+if(document.getElementById("claimItemsButton")){
+   document.getElementById("claimItemsButton").addEventListener("click", () => {
         uploadProgress("progressbar-claim", "progressbar-text-claim", "claim-files", "progress-container-claim");
-      });
+      })
+}
  document.getElementById("purchasedItemsButton").addEventListener("click", () => {
         uploadProgress("progressbar-purchased", "progress-text-purchased", "purchased-files", "progress-container-purchased");
-      });
+      })
   document.getElementById("paidItemsButton").addEventListener("click", () => {
         uploadProgress("progressbar-paid", "progress-text-paid", "paid-files", "progress-container-paid");
-      });
+      })
   document.getElementById("inPlaceItemsButton").addEventListener("click", () => {
         uploadProgress("progressbar-inPlace", "progress-text-inPlace", "inPlace-files", "progress-container-inPlace");
-      });
+      })
   document.getElementById("conditionsItemsButton").addEventListener("click", () => {
         uploadProgress("progressbar-conditions", "progress-text-conditions", "conditions-files", "progress-container-conditions");
-      });
-})
+      })
  </script>
 {% endblock %}
