@@ -25,7 +25,6 @@ const config = {
   useBlobStorageConnectionString: process.env.USE_BLOB_STORAGE_CONNECTION_STRING,
   claimFormDownloadUrl: process.env.CLAIM_FORM_DOWNLOAD_URL
 }
-console.log(config)
 // Validate config
 const result = schema.validate(config, {
   abortEarly: false
