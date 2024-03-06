@@ -264,7 +264,7 @@ module.exports = [
             ))
         }
         if (newFilesArray.length) {
-          if(actionPath[1] === 'claim') {
+          if (actionPath[1] === 'claim') {
             formSubmitted = {
               ...formSubmitted,
               claim: newFilesArray[0],
@@ -272,28 +272,27 @@ module.exports = [
                 ...formSubmitted.errorMessage,
                 claim: null
               }
+            }
+          } else {
+            formSubmitted = formSubmitted.multiForms[actionPath[1]]
+              ? {
+                  ...formSubmitted,
+                  multiForms: {
+                    ...formSubmitted.multiForms,
+                    [actionPath[1]]: [
+                      ...formSubmitted.multiForms[actionPath[1]],
+                      ...newFilesArray
+                    ]
+                  }
+                }
+              : {
+                  ...formSubmitted,
+                  multiForms: {
+                    ...formSubmitted.multiForms,
+                    [actionPath[1]]: newFilesArray
+                  }
+                }
           }
-        } else {
-          formSubmitted = formSubmitted.multiForms[actionPath[1]]
-            ? {
-                ...formSubmitted,
-                multiForms: {
-                  ...formSubmitted.multiForms,
-                  [actionPath[1]]: [
-                    ...formSubmitted.multiForms[actionPath[1]],
-                    ...newFilesArray
-                  ]
-                }
-              }
-            : {
-                ...formSubmitted,
-                multiForms: {
-                  ...formSubmitted.multiForms,
-                  [actionPath[1]]: newFilesArray
-                }
-              }
-        }
-         
         }
         const allFilesErrors = errorArray
           .map((item) => item.html)
