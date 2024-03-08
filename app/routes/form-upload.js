@@ -41,8 +41,11 @@ module.exports = [
       auth: false
     },
     handler: async (request, h) => {
-      const formSubmitted = createModel(null, null)
+      const state = request.yar.get('formSubmitted')
+      const formSubmitted = state ? state : createModel(null, null)
       const sessionId = uuidv4()
+      console.log('data===> \n \n', request.yar.get('formSubmitted'));
+      // console.log('\n \n IN GET REQ===  \n \n', request)
       await sendMessage(
         { sessionId, userId: 8749 },
         applicationRequestMsgType,
@@ -55,7 +58,7 @@ module.exports = [
       formSubmitted.claim = data.claim
       formSubmitted.multiForms = data.multiForms
       request.yar.set('formSubmitted', formSubmitted)
-      return h.view(viewTemplate, formSubmitted)
+      return h.view(viewTemplate,formSubmitted)
     }
   },
   {
@@ -100,6 +103,7 @@ module.exports = [
     handler: async (request, h) => {
       const { action } = request.payload
       const actionPath = action.split('-')
+      console.log(actionPath)
       let formSubmitted = request.yar.get('formSubmitted')
       if (actionPath[0] === 'delete') {
         const fileName = request.payload.fileName
@@ -112,7 +116,7 @@ module.exports = [
             }
           }
           request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted).takeover()
+          return h.redirect(viewTemplate, formSubmitted)
         }
         let fileId
         if (actionPath[1] === 'claim') {
@@ -134,7 +138,7 @@ module.exports = [
             claim: null
           }
           request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted)
+          return h.redirect(viewTemplate, formSubmitted)
         } else if (isDeleted && actionPath[1] !== 'claim') {
           const filteredArray = formSubmitted.multiForms[actionPath[1]].filter(
             (item) => item.file_name !== fileName
@@ -147,7 +151,7 @@ module.exports = [
             }
           }
           request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted)
+          return h.redirect(viewTemplate, formSubmitted)
         } else {
           formSubmitted = {
             ...formSubmitted,
@@ -157,7 +161,7 @@ module.exports = [
             }
           }
           request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted).takeover()
+          return h.redirect(viewTemplate, formSubmitted)
         }
       } else if (actionPath[0] === 'upload') {
         const queueArray = []
@@ -188,7 +192,7 @@ module.exports = [
           )
           formSubmitted.errorSummaryList = errorsList
           request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted)
+          return h.redirect(viewTemplate, formSubmitted)
         }
         const newFilesArray = []
         const errorArray = []
@@ -311,7 +315,7 @@ module.exports = [
           : createErrorsSummaryList(formSubmitted, null, actionPath[1])
         formSubmitted.errorSummaryList = errorsSummary
         request.yar.set('formSubmitted', formSubmitted)
-        return h.view(viewTemplate, formSubmitted)
+        return h.redirect(viewTemplate, formSubmitted)
       }
     }
   }
