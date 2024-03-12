@@ -55,6 +55,9 @@ module.exports = [
       )
       formSubmitted.claim = data.claim
       formSubmitted.multiForms = data.multiForms
+      const allEmpty = formSubmitted.errorSummaryList.every(obj => Object.keys(obj).length === 0)
+      formSubmitted.errorSummaryList = allEmpty && []
+      console.log('FORM SUBMITTED=====> \n', formSubmitted, '\n')
       request.yar.set('formSubmitted', formSubmitted)
       return h.view(viewTemplate, formSubmitted)
     }
