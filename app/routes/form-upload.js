@@ -42,7 +42,7 @@ module.exports = [
     },
     handler: async (request, h) => {
       const state = request.yar.get('formSubmitted')
-      const formSubmitted = state ? state : createModel(null, null)
+      const formSubmitted = state || createModel(null, null)
       const sessionId = uuidv4()
       await sendMessage(
         { sessionId, userId: 8749 },
@@ -56,7 +56,7 @@ module.exports = [
       formSubmitted.claim = data.claim
       formSubmitted.multiForms = data.multiForms
       request.yar.set('formSubmitted', formSubmitted)
-      return h.view(viewTemplate,formSubmitted)
+      return h.view(viewTemplate, formSubmitted)
     }
   },
   {
@@ -114,9 +114,9 @@ module.exports = [
               href: '#' + actionPath[1]
             }
           }
+        }
+        return h.view(viewTemplate, formSubmitted)
       }
-      return h.view(viewTemplate, formSubmitted)
-    }
       if (actionPath[0] === 'delete') {
         isProcessing = true
         const fileName = request.payload.fileName
