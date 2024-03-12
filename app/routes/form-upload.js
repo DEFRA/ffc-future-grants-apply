@@ -33,6 +33,7 @@ function createModel (claim, multiForms) {
     errorSummaryList: []
   }
 }
+let isProcessing = false
 module.exports = [
   {
     method: 'GET',
@@ -90,12 +91,14 @@ module.exports = [
               }
             }
             request.yar.set('formSubmitted', formSubmitted)
+            isProcessing = false
             return h.view(viewTemplate, formSubmitted).takeover()
           }
           formSubmitted = {
             ...formSubmitted,
             errorMessage: { ...formSubmitted.errorMessage, [inputName]: error }
           }
+          isProcessing = false
           return h.view(viewTemplate, formSubmitted).takeover()
         }
       }
@@ -105,7 +108,21 @@ module.exports = [
       const actionPath = action.split('-')
       console.log(actionPath)
       let formSubmitted = request.yar.get('formSubmitted')
+      if (isProcessing) {
+        formSubmitted = {
+          ...formSubmitted,
+          errorMessage: {
+            ...formSubmitted.errorMessage,
+            [actionPath[1]]: {
+              html: 'Please wait for previous file(s) to upload first',
+              href: '#' + actionPath[1]
+            }
+          }
+      }
+      return h.view(viewTemplate, formSubmitted)
+    }
       if (actionPath[0] === 'delete') {
+        isProcessing = true
         const fileName = request.payload.fileName
         if (!fileName || !fileName.length) {
           formSubmitted = {
@@ -116,6 +133,7 @@ module.exports = [
             }
           }
           request.yar.set('formSubmitted', formSubmitted)
+          isProcessing = false
           return h.redirect(viewTemplate, formSubmitted)
         }
         let fileId
@@ -138,6 +156,7 @@ module.exports = [
             claim: null
           }
           request.yar.set('formSubmitted', formSubmitted)
+          isProcessing = false
           return h.redirect(viewTemplate, formSubmitted)
         } else if (isDeleted && actionPath[1] !== 'claim') {
           const filteredArray = formSubmitted.multiForms[actionPath[1]].filter(
@@ -151,6 +170,7 @@ module.exports = [
             }
           }
           request.yar.set('formSubmitted', formSubmitted)
+          isProcessing = false
           return h.redirect(viewTemplate, formSubmitted)
         } else {
           formSubmitted = {
@@ -161,9 +181,12 @@ module.exports = [
             }
           }
           request.yar.set('formSubmitted', formSubmitted)
+          isProcessing = false
           return h.redirect(viewTemplate, formSubmitted)
         }
       } else if (actionPath[0] === 'upload') {
+        console.log('object')
+        isProcessing = true
         const queueArray = []
         let filesArray = request.payload[actionPath[1]]
         if (!filesArray.length) {
@@ -192,6 +215,7 @@ module.exports = [
           )
           formSubmitted.errorSummaryList = errorsList
           request.yar.set('formSubmitted', formSubmitted)
+          isProcessing = false
           return h.redirect(viewTemplate, formSubmitted)
         }
         const newFilesArray = []
@@ -315,6 +339,7 @@ module.exports = [
           : createErrorsSummaryList(formSubmitted, null, actionPath[1])
         formSubmitted.errorSummaryList = errorsSummary
         request.yar.set('formSubmitted', formSubmitted)
+        isProcessing = false
         return h.redirect(viewTemplate, formSubmitted)
       }
     }
