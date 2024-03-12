@@ -179,7 +179,7 @@
         Proof items have been purchased
       </h3>
       <p class="govuk-body">For example, invoices</p>
-      <form action="{{ formActionPage }}#purchased" method="POST" enctype="multipart/form-data">
+      <form action="{{ formActionPage }}#purchased" method="POST" enctype="multipart/form-data" id="testForm">
         {% set purchasedItemsUploadHtml %}
         {{
           govukFileUpload({
@@ -200,6 +200,7 @@
             name: "action",
             value: "upload-purchased",
             text: "Upload file",
+            preventDoubleClick: true,
             classes: "govuk-button--secondary moj-multi-file-upload__button",
             attributes:{
               id:'purchasedItemsButton'
@@ -604,22 +605,62 @@
         },300)
         return
 }
+let claimBtn
 if(document.getElementById("claimItemsButton")){
-   document.getElementById("claimItemsButton").addEventListener("click", () => {
-        uploadProgress("progressbar-claim", "progressbar-text-claim", "claim-files", "progress-container-claim");
-      })
+  claimBtn = document.getElementById("claimItemsButton")
+  claimBtn.addEventListener("click", (e) => {
+    e.target.classList.add('hidden')
+    paidItemsBtn.disabled = true
+    inPlaceBtn.disabled = true
+    conditionsBtn.disabled = true
+    purchasedBtn.disabled = true
+    uploadProgress("progressbar-claim", "progressbar-text-claim", "claim-files", "progress-container-claim");
+  })
 }
- document.getElementById("purchasedItemsButton").addEventListener("click", () => {
+const purchasedBtn = document.getElementById("purchasedItemsButton")
+const paidItemsBtn = document.getElementById("paidItemsButton")
+const inPlaceBtn = document.getElementById("inPlaceItemsButton")
+const conditionsBtn = document.getElementById("conditionsItemsButton")
+purchasedBtn.addEventListener("click", function(e) {
+  e.target.classList.add('hidden')
+   if (claimBtn) {
+    claimBtn.disabled = true 
+    }
+    paidItemsBtn.disabled = true
+    inPlaceBtn.disabled = true
+    conditionsBtn.disabled = true
         uploadProgress("progressbar-purchased", "progress-text-purchased", "purchased-files", "progress-container-purchased");
-      })
-  document.getElementById("paidItemsButton").addEventListener("click", () => {
+})
+paidItemsBtn.addEventListener("click", () => {
+   e.target.classList.add('hidden')
+   if (claimBtn) {
+    claimBtn.disabled = true 
+    }
+    purchasedBtn.disabled = true
+    inPlaceBtn.disabled = true
+    conditionsBtn.disabled = true
         uploadProgress("progressbar-paid", "progress-text-paid", "paid-files", "progress-container-paid");
-      })
-  document.getElementById("inPlaceItemsButton").addEventListener("click", () => {
-        uploadProgress("progressbar-inPlace", "progress-text-inPlace", "inPlace-files", "progress-container-inPlace");
-      })
-  document.getElementById("conditionsItemsButton").addEventListener("click", () => {
-        uploadProgress("progressbar-conditions", "progress-text-conditions", "conditions-files", "progress-container-conditions");
-      })
+})
+inPlaceBtn.addEventListener("click", () => {
+   e.target.classList.add('hidden')
+   if (claimBtn) {
+    claimBtn.disabled = true 
+    }
+    paidItemsBtn.disabled = true
+    purchasedBtn.disabled = true
+    conditionsBtn.disabled = true
+    uploadProgress("progressbar-inPlace", "progress-text-inPlace", "inPlace-files", "progress-container-inPlace");
+})
+conditionsBtn.addEventListener("click", () => {
+   e.target.classList.add('hidden')
+   if (claimBtn) {
+    claimBtn.disabled = true 
+    }
+    paidItemsBtn.disabled = true
+    inPlaceBtn.disabled = true
+    purchasedBtn.disabled = true
+    preventResubmit()
+    uploadProgress("progressbar-conditions", "progress-text-conditions", "conditions-files", "progress-container-conditions");
+})
  </script>
 {% endblock %}
