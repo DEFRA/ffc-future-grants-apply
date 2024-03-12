@@ -8,7 +8,6 @@ const backLink = `${urlPrefix}/form-download`
 const {
   fileCheck,
   createErrorsSummaryList
-  // ,extractDataToJson
 } = require('../utils/uploadHelperFunctions')
 const { sendMessage, receiveMessage } = require('../messaging')
 const {
@@ -45,8 +44,6 @@ module.exports = [
       const state = request.yar.get('formSubmitted')
       const formSubmitted = state ? state : createModel(null, null)
       const sessionId = uuidv4()
-      console.log('data===> \n \n', request.yar.get('formSubmitted'));
-      // console.log('\n \n IN GET REQ===  \n \n', request)
       await sendMessage(
         { sessionId, userId: 8749 },
         applicationRequestMsgType,
@@ -106,7 +103,6 @@ module.exports = [
     handler: async (request, h) => {
       const { action } = request.payload
       const actionPath = action.split('-')
-      console.log(actionPath)
       let formSubmitted = request.yar.get('formSubmitted')
       if (isProcessing) {
         formSubmitted = {
@@ -185,7 +181,6 @@ module.exports = [
           return h.redirect(viewTemplate, formSubmitted)
         }
       } else if (actionPath[0] === 'upload') {
-        console.log('object')
         isProcessing = true
         const queueArray = []
         let filesArray = request.payload[actionPath[1]]

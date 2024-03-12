@@ -70,7 +70,6 @@ async function checkFileExists (fileName) {
 }
 async function deleteFile (fileName, prefix, fileId) {
   const newFileName = `${prefix}-${fileName}`
-  console.log(fileName)
   try {
     await blobContainerClient.getBlobClient(newFileName).delete()
     console.log(`Blob '${fileName}' was deleted successfully.`)
