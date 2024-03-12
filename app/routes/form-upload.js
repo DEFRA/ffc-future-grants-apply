@@ -115,7 +115,8 @@ module.exports = [
             }
           }
         }
-        return h.view(viewTemplate, formSubmitted)
+        isProcessing = false
+        return h.redirect(viewTemplate, formSubmitted)
       }
       if (actionPath[0] === 'delete') {
         isProcessing = true
