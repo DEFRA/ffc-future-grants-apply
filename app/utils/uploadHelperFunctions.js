@@ -123,9 +123,9 @@ async function extractDataToJson (fileBuffer) {
   const workBook = new ExcelJS.Workbook()
   await workBook.xlsx.load(fileBuffer)
   const data = []
-  workBook.eachSheet(sheet => {
+  workBook.eachSheet((sheet) => {
     const sheetData = []
-    sheet.eachRow(row => {
+    sheet.eachRow((row) => {
       sheetData.push(row.values)
     })
     data.push({
@@ -135,4 +135,75 @@ async function extractDataToJson (fileBuffer) {
   })
   return data
 }
-module.exports = { fileCheck, createErrorsSummaryList, extractDataToJson }
+function getFilesArray (actionPath, payload) {
+  let filesArray = payload[actionPath[1]]
+  if (!Array.isArray(filesArray)) {
+    filesArray = [filesArray]
+  }
+  return filesArray
+}
+function handleFileLimitExceeded (fieldName, formSubmitted, request) {
+  formSubmitted = {
+    ...formSubmitted,
+    errorMessage: {
+      ...formSubmitted.errorMessage,
+      [fieldName]: {
+        html: 'Uploaded files must be less than 15 files.',
+        href: `#${fieldName}`
+      }
+    }
+  }
+
+  const errorsList = createErrorsSummaryList(
+    formSubmitted,
+    [
+      {
+        href: `#${fieldName}`,
+        html: 'Uploaded files must be less than 15 files.'
+      }
+    ],
+    fieldName
+  )
+
+  formSubmitted.errorSummaryList = errorsList
+  request.yar.set('formSubmitted', formSubmitted)
+}
+function filesState (actionPath, formSubmitted, filesArray) {
+  if (actionPath[1] === 'claim') {
+    formSubmitted = {
+      ...formSubmitted,
+      claim: filesArray[0],
+      errorMessage: {
+        ...formSubmitted.errorMessage,
+        claim: null
+      }
+    }
+  } else {
+    formSubmitted = formSubmitted.multiForms[actionPath[1]]
+      ? {
+          ...formSubmitted,
+          multiForms: {
+            ...formSubmitted.multiForms,
+            [actionPath[1]]: [
+              ...formSubmitted.multiForms[actionPath[1]],
+              ...filesArray
+            ]
+          }
+        }
+      : {
+          ...formSubmitted,
+          multiForms: {
+            ...formSubmitted.multiForms,
+            [actionPath[1]]: filesArray
+          }
+        }
+  }
+}
+module.exports = {
+  filesState,
+  getFilesArray,
+  handleFileLimitExceeded,
+  fileCheck,
+  createErrorsSummaryList,
+  extractDataToJson
+}

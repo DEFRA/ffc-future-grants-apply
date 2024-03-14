@@ -7,7 +7,10 @@ const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
 const {
   fileCheck,
-  createErrorsSummaryList
+  createErrorsSummaryList,
+  getFilesArray,
+  handleFileLimitExceeded,
+  filesState
 } = require('../utils/uploadHelperFunctions')
 const { sendMessage, receiveMessage } = require('../messaging')
 const {
@@ -56,10 +59,13 @@ module.exports = [
       formSubmitted.claim = data.claim
       formSubmitted.multiForms = data.multiForms
       if (formSubmitted.errorSummaryList) {
-        const allEmpty = formSubmitted.errorSummaryList.every(obj => Object.keys(obj).length === 0)
-        formSubmitted.errorSummaryList = allEmpty && []
+        const allEmpty = formSubmitted.errorSummaryList.every(
+          (obj) => Object.keys(obj).length === 0
+        )
+        if (allEmpty) {
+          formSubmitted.errorSummaryList = []
+        }
       }
-      console.log('FORM SUBMITTED=====> \n', formSubmitted, '\n')
       request.yar.set('formSubmitted', formSubmitted)
       return h.view(viewTemplate, formSubmitted)
     }
@@ -190,33 +196,9 @@ module.exports = [
       } else if (actionPath[0] === 'upload') {
         isProcessing = true
         const queueArray = []
-        let filesArray = request.payload[actionPath[1]]
-        if (!filesArray.length) {
-          filesArray = [filesArray]
-        }
+        const filesArray = getFilesArray(actionPath, request.payload)
         if (filesArray.length > 15) {
-          formSubmitted = {
-            ...formSubmitted,
-            errorMessage: {
-              ...formSubmitted.errorMessage,
-              [actionPath[1]]: {
-                html: 'Uploaded files must be less than 15 files.',
-                href: '#' + actionPath[1]
-              }
-            }
-          }
-          const errorsList = createErrorsSummaryList(
-            formSubmitted,
-            [
-              {
-                href: '#' + actionPath[1],
-                html: 'Uploaded files must be less than 15 files.'
-              }
-            ],
-            actionPath[1]
-          )
-          formSubmitted.errorSummaryList = errorsList
-          request.yar.set('formSubmitted', formSubmitted)
+          handleFileLimitExceeded(actionPath[1], formSubmitted, request)
           isProcessing = false
           return h.redirect(viewTemplate, formSubmitted)
         }
@@ -294,35 +276,7 @@ module.exports = [
             ))
         }
         if (newFilesArray.length) {
-          if (actionPath[1] === 'claim') {
-            formSubmitted = {
-              ...formSubmitted,
-              claim: newFilesArray[0],
-              errorMessage: {
-                ...formSubmitted.errorMessage,
-                claim: null
-              }
-            }
-          } else {
-            formSubmitted = formSubmitted.multiForms[actionPath[1]]
-              ? {
-                  ...formSubmitted,
-                  multiForms: {
-                    ...formSubmitted.multiForms,
-                    [actionPath[1]]: [
-                      ...formSubmitted.multiForms[actionPath[1]],
-                      ...newFilesArray
-                    ]
-                  }
-                }
-              : {
-                  ...formSubmitted,
-                  multiForms: {
-                    ...formSubmitted.multiForms,
-                    [actionPath[1]]: newFilesArray
-                  }
-                }
-          }
+          filesState(actionPath, formSubmitted, newFilesArray)
         }
         const allFilesErrors = errorArray
           .map((item) => item.html)
