@@ -30,7 +30,7 @@ async function getToken () {
     const accessToken = `${token.token_type} ${token.access_token}`
     return { token: accessToken, isTokenExist: true }
   } catch (error) {
-    console.log('ERROR: ', error)
+    console.log('ERROR in getting AV token: ', error)
     throw error
   }
 }

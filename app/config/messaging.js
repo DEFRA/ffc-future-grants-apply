@@ -102,7 +102,6 @@ const mqConfig = {
 const { value, error } = mqSchema.validate(mqConfig, {
   abortEarly: false
 })
-console.log('\n \n \n ', value, '\n')
 if (error) {
   throw new Error(
     `The message queue config is invalid. ${error.message}`

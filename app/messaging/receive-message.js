@@ -1,7 +1,6 @@
 const { createMessageReceiver } = require('./create-message-receiver')
 
 async function receiveMessage (messageId, config) {
-  console.log(messageId, config)
   const receiver = createMessageReceiver(config)
   const sessionReceiver = await receiver.sbClient.acceptSession(config.address, messageId)
   const messages = await sessionReceiver.receiveMessages(1, { maxWaitTimeInMs: 50000 })
