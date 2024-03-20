@@ -7,8 +7,10 @@ const currentPath = `${urlPrefix}/${viewTemplate}`
 const backLink = `${urlPrefix}/form-download`
 const {
   fileCheck,
-  createErrorsSummaryList
-  // ,extractDataToJson
+  createErrorsSummaryList,
+  getFilesArray,
+  handleFileLimitExceeded,
+  filesState
 } = require('../utils/uploadHelperFunctions')
 const { sendMessage, receiveMessage } = require('../messaging')
 const {
@@ -33,6 +35,7 @@ function createModel (claim, multiForms) {
     errorSummaryList: []
   }
 }
+let isProcessing = false
 module.exports = [
   {
     method: 'GET',
@@ -41,7 +44,8 @@ module.exports = [
       auth: false
     },
     handler: async (request, h) => {
-      const formSubmitted = createModel(null, null)
+      const state = request.yar.get('formSubmitted')
+      const formSubmitted = state || createModel(null, null)
       const sessionId = uuidv4()
       await sendMessage(
         { sessionId, userId: 8749 },
@@ -54,6 +58,14 @@ module.exports = [
       )
       formSubmitted.claim = data.claim
       formSubmitted.multiForms = data.multiForms
+      if (formSubmitted.errorSummaryList) {
+        const allEmpty = formSubmitted.errorSummaryList.every(
+          (obj) => Object.keys(obj).length === 0
+        )
+        if (allEmpty) {
+          formSubmitted.errorSummaryList = []
+        }
+      }
       request.yar.set('formSubmitted', formSubmitted)
       return h.view(viewTemplate, formSubmitted)
     }
@@ -87,12 +99,14 @@ module.exports = [
               }
             }
             request.yar.set('formSubmitted', formSubmitted)
+            isProcessing = false
             return h.view(viewTemplate, formSubmitted).takeover()
           }
           formSubmitted = {
             ...formSubmitted,
             errorMessage: { ...formSubmitted.errorMessage, [inputName]: error }
           }
+          isProcessing = false
           return h.view(viewTemplate, formSubmitted).takeover()
         }
       }
@@ -101,138 +115,23 @@ module.exports = [
       const { action } = request.payload
       const actionPath = action.split('-')
       let formSubmitted = request.yar.get('formSubmitted')
-      if (actionPath[0] === 'singleUpload') {
-        try {
-          const claimFile = request.payload.claim
-          const fileCheckDetails = fileCheck(claimFile, 'claim', formSubmitted)
-          if (!fileCheckDetails.isCheckPassed) {
-            formSubmitted = {
-              ...formSubmitted,
-              errorMessage: {
-                ...formSubmitted.errorMessage,
-                claim: { html: fileCheckDetails.html, href: '#claim' }
-              },
-              claim: null
-            }
-            const errorsList = createErrorsSummaryList(
-              formSubmitted,
-              [{ html: fileCheckDetails.html, href: '#claim' }],
-              'claim'
-            )
-            formSubmitted.errorSummaryList = errorsList
-            request.yar.set('formSubmitted', formSubmitted)
-            return h.view(viewTemplate, formSubmitted).takeover()
-          } else {
-            const { token } = await getToken()
-            const key = uuidv4()
-            if (token) {
-              const content = Buffer.from(claimFile._data).toString('base64')
-              // We can uncomment this line and move it. 1st line below, send the file buffer to a function and it returns extracted data from xls file and the 2nd line logs the data in a table.
-              // const excelFile = await extractDataToJson(claimFile._data)
-              // console.table(excelFile[0].data)
-              const result = await sendToAvScan(token, {
-                key,
-                collection: 'claim',
-                service: 'fgp',
-                extension: fileCheckDetails.file_extension,
-                content,
-                fileName: fileCheckDetails.file_name
-              })
-              if (result.isScanned && result.isSafe) {
-                const fileUploaded = await uploadFile(
-                  fileCheckDetails.fileBuffer,
-                  fileCheckDetails.file_name,
-                  'claim'
-                )
-                if (fileUploaded.isUploaded) {
-                  await sendMessage(
-                    {
-                      method: 'add',
-                      data: [
-                        {
-                          fileId: key,
-                          fileName: fileCheckDetails.file_name,
-                          fileSize: fileCheckDetails.fileSizeFormatted,
-                          fileType: 'claim',
-                          file_extension: fileCheckDetails.file_extension,
-                          category: 'category test',
-                          userId: 8749,
-                          bussinessId: 97058,
-                          caseId: 65378,
-                          grantScheme: 'Grant Scheme test',
-                          grantSubScheme: 'Gran sub scheme test',
-                          grantTheme: 'Grant theme test',
-                          dateAndTime: new Date(),
-                          storageUrl: 'Storage URL test'
-                        }
-                      ]
-                    },
-                    applicationRequestMsgType,
-                    fileStoreQueueAddress
-                  )
-                  formSubmitted = {
-                    ...formSubmitted,
-                    claim: {
-                      file_id: key,
-                      file_size: fileCheckDetails.fileSizeFormatted,
-                      file_name: fileUploaded.originalFileName
-                    },
-                    errorMessage: {
-                      ...formSubmitted.errorMessage,
-                      claim: null
-                    }
-                  }
-                  const errorsList = createErrorsSummaryList(
-                    formSubmitted,
-                    null,
-                    'claim'
-                  )
-                  formSubmitted.errorSummaryList = errorsList
-                  request.yar.set('formSubmitted', formSubmitted)
-                }
-                return h.view('form-upload', formSubmitted)
-              }
-              if (result.isScanned && !result.isSafe) {
-                formSubmitted = {
-                  ...formSubmitted,
-                  errorMessage: {
-                    ...formSubmitted.errorMessage,
-                    claim: {
-                      html: `${fileCheckDetails.file_name} can't be uploaded as it's an un-readable file or not a safe file`,
-                      href: '#claim'
-                    }
-                  },
-                  claim: null
-                }
-                const errorsList = createErrorsSummaryList(
-                  formSubmitted,
-                  [
-                    {
-                      html: `${fileCheckDetails.file_name} can't be uploaded as it's not a safe file`,
-                      href: '#claim'
-                    }
-                  ],
-                  'claim'
-                )
-                formSubmitted.errorSummaryList = errorsList
-                request.yar.set('formSubmitted', formSubmitted)
-                return h.view('form-upload', formSubmitted)
-              }
+      if (isProcessing) {
+        formSubmitted = {
+          ...formSubmitted,
+          errorMessage: {
+            ...formSubmitted.errorMessage,
+            [actionPath[1]]: {
+              html: 'Please wait for previous file(s) to upload first',
+              href: '#' + actionPath[1]
             }
           }
-        } catch (error) {
-          return h
-            .view(
-              viewTemplate,
-              createModel(
-                'The selected file could not be uploaded – try again',
-                false,
-                null
-              )
-            )
-            .takeover()
         }
-      } else if (actionPath[0] === 'delete') {
+        request.yar.set('formSubmitted', formSubmitted)
+        isProcessing = false
+        return h.redirect(viewTemplate, formSubmitted)
+      }
+      if (actionPath[0] === 'delete') {
+        isProcessing = true
         const fileName = request.payload.fileName
         if (!fileName || !fileName.length) {
           formSubmitted = {
@@ -243,7 +142,8 @@ module.exports = [
             }
           }
           request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted).takeover()
+          isProcessing = false
+          return h.redirect(viewTemplate, formSubmitted)
         }
         let fileId
         if (actionPath[1] === 'claim') {
@@ -265,7 +165,8 @@ module.exports = [
             claim: null
           }
           request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted)
+          isProcessing = false
+          return h.redirect(viewTemplate, formSubmitted)
         } else if (isDeleted && actionPath[1] !== 'claim') {
           const filteredArray = formSubmitted.multiForms[actionPath[1]].filter(
             (item) => item.file_name !== fileName
@@ -278,7 +179,8 @@ module.exports = [
             }
           }
           request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted)
+          isProcessing = false
+          return h.redirect(viewTemplate, formSubmitted)
         } else {
           formSubmitted = {
             ...formSubmitted,
@@ -288,38 +190,17 @@ module.exports = [
             }
           }
           request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted).takeover()
+          isProcessing = false
+          return h.redirect(viewTemplate, formSubmitted)
         }
-      } else if (actionPath[0] === 'multiUpload') {
+      } else if (actionPath[0] === 'upload') {
+        isProcessing = true
         const queueArray = []
-        let filesArray = request.payload[actionPath[1]]
-        if (!filesArray.length) {
-          filesArray = [filesArray]
-        }
+        const filesArray = getFilesArray(actionPath, request.payload)
         if (filesArray.length > 15) {
-          formSubmitted = {
-            ...formSubmitted,
-            errorMessage: {
-              ...formSubmitted.errorMessage,
-              [actionPath[1]]: {
-                html: 'Uploaded files must be less than 15 files.',
-                href: '#' + actionPath[1]
-              }
-            }
-          }
-          const errorsList = createErrorsSummaryList(
-            formSubmitted,
-            [
-              {
-                href: '#' + actionPath[1],
-                html: 'Uploaded files must be less than 15 files.'
-              }
-            ],
-            actionPath[1]
-          )
-          formSubmitted.errorSummaryList = errorsList
-          request.yar.set('formSubmitted', formSubmitted)
-          return h.view(viewTemplate, formSubmitted)
+          handleFileLimitExceeded(actionPath[1], formSubmitted, request)
+          isProcessing = false
+          return h.redirect(viewTemplate, formSubmitted)
         }
         const newFilesArray = []
         const errorArray = []
@@ -352,15 +233,14 @@ module.exports = [
                   newFilesArray.push({
                     ...fileCheckDetails,
                     file_id: key,
-                    fie_size: fileCheckDetails.fileSizeFormatted
+                    file_size: fileCheckDetails.fileSizeFormatted
                   })
-
                   queueArray.push({
                     fileId: key,
                     fileName: fileCheckDetails.file_name,
                     fileSize: fileCheckDetails.fileSizeFormatted,
                     fileType: actionPath[1],
-                    file_extension: fileCheckDetails.file_extension,
+                    fileExtension: fileCheckDetails.file_extension,
                     category: 'category test',
                     userId: 8749,
                     bussinessId: 97058,
@@ -396,24 +276,7 @@ module.exports = [
             ))
         }
         if (newFilesArray.length) {
-          formSubmitted = formSubmitted.multiForms[actionPath[1]]
-            ? {
-                ...formSubmitted,
-                multiForms: {
-                  ...formSubmitted.multiForms,
-                  [actionPath[1]]: [
-                    ...formSubmitted.multiForms[actionPath[1]],
-                    ...newFilesArray
-                  ]
-                }
-              }
-            : {
-                ...formSubmitted,
-                multiForms: {
-                  ...formSubmitted.multiForms,
-                  [actionPath[1]]: newFilesArray
-                }
-              }
+          filesState(actionPath, formSubmitted, newFilesArray)
         }
         const allFilesErrors = errorArray
           .map((item) => item.html)
@@ -432,7 +295,8 @@ module.exports = [
           : createErrorsSummaryList(formSubmitted, null, actionPath[1])
         formSubmitted.errorSummaryList = errorsSummary
         request.yar.set('formSubmitted', formSubmitted)
-        return h.view(viewTemplate, formSubmitted)
+        isProcessing = false
+        return h.redirect(viewTemplate, formSubmitted)
       }
     }
   }

@@ -60,7 +60,7 @@
         }}
     {%endif%}
 
-    <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4">
+    <h1 class="govuk-heading-xl govuk-!-margin-top-0 govuk-!-margin-bottom-4" id="claim">
       Upload claim form and evidence
     </h1>
     <h1 class="govuk-heading-l govuk-!-padding-left-3 govuk-!-margin-bottom-3 govuk-!-margin-top-8">
@@ -80,9 +80,10 @@
       {% if claim %} Files added {% else %} Upload a file {% endif %}
     </h2>
      <form method="POST" action="{{ formActionPage }}#claim" enctype="multipart/form-data">
+      
+      {% if not claim.file_name%}
       {{
         govukFileUpload({
-          id: "claim",
           name: "claim",
           attributes:{
             accept:".doc, .docx, .xls, .xlsx"
@@ -96,12 +97,14 @@
           text: "Upload file",
           classes: "govuk-button--secondary",
           name: "action",
-          value: "singleUpload-claim",
+          value: "upload-claim",
           attributes: {
             id: "claimItemsButton"
           }
         })
       }}
+      {% endif%}
+      
       <div class="progress-container progress-container-claim hidden">
       <progress id="progressbar-claim" max="100" value="0"></progress>
       <span id="progressbar-text-claim">0%</span>
@@ -172,15 +175,14 @@
     }}
     <hr />
     <div>
-      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3" id="purchased">
         Proof items have been purchased
       </h3>
       <p class="govuk-body">For example, invoices</p>
-      <form action="{{ formActionPage }}#purchased" method="POST" enctype="multipart/form-data">
+      <form action="{{ formActionPage }}#purchased" method="POST" enctype="multipart/form-data" id="testForm">
         {% set purchasedItemsUploadHtml %}
         {{
           govukFileUpload({
-            id: "purchased",
             name: "purchased",
             classes: "moj-multi-file-upload__input",
             label: {
@@ -196,8 +198,9 @@
           govukButton({
             id: "purchasedItemsButton",
             name: "action",
-            value: "multiUpload-purchased",
+            value: "upload-purchased",
             text: "Upload file",
+            preventDoubleClick: true,
             classes: "govuk-button--secondary moj-multi-file-upload__button",
             attributes:{
               id:'purchasedItemsButton'
@@ -274,7 +277,7 @@
     </div>
     <hr />
     <div>
-      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3" id="paid">
         Proof items have been paid for
       </h3>
       <p class="govuk-body">
@@ -285,7 +288,6 @@
         {% set paidItemsUploadHtml %}
         {{
           govukFileUpload({
-            id: "paid",
             name: "paid",
             classes: "moj-multi-file-upload__input",
             label: {
@@ -300,7 +302,7 @@
           govukButton({
             id: "paidItemsButton",
             name: "action",
-            value: "multiUpload-paid",
+            value: "upload-paid",
             text: "Upload file",
             classes: "govuk-button--secondary moj-multi-file-upload__button",
             attributes: {
@@ -377,7 +379,7 @@
     </div>
     <hr />
     <div>
-      <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
+      <h3 class="govuk-heading-m govuk-!-margin-bottom-3" id="inPlace">
         Proof items are in place
       </h3>
       <p class="govuk-body">For example, photos and videos</p>
@@ -385,7 +387,6 @@
         {% set inPlaceItemsUploadHtml %}
         {{
             govukFileUpload({
-              id: "inPlace",
               name: "inPlace",
               classes: "moj-multi-file-upload__input",
               label: {
@@ -400,7 +401,7 @@
             govukButton({
               id: "inPlaceItemsButton",
               name: "action",
-              value: "multiUpload-inPlace",
+              value: "upload-inPlace",
               text: "Upload file",
               classes: "govuk-button--secondary moj-multi-file-upload__button",
               attributes: {
@@ -479,14 +480,13 @@
       <h3 class="govuk-heading-m govuk-!-margin-bottom-3">
         Proof conditions and outputs have been met
       </h3>
-      <p class="govuk-body">
+      <p class="govuk-body" id="conditions">
         Only for projects with grant-specefic conditions and outputs
       </p>
       <form action="{{ formActionPage }}#conditions" method="POST" enctype="multipart/form-data">
         {% set conditionsUploadHtml %}
         {{
               govukFileUpload({
-                id: "conditions",
                 name: "conditions",
                 classes: "moj-multi-file-upload__input",
                 label: {
@@ -499,8 +499,9 @@
             }}
         {{
               govukButton({
+                id: "conditionsItemsButton",
                 name: "action",
-                value: "multiUpload-conditions",
+                value: "upload-conditions",
                 text: "Upload file",
                 classes: "govuk-button--secondary moj-multi-file-upload__button",
                 attributes: {
@@ -581,44 +582,4 @@
     }}
   </div>
 </div>
-<script>
- function uploadProgress( progressbarId, progressbarTextId, uploadedFilesClassName, progressBarContainerClassName) {
-        const progressbarValue = document.getElementById(progressbarId);
-        const progressbarText = document.getElementById(progressbarTextId);
-        const uploadedFiles = document.getElementsByClassName(uploadedFilesClassName);
-          const progressbarContainer = document.getElementsByClassName(progressBarContainerClassName)[0];
-          progressbarContainer.classList.remove('hidden')
-        const total = 90;
-        let loaded = 0;
-        const createLoading = setInterval(()=>{
-          if(loaded < 90){
-            loaded += 5;
-            progressbarValue.value = loaded;
-            progressbarText.innerText = `${loaded}%`;
-          }else{
-            clearInterval(createLoading);
-          }
-          if(uploadedFiles.length){
-              progressbarContainer.classList.add('hidden')
-          }
-        },300)
-        return
-}
-document.getElementById("claimItemsButton").addEventListener("click", () => {
-        uploadProgress("progressbar-claim", "progressbar-text-claim", "calim-files", "progress-container-claim");
-      });
- document.getElementById("purchasedItemsButton").addEventListener("click", () => {
-        uploadProgress("progressbar-purchased", "progress-text-purchased", "purchased-files", "progress-container-purchased");
-      });
-  document.getElementById("paidItemsButton").addEventListener("click", () => {
-        uploadProgress("progressbar-paid", "progress-text-paid", "paid-files", "progress-container-paid");
-      });
-  document.getElementById("inPlaceItemsButton").addEventListener("click", () => {
-        uploadProgress("progressbar-inPlace", "progress-text-inPlace", "inPlace-files", "progress-container-inPlace");
-      });
-  document.getElementById("conditionsItemsButton").addEventListener("click", () => {
-        uploadProgress("progressbar-conditions", "progress-text-conditions", "conditions-files", "progress-container-conditions");
-      });
-
- </script>
 {% endblock %}
